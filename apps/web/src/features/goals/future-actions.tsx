@@ -1,8 +1,4 @@
 import Link from "next/link";
-import { useRef } from "react";
-import { faChevronRight, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { duration, type GoalPlan } from "./demo-goals";
 import styles from "./future-you.module.css";
 
 function TalkIcon() {
@@ -26,36 +22,15 @@ function WorldIcon() {
   );
 }
 
-export function FutureActions({ goals }: { goals: GoalPlan[] }) {
-  const chooser = useRef<HTMLDialogElement>(null);
+export function FutureActions() {
   return (
-    <>
-      <div className={styles.futureActions}>
-        <Link href="/companion" className={styles.futureAction}>
-          <TalkIcon /><span>Future Talk</span>
-        </Link>
-        <button type="button" className={styles.futureAction} aria-haspopup="dialog" onClick={() => chooser.current?.showModal()}>
-          <WorldIcon /><span>Future World</span>
-        </button>
-      </div>
-      <dialog ref={chooser} className={styles.preview} aria-labelledby="world-title"
-        onClick={e => { if (e.target === e.currentTarget) e.currentTarget.close(); }}>
-        <div className={styles.previewContent}>
-          <div className={styles.previewHeading}>
-            <h2 id="world-title">Future World</h2>
-            <form method="dialog"><button aria-label="Close Future World"><FontAwesomeIcon icon={faXmark} /></button></form>
-          </div>
-          <p>Where would you like to go?</p>
-          <ul className={styles.worldList}>
-            {goals.map(goal => <li key={goal.id}>
-              <Link href={`/future-you/${goal.id}`} onNavigate={() => chooser.current?.close()}>
-                <span>{goal.title}<small>In {duration(goal.months)}</small></span>
-                <FontAwesomeIcon icon={faChevronRight} />
-              </Link>
-            </li>)}
-          </ul>
-        </div>
-      </dialog>
-    </>
+    <div className={styles.futureActions}>
+      <Link href="/companion" className={styles.futureAction}>
+        <TalkIcon /><span>Future Talk</span>
+      </Link>
+      <Link href="/future-world" className={styles.futureAction}>
+        <WorldIcon /><span>Future World</span>
+      </Link>
+    </div>
   );
 }

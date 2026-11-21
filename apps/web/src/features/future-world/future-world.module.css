@@ -1,0 +1,97 @@
+.page {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: #9bce70;
+  font-family: var(--font-sans);
+  touch-action: none;
+}
+.canvas { display: block; width: 100%; height: 100%; }
+.back, .iconButton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  background: #fff9ebd9;
+  color: #473c31;
+  border: 1px solid #70574033;
+}
+.back { position: absolute; left: max(12px, env(safe-area-inset-left)); top: max(12px, env(safe-area-inset-top)); }
+.stick {
+  position: absolute;
+  bottom: max(6%, calc(env(safe-area-inset-bottom) + 16px));
+  left: max(7%, calc(env(safe-area-inset-left) + 12px));
+  width: clamp(96px, 30vmin, 132px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid #64584438;
+  background: #fffdf740;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: grab;
+}
+.stick:active { cursor: grabbing; }
+.stick span {
+  width: 49%; aspect-ratio: 1; border-radius: 50%; background: #fffff8b5;
+  border: 2px solid #64584436; pointer-events: none;
+  transform: translate(var(--dx, 0px), var(--dy, 0px));
+}
+.details, .message {
+  position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%); width: min(calc(100% - 28px), 360px);
+  padding: 18px; background: #fffbf2f5; color: #3d332e; border-radius: 20px;
+  max-height: 65dvh; overflow: auto; touch-action: pan-y; box-shadow: 0 6px 30px #50382022;
+}
+.message { margin: 0; text-align: center; }
+.message button { display: block; width: 100%; margin: 6px 0; }
+.detailsHeading { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
+.detailsHeading h2 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+.detailsHeading span, .detailsFooter { font-size: 13px; }
+.landmarkIcon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; }
+.funding { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; }
+.funding dd { margin: 0; font-weight: 650; overflow-wrap: anywhere; }
+.progress { height: 6px; overflow: hidden; background: #e7dfd3; border-radius: 5px; }
+.progress span { display: block; height: 100%; }
+.detailsFooter { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.detailsFooter :is(a, button) { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+.page :focus-visible { outline: 3px solid #284d7c; outline-offset: 2px; }
+
+.travel {
+  position: absolute; right: max(12px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top));
+  display: flex; gap: 6px;
+}
+.travel a, .travel button, .interact, .answers a, .answers button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 44px; min-height: 44px; padding: 7px 14px; border-radius: 22px;
+  border: 1px solid #70574033; background: #fff9ebed; color: #473c31;
+  text-decoration: none; font: 600 13px/1.35 var(--font-sans);
+}
+.travel button { padding: 0; }
+.interact {
+  position: absolute; bottom: max(8%, calc(env(safe-area-inset-bottom) + 22px)); right: max(5%, env(safe-area-inset-right));
+  max-width: min(48%, 270px); overflow-wrap: anywhere; box-shadow: 0 4px 14px #453b4526;
+}
+.guide {
+  position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%); width: min(calc(100% - 28px), 360px); padding: 16px;
+  border-radius: 20px; background: #fffbf3f5; color: #3d332e; box-shadow: 0 6px 30px #50382022;
+  max-height: 70dvh; overflow: auto; touch-action: pan-y;
+}
+.guideHeading, .answers { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.guide h2 { margin: 0; font-size: 18px; }
+.guide p { margin: 8px 0 16px; font-size: 14px; }
+.answers { flex-wrap: wrap; justify-content: flex-start; }
+.answers :is(a, button) { background: #f3e8d7; }
+.detailsFooter { flex-wrap: wrap; gap: 6px; }
+
+.detailsFooter button { padding: 0 6px; background: transparent; color: #126651; font: inherit; text-decoration: underline; }

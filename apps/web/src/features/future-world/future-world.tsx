@@ -1,0 +1,231 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { faArrowLeft, faHouse, faMoon, faSun, faTicket, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { duration, initialPlans, money } from "../goals/demo-goals";
+import { useGoalPlans } from "../goals/use-goal-plans";
+import { landmarkStyles, worldLandmarks, type Landmark } from "./landmarks";
+import type { WorldScene } from "./world-scene";
+import styles from "./future-world.module.css";
+
+const ticketGoals = new Set(initialPlans.filter(plan => plan.id !== "emergency").map(plan => plan.id));
+
+function FundingDetails({ landmark, onEnter, onClose }: { landmark: Landmark; onEnter?: () => void; onClose: () => void }) {
+  const { plan, kind } = landmark;
+  const funded = Math.round(Math.min(1, plan.saved / plan.target) * 1000) / 10;
+  const theme = landmarkStyles[kind];
+  return (
+    <section className={styles.details} aria-label={`${plan.title} funding`}>
+      <div className={styles.detailsHeading}>
+        <span className={styles.landmarkIcon} style={{ backgroundColor: theme.color }}><FontAwesomeIcon icon={theme.icon} /></span>
+        <div>
+          <h2>{plan.title}</h2>
+          <span>{duration(plan.months)} from now</span>
+        </div>
+        <button className={styles.iconButton} type="button" aria-label="Close goal details" onClick={onClose}>
+          <FontAwesomeIcon icon={faXmark} />
+        </button>
+      </div>
+      <dl className={styles.funding}>
+        <div><dt>Saved</dt><dd>THB {money.format(plan.saved)}</dd></div>
+        <div><dt>Target</dt><dd>THB {money.format(plan.target)}</dd></div>
+      </dl>
+      <div className={styles.progress} role="progressbar" aria-label="Goal funded" aria-valuenow={funded}>
+        <span style={{ width: `${funded}%`, background: theme.color }} />
+      </div>
+      <div className={styles.detailsFooter}>
+        <span>{funded}% funded</span>
+        {onEnter && <button onClick={onEnter}><FontAwesomeIcon icon={faHouse} /> Enter house</button>}
+        {ticketGoals.has(plan.id) && (
+          <Link href={`/future-you/${plan.id}`}><FontAwesomeIcon icon={faTicket} /> Trip ticket</Link>
+        )}
+      </div>
+    </section>
+  );
+}
+
+export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; houseId?: string }) {
+  const [interiorId, setInteriorId] = useState<string | null>(null);
+  const town = interiorId === null;
+  const [night, setNight] = useState(false);
+  const [guideReply, setGuideReply] = useState("Welcome! Walk up to a landmark to explore a goal, or tap a path to walk there.");
+  const { plans, loaded } = useGoalPlans();
+  const landmarks = useMemo(() => worldLandmarks(plans), [plans]);
+  const [selectedId, setSelectedId] = useState(initialGoal ?? null);
+  const [nearbyId, setNearbyId] = useState<string | null>(null);
+  const [availability, setAvailability] = useState<"loading" | "ready" | "fallback">("loading");
+  const pointer = useRef<number | null>(null);
+  const pad = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const scene = useRef<WorldScene | null>(null);
+  const latestLandmarks = useRef(landmarks);
+  const activeTrigger = useRef<HTMLElement | null>(null);
+  const selected = landmarks.find(plot => plot.plan.id === selectedId);
+  const guideOpen = selectedId === "town-guide";
+  const panelOpen = Boolean(selected || guideOpen);
+  const nearby = landmarks.find(plot => plot.plan.id === nearbyId);
+  const enterNearby = town && nearby?.kind === "house";
+  const nearbyLabel = nearbyId === "house-exit" ? "Exit to town"
+    : enterNearby ? "Enter house"
+    : nearbyId === "town-guide" ? "Talk to town guide"
+    : town && nearby ? "Explore " + nearby.plan.title : null;
+  const discover = useCallback((id: string, trigger?: HTMLElement) => {
+    if (id === "town-guide") setGuideReply("Welcome! Walk up to a landmark to explore a goal, or tap a path to walk there.");
+    activeTrigger.current = trigger ?? null;
+    setSelectedId(id);
+    releaseStick();
+    scene.current?.stop();
+  }, []);
+
+  useEffect(() => {
+    latestLandmarks.current = landmarks;
+    scene.current?.setLandmarks(landmarks);
+  }, [landmarks]);
+
+  useEffect(() => {
+    if (!loaded || !canvas.current) return;
+    const element = canvas.current;
+    let cancelled = false;
+    import("./world-scene").then(({ mountWorld }) => {
+      if (cancelled) return;
+      scene.current = mountWorld({
+        canvas: element, houseId,
+        landmarks: latestLandmarks.current,
+        onNearby: setNearbyId,
+        onInspect: discover,
+        onInterior: setInteriorId,
+        onAvailability: available => setAvailability(available ? "ready" : "fallback"),
+      });
+    }).catch(() => {
+      if (!cancelled) setAvailability("fallback");
+    });
+    return () => {
+      cancelled = true;
+      scene.current?.dispose();
+      scene.current = null;
+    };
+  }, [houseId, discover, loaded]);
+
+  useEffect(() => {
+    if (town && availability === "ready") scene.current?.setNight(night);
+  }, [town, availability, night]);
+
+  const closeDetails = useCallback(() => {
+    setSelectedId(null);
+    activeTrigger.current?.focus();
+    activeTrigger.current = null;
+  }, []);
+
+  const interactNearby = useCallback((trigger?: HTMLElement) => {
+    if (!nearbyId) return;
+    if (nearbyId === "house-exit" || enterNearby) {
+      releaseStick();
+      scene.current?.stop();
+      if (enterNearby) scene.current?.enterHouse(nearbyId);
+      else scene.current?.exitHouse();
+    } else {
+      discover(nearbyId, trigger);
+    }
+  }, [discover, enterNearby, nearbyId]);
+
+  useEffect(() => {
+    function keyDown(event: KeyboardEvent) {
+      const target = event.target;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.defaultPrevented ||
+        (target instanceof HTMLElement && (target.isContentEditable || target.matches("input, select, textarea")))) return;
+      const key = event.key.toLowerCase();
+      if (!panelOpen && /^(arrow(left|right|up|down)|[wasd])$/.test(key) && availability === "ready") {
+        event.preventDefault();
+        scene.current?.key(key, true);
+      }
+      if (key === "e" && !event.repeat && availability === "ready" && !panelOpen) interactNearby();
+      if (event.key === "Escape" && selectedId) closeDetails();
+    }
+    function keyUp(event: KeyboardEvent) { scene.current?.key(event.key.toLowerCase(), false); }
+    window.addEventListener("keydown", keyDown);
+    window.addEventListener("keyup", keyUp);
+    return () => {
+      window.removeEventListener("keydown", keyDown);
+      window.removeEventListener("keyup", keyUp);
+    };
+  }, [availability, closeDetails, interactNearby, panelOpen, selectedId]);
+
+  function releaseStick() {
+    pointer.current = null;
+    scene.current?.setStick(0, 0);
+    pad.current?.style.removeProperty("--dx");
+    pad.current?.style.removeProperty("--dy");
+  }
+
+  useEffect(() => {
+    window.addEventListener("blur", releaseStick);
+    return () => window.removeEventListener("blur", releaseStick);
+  }, []);
+
+  function steer(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerId !== pointer.current) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const dx = event.clientX - rect.left - rect.width / 2;
+    const dy = event.clientY - rect.top - rect.height / 2;
+    const radius = rect.width * 0.27;
+    const length = Math.max(radius, Math.hypot(dx, dy));
+    const x = dx / length, y = dy / length;
+    event.currentTarget.style.setProperty("--dx", x * radius + "px");
+    event.currentTarget.style.setProperty("--dy", y * radius + "px");
+    scene.current?.setStick(x, y);
+  }
+
+  return (
+    <main id="main" className={styles.page} aria-label="Future World">
+      <canvas ref={canvas} className={styles.canvas} aria-label={town ? "Walk through your goal town" : "Walk through your future home"}
+        onClick={event => { if (!panelOpen) scene.current?.inspect(event.clientX, event.clientY); }} />
+      <Link href="/goals" className={styles.back} aria-label="Back to Future You"><FontAwesomeIcon icon={faArrowLeft} /></Link>
+      <div className={styles.travel}>
+        {town && availability === "ready" && <button type="button" aria-label="Night mode" aria-pressed={night} onClick={() => setNight(value => !value)}>
+          <FontAwesomeIcon icon={night ? faSun : faMoon} />
+        </button>}
+      </div>
+      {availability === "ready" && !panelOpen && nearbyId && nearbyLabel && (
+        <button className={styles.interact} title={enterNearby ? nearby?.plan.title : undefined} onClick={event => interactNearby(event.currentTarget)}>{nearbyLabel}</button>
+      )}
+      {availability === "ready" && !panelOpen && (
+        <div ref={pad} className={styles.stick} tabIndex={0} role="group"
+          aria-label="Movement joystick. Drag to walk, or use the arrow keys. Press E to inspect a nearby goal."
+          onPointerDown={event => {
+            if (event.button !== 0 || pointer.current !== null) return;
+            pointer.current = event.pointerId;
+            event.currentTarget.setPointerCapture(event.pointerId);
+            steer(event);
+          }}
+          onPointerMove={steer}
+          onPointerUp={event => { if (event.pointerId === pointer.current) releaseStick(); }}
+          onPointerCancel={event => { if (event.pointerId === pointer.current) releaseStick(); }}
+          onLostPointerCapture={event => { if (event.pointerId === pointer.current) releaseStick(); }}>
+          <span />
+        </div>
+      )}
+      {availability === "loading" && <p className={styles.message} role="status">Opening your world…</p>}
+      {availability === "fallback" && !selected && (
+        <section className={styles.message}><h2>3D view unavailable</h2><p>Explore your saved goals here.</p>
+          {landmarks.map(({ plan }) => <button key={plan.id} onClick={event => discover(plan.id, event.currentTarget)}>{plan.title}</button>)}
+        </section>
+      )}
+      {guideOpen && <section className={styles.guide} aria-label="Town guide">
+        <div className={styles.guideHeading}><h2>Town guide</h2>
+          <button className={styles.iconButton} onClick={closeDetails} aria-label="Close conversation"><FontAwesomeIcon icon={faXmark} /></button>
+        </div>
+        <p aria-live="polite">{guideReply}</p>
+        <div className={styles.answers}>
+          <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>
+          <button onClick={closeDetails}>Back to exploring</button>
+        </div>
+      </section>}
+      {selected && <FundingDetails landmark={selected} onEnter={town && selected.kind === "house" && availability === "ready" ? () => {
+        setSelectedId(null);
+        scene.current?.enterHouse(selected.plan.id);
+      } : undefined} onClose={closeDetails} />}
+    </main>
+  );
+}

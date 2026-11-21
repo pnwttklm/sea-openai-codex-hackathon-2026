@@ -18,6 +18,11 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | WEB-09 | Add personal goals and refine the Future You editor in `apps/web` | Codex | Review | `poon-future-you` | WEB-07 |
 | WEB-10 | Apply the supplied Brim and Slava references to the Future You dashboard | Codex | Review | `poon-future-you` | WEB-09 |
 | WEB-11 | Restore the previous web UI icons and design guidance | Codex | Review | `poon-future-you` | WEB-10 |
+| WEB-12 | Build playable Future World and render saved Future You goals as 3D landmarks in `apps/web` | Codex | Review | `poon-future-you` | WEB-08, WEB-09; Spline miniature and Figma `54:1927` |
+| WEB-13 | Full-screen mobile Future World house and analog thumbstick in `apps/web/src/features/future-world` | Codex | Review | `poon-future-you` | WEB-12; supplied mobile reference |
+| WEB-14 | Restore the island as a walkable full-screen town alongside the house in `apps/web` | Codex | Review | `poon-future-you` | WEB-12, WEB-13 |
+| WEB-15 | Connect town houses and interior doors with matching doorstep returns in `apps/web` | Codex | Review | `poon-future-you` | WEB-14 |
+| WEB-16 | Unify the town and its enterable interiors in a single Future World scene under `apps/web` | Codex | Review | `poon-future-you` | WEB-15 |
 | API-01 | Scaffold FastAPI, configuration, health route, and Python package | Codex | Review | Current workspace | Starter implemented; review before feature work |
 | DATA-01 | Implement MongoDB client lifecycle and agreed repository interfaces | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
 | AI-01 | Implement configurable OpenAI service and FastMCP entry point | Unassigned | Ready | TBD | API-01; CONTRACT-01 |

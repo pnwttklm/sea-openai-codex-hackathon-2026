@@ -136,7 +136,7 @@ export function FutureYou() {
           <h1 id="future-you-title">Future You</h1>
         </div>
         <SavingsOverview goals={goals} />
-        <FutureActions goals={goals.filter(goal => !goal.id.startsWith("custom-"))} />
+        <FutureActions />
       </section>
 
       <section className={styles.goals} aria-label="Your life goals">

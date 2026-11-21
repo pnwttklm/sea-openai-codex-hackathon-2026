@@ -83,6 +83,7 @@ export function TimeMachine({ id }: { id: string }) {
       </div>
       <div className={styles.journeyBar} aria-hidden="true"><span /></div>
       <TripTicket key={plan.id} plan={plan} />
+      <Link className={styles.enterWorld} href={`/future-world?goal=${plan.id}`}>Enter Future World</Link>
     </main>
   );
 }

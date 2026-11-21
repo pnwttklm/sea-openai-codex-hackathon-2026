@@ -30,9 +30,11 @@ function readPlans() {
 
 export function useGoalPlans() {
   const [plans, setPlans] = useState(initialPlans);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     function refresh() { setPlans(readPlans()); }
     refresh();
+    setLoaded(true);
     window.addEventListener("storage", refresh);
     window.addEventListener("pageshow", refresh);
     return () => {
@@ -47,5 +49,5 @@ export function useGoalPlans() {
     setPlans(readPlans());
   }
 
-  return { plans, savePlan };
+  return { plans, loaded, savePlan };
 }
