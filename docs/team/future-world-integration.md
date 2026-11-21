@@ -17,18 +17,26 @@ To check the integration, open a Doraemon conversation at a goal, close it, then
 
 ## 1. Let Doraemon answer and ask back
 
+Doraemon can also walk up to Nobita and bring up a landmark near Nobita, one he recently inspected, or another goal he is curious about. Any goal in town can come up, including a goal awaiting its first contribution or one already funded. The frontend uses that context and the saved amounts to choose an opening line. The accepted conversation shows a progress bar for the same goal. If the player chooses **Let’s talk**, the same Doraemon conversation handler receives that goal ID. Use it to continue the topic when wiring the LLM. Dismissing or walking away ends the invitation locally.
+
 When the player taps **Talk to Doraemon**, open a conversation where they can type a question or choose a suggested reply. If Doraemon was looking at a landmark, the scene already supplies its goal ID. Use that context for the opening exchange. When he is wandering, let him ask which goal the player wants to discuss.
 
 - **Backend and Data** — Resolve the goal ID against the signed-in user’s goals. Keep the conversation ID, turns, and current goal together so a short reply such as “500 more” makes sense in the next turn.
 - **AI** — Use the server-side OpenAI SDK to answer from the saved goal and ask a relevant follow-up. For example, after “When could I buy my car?”, Doraemon could ask “Would you like to see what happens if you save another ฿500 each month?” Trigger the model when the player engages. Wandering and notebook animations already run locally.
 - **Frontend** — Replace the scripted reply in the conversation sheet. Preserve the pause while talking and resume exploring on close. If a turn fails, keep the typed question available to retry. [Conversation sheet](../../apps/web/src/features/future-world/future-world.tsx) · [Doraemon’s routine](../../apps/web/src/features/future-world/guide-routine.ts)
 
-## 2. Make a reply interactive
+## 2. Include a visual in every Doraemon AI reply
 
-Start with one graph the player can change. For the car example, show two projected savings lines against the target, one for the saved monthly contribution and one for the extra ฿500. Tapping a different contribution should update the comparison. Keep the saved plan intact while the player explores.
+**Every Doraemon AI reply must include a visual that helps answer the question, alongside a short, accessible caption.** This applies to player-initiated chats, follow-up turns, and AI replies after the player accepts a town reminder. Show the visual directly in the conversation.
+
+| What the player asks | What Doraemon shows |
+| --- | --- |
+| “How close am I to my car?” | A progress bar labeled with the amount saved, target, and THB remaining. |
+| “What if I save ฿500 more each month?” | A graph comparing the current and proposed savings paths against the target. Tapping a contribution updates the graph and caption while preserving the saved plan. |
+| “Which goal should we look at?” | Tappable cards for the player’s saved goals. Each card names the goal and shows its landmark icon. If there are no saved goals, show an illustrated **Add a goal** card. |
 
 - **Backend** — Calculate the series and estimated dates from the same goal values used in the conversation. A first version could assume monthly contributions and zero investment growth. Return those assumptions with the figures.
-- **AI and Frontend** — Agree on a structured chart response carrying the goal ID, series labels, month and THB values, and supported actions. The model can introduce the chart and ask the next question. The mobile sheet renders the graph, a readable text summary, and tappable contribution choices.
+- **API acceptance check** — Require a caption and at least one supported visual in each successful AI reply. Validate the data for that visual before returning it. For a savings graph, include labeled series, units, and backend-calculated values. When information is missing, return a card that lets the player supply it. Cover a caption-only response as a validation failure.
 - **Demo check** — With ฿20,000 saved toward ฿50,000, a constant ฿2,000 per month reaches the target in 15 months. Choosing **Add ฿500/month** should show 12 months on both the graph and in Doraemon’s answer under the same assumptions.
 
 ## 3. Personalize the 3D object when a goal is added

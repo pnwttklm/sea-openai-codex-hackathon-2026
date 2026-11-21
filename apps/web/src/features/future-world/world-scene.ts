@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import type { GoalReminder } from "./goal-reminder";
 import type { Landmark } from "./landmarks";
 import { createWorldArt } from "./world-art";
 
@@ -13,13 +14,14 @@ type Options = {
   houseId?: string;
   dogImage: HTMLImageElement;
   landmarks: Landmark[];
+  onReminder: (reminder: GoalReminder | null) => void;
   onNearby: (id: string | null) => void;
   onInspect: (id: string) => void;
   onInterior: (id: string | null) => void;
   onAvailability: (available: boolean) => void;
 };
 
-export function mountWorld({ canvas, houseId, dogImage, landmarks, onNearby, onInspect, onInterior, onAvailability }: Options) {
+export function mountWorld({ canvas, houseId, dogImage, landmarks, onReminder, onNearby, onInspect, onInterior, onAvailability }: Options) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.shadowMap.enabled = true;
@@ -59,7 +61,8 @@ export function mountWorld({ canvas, houseId, dogImage, landmarks, onNearby, onI
   const dog = createDogCompanion(dogImage);
   dog.group.name = "shopee-dog";
   const companions = [guide, dog.group];
-  const routine = createGuideRoutine(guideArt, avatar.position, canWalkTown, dog.group.position, true);
+  const routine = createGuideRoutine(guideArt, avatar.position, canWalkTown, dog.group.position, true, onReminder);
+  let panelOpen = false;
   const dogRoutine = createGuideRoutine(dog, avatar.position, canWalkTown, guide.position, false);
   guide.name = "town-guide";
   let path: [number, number][] = [];
@@ -129,6 +132,7 @@ export function mountWorld({ canvas, houseId, dogImage, landmarks, onNearby, onI
     const house = landmarks.find(plot => plot.kind === "house" && plot.plan.id === id);
     if (!house) return;
     stop();
+    routine.dismissReminder();
     home = house;
     avatar.position.set(0, 0.10, 1.55);
     heading = 0;
@@ -236,7 +240,7 @@ export function mountWorld({ canvas, houseId, dogImage, landmarks, onNearby, onI
       dirty = true;
     } else if (phase) { phase = 0; dirty = true; }
     if (!home) {
-      const guideMoved = routine.tick(dt, landmarks, reduced.matches);
+      const guideMoved = routine.tick(dt, landmarks, reduced.matches, !panelOpen);
       const dogMoved = dogRoutine.tick(dt, landmarks, reduced.matches);
       if (guideMoved || dogMoved) { updateNearby(); dirty = true; }
     }
@@ -293,6 +297,11 @@ export function mountWorld({ canvas, houseId, dogImage, landmarks, onNearby, onI
   onAvailability(true);
   return {
     setLandmarks, inspect, stop, enterHouse, exitHouse,
+    dismissReminder() { routine.dismissReminder(); dirty = true; },
+    setPanelOpen(open: boolean) {
+      panelOpen = open;
+      if (open) { routine.dismissReminder(); dirty = true; }
+    },
     startConversation(id: string) {
       dirty = true;
       return (id === dog.group.name ? dogRoutine : routine).startConversation();

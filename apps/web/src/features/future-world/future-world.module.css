@@ -104,6 +104,33 @@
 .sheet p { margin: 8px 0 16px; line-height: 20px; }
 .answers { flex-wrap: wrap; justify-content: flex-start; }
 
+.invitation {
+  position: absolute;
+  top: calc(max(16px, env(safe-area-inset-top)) + 52px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, calc(100% - 24px));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--sheet);
+  box-shadow: 0 4px 16px #10111430;
+}
+.portrait {
+  height: 36px;
+  background: url("/future-you/doraemon-tab.svg") center / contain no-repeat;
+}
+.goalMeter { display: grid; gap: 6px; margin-bottom: 16px; color: var(--ink); overflow-wrap: anywhere; }
+.goalMeter progress { width: 100%; height: 8px; accent-color: var(--focus); }
+
+.invitation strong { color: var(--focus); }
+.invitation p { margin: 4px 0 10px; overflow-wrap: anywhere; }
+.invitation .answers button { min-height: 44px; }
+
 @media (prefers-reduced-motion: no-preference) {
   .sheet[open] { animation: arrive 220ms cubic-bezier(.22,1,.36,1); }
   @keyframes arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }

@@ -1,12 +1,13 @@
 import type { Vector3 } from "three";
 import type { Landmark } from "./landmarks";
+import { nextReminderGoal, type GoalReminder } from "./goal-reminder";
 import { townPath } from "./town-path";
 import type { createWorldArt } from "./world-art";
 
 type Guide = ReturnType<ReturnType<typeof createWorldArt>["townGuide"]>;
 type Point = [number, number];
 
-export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: number, z: number) => boolean, other: Vector3, takesNotes: boolean) {
+export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: number, z: number) => boolean, other: Vector3, takesNotes: boolean, onReminder?: (reminder: GoalReminder | null) => void) {
   const { position, rotation } = guide.group;
   const spawn = position.clone();
   const clearOfCompanion = (x: number, z: number) => Math.hypot(x - other.x, z - other.z) >= 0.75;
@@ -19,6 +20,22 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
   let talking = false;
   let greeted = false;
   let visits = 0;
+  const mentioned = new Set<string>();
+  let reminderDelay = 8 + Math.random() * 4;
+  let reminderGoal: GoalReminder | undefined;
+  let speaking = false;
+  let approachTime = 0;
+  let routeAge = 0;
+  let targetX = 0, targetZ = 0;
+
+  function dismissReminder() {
+    if (!reminderGoal) return;
+    reminderGoal = undefined;
+    if (speaking) onReminder?.(null);
+    speaking = false;
+    reminderDelay = 60 + Math.random() * 30;
+    reset();
+  }
 
   function begin(next: typeof activity, seconds = 0) {
     activity = next;
@@ -52,25 +69,71 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
       const side = Math.random() < 0.5 ? -1 : 1;
       destinations = [[player.x + side * 1.35, player.z + 0.45], [side * 2.32, 0], [-side * 2.32, 4.82]];
     }
+    if (walkTo(destinations)) visits++;
+    else reset();
+  }
+
+  function walkTo(destinations: Point[]) {
     const clear = (x: number, z: number) => walkable(x, z) && clearOfCompanion(x, z) && Math.hypot(x - player.x, z - player.z) > 0.75;
     for (const [x, z] of destinations) {
       if (!clear(x, z)) continue;
       route = townPath(position.x, position.z, x, z, clear);
       if (route.length) {
-        visits++;
         begin("walk");
-        return;
+        return true;
       }
     }
-    reset();
+    return false;
   }
 
-  function tick(dt: number, plots: Landmark[], reduced: boolean) {
+  function tick(dt: number, plots: Landmark[], reduced: boolean, allowReminder = true) {
     if (talking) return false;
     elapsed += dt;
     const distance = Math.hypot(position.x - player.x, position.z - player.z);
+    if (onReminder && allowReminder) {
+      if (!reminderGoal && (reminderDelay -= dt) <= 0) {
+        reminderGoal = nextReminderGoal(plots, mentioned, player, lastGoal);
+        reminderDelay = 15;
+        routeAge = Infinity;
+        approachTime = 0;
+      }
+      if (reminderGoal) {
+        const plan = plots.find(plot => plot.plan.id === reminderGoal?.id)?.plan;
+        if (!plan || (speaking && distance > 2.9)) {
+          dismissReminder();
+          return true;
+        }
+        if (speaking) {
+          if (elapsed < 22) return false;
+          dismissReminder();
+          return true;
+        }
+        if (distance < 1.5) {
+          goalId = reminderGoal.id;
+          mentioned.add(reminderGoal.id);
+          face(player.x, player.z);
+          begin("idle");
+          speaking = true;
+          onReminder(reminderGoal);
+          return true;
+        }
+        approachTime += dt;
+        routeAge += dt;
+        if (approachTime > 20) { dismissReminder(); return true; }
+        if (routeAge >= 1 && (activity !== "walk" || routeAge === Infinity || Math.hypot(player.x - targetX, player.z - targetZ) > 1)) {
+          routeAge = 0;
+          targetX = player.x;
+          targetZ = player.z;
+          const side = position.x < player.x ? -1 : 1;
+          if (!walkTo([[targetX + side, targetZ], [targetX - side, targetZ], [targetX, targetZ + 1], [targetX, targetZ - 1]])) {
+            dismissReminder();
+            return true;
+          }
+        }
+      }
+    }
     if (distance > 2) greeted = false;
-    if (activity === "walk" && distance < 1.3 && !greeted) {
+    if (!reminderGoal && activity === "walk" && distance < 1.3 && !greeted) {
       greeted = true;
       route = [];
       goalId = undefined;
@@ -119,7 +182,8 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
   }
 
   function startConversation() {
-    const subject = activity === "write" || activity === "look" ? goalId : undefined;
+    const subject = speaking ? reminderGoal?.id : (activity === "write" || activity === "look" ? goalId : undefined);
+    dismissReminder();
     talking = true;
     face(player.x, player.z);
     guide.pose("idle", 0);
@@ -133,5 +197,5 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
     reset();
   }
 
-  return { tick, reset, startConversation, endConversation };
+  return { tick, reset, dismissReminder, startConversation, endConversation };
 }

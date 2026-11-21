@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { duration, initialPlans, money } from "../goals/demo-goals";
 import { useGoalPlans } from "../goals/use-goal-plans";
 import { landmarkStyles, worldLandmarks, type Landmark } from "./landmarks";
+import { goalFollowUp, reminderMessage, type GoalReminder } from "./goal-reminder";
 import type { WorldScene } from "./world-scene";
 import styles from "./future-world.module.css";
 
@@ -70,6 +71,8 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const [interiorId, setInteriorId] = useState<string | null>(null);
   const town = interiorId === null;
   const [night, setNight] = useState(false);
+  const [reminder, setReminder] = useState<GoalReminder | null>(null);
+  const [conversationGoalId, setConversationGoalId] = useState<string | undefined>(undefined);
   const [guideReply, setGuideReply] = useState("");
   const { plans, loaded } = useGoalPlans();
   const landmarks = useMemo(() => worldLandmarks(plans), [plans]);
@@ -87,6 +90,8 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const companionName = dogOpen ? "Shopee dog" : "Doraemon";
   const guideOpen = dogOpen || selectedId === "town-guide";
   const panelOpen = Boolean(selected || guideOpen);
+  const invitation = landmarks.find(plot => plot.plan.id === reminder?.id);
+  const conversationGoal = landmarks.find(plot => plot.plan.id === conversationGoalId);
   const nearby = landmarks.find(plot => plot.plan.id === nearbyId);
   const enterNearby = town && nearby?.kind === "house";
   const nearbyLabel = nearbyId === "house-exit" ? "Exit to town"
@@ -101,8 +106,9 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
     } else if (id === "town-guide") {
       const subject = scene.current?.startConversation(id);
       const plan = latestLandmarks.current.find(plot => plot.plan.id === subject)?.plan;
+      setConversationGoalId(subject);
       setGuideReply(plan
-        ? `I was making a note about “${plan.title}”. You've saved THB ${money.format(plan.saved)} toward it so far.`
+        ? goalFollowUp(plan)
         : "Hi! I’m taking a walk around your town. Come look at the goals with me!");
     }
     activeTrigger.current = trigger ?? null;
@@ -127,6 +133,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
       scene.current = mountWorld({
         canvas: element, houseId, dogImage,
         landmarks: latestLandmarks.current,
+        onReminder: setReminder,
         onNearby: setNearbyId,
         onInspect: discover,
         onInterior: setInteriorId,
@@ -146,8 +153,13 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
     if (town && availability === "ready") scene.current?.setNight(night);
   }, [town, availability, night]);
 
+  useEffect(() => {
+    if (availability === "ready") scene.current?.setPanelOpen(panelOpen);
+  }, [availability, panelOpen]);
+
   const closeDetails = useCallback(() => {
     scene.current?.endConversation();
+    setConversationGoalId(undefined);
     setSelectedId(null);
     const trigger = activeTrigger.current;
     activeTrigger.current = null;
@@ -223,7 +235,20 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
           <FontAwesomeIcon icon={night ? faSun : faMoon} />
         </button>}
       </div>
-      {availability === "ready" && !panelOpen && nearbyId && nearbyLabel && (
+      {town && availability === "ready" && !panelOpen && invitation && reminder && (
+        <aside className={styles.invitation} aria-label="Message from Doraemon">
+          <span className={styles.portrait} aria-hidden="true" />
+          <div>
+            <strong>Doraemon</strong>
+            <p role="status">{reminderMessage(invitation.plan, reminder.reason)}</p>
+            <div className={styles.answers}>
+              <button onClick={() => discover("town-guide")}>Let’s talk</button>
+              <button onClick={() => scene.current?.dismissReminder()}>Maybe later</button>
+            </div>
+          </div>
+        </aside>
+      )}
+      {availability === "ready" && !panelOpen && nearbyId && nearbyLabel && !(invitation && nearbyId === "town-guide") && (
         <button className={styles.interact} title={enterNearby ? nearby?.plan.title : undefined} onClick={event => interactNearby(event.currentTarget)}>{nearbyLabel}</button>
       )}
       {availability === "ready" && !panelOpen && (
@@ -253,8 +278,17 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
           <button className={styles.iconButton} onClick={closeDetails} aria-label="Close conversation"><FontAwesomeIcon icon={faXmark} /></button>
         </div>
         <p aria-live="polite">{guideReply}</p>
+        {!dogOpen && conversationGoal && <label className={styles.goalMeter}>
+          <span>{conversationGoal.plan.title} · ฿{money.format(conversationGoal.plan.saved)} of ฿{money.format(conversationGoal.plan.target)}</span>
+          <progress value={Math.min(conversationGoal.plan.saved, conversationGoal.plan.target)} max={conversationGoal.plan.target} />
+        </label>}
         <div className={styles.answers}>
           {dogOpen ? <button onClick={() => setGuideReply("The little dog leans into your hand. Woof!")}>Pet the dog</button> :
+          conversationGoal ? <button onClick={() => {
+            scene.current?.endConversation();
+            setSelectedId(conversationGoal.plan.id);
+            setConversationGoalId(undefined);
+          }}>Show my progress</button> :
           <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>}
           <button onClick={closeDetails}>Back to exploring</button>
         </div>
