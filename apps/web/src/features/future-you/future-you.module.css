@@ -206,7 +206,8 @@
 .photoSelection { max-width: 330px; margin: 0 auto; overflow-wrap: anywhere; }
 .photoSelection p { margin: 4px 0; }
 .portraitLabel { margin: 6px 0 0; font-weight: 600; }
-.voiceControls { max-width: 350px; margin: 14px auto 0; }
+.voiceBeam { display: block; width: 100%; max-width: 350px; margin: 14px auto 0; }
+.voiceControls { padding: 8px 12px 14px; border: 1px solid var(--line); border-radius: 21px; background: #1b192b; }
 .callStatus:empty { display: none; }
 .callStatus {
   display: inline-flex;
