@@ -7,6 +7,13 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | PLAN-01 | Select MVP journey and review accessible design references | Unassigned | Ready | TBD | Team decision |
 | CONTRACT-01 | Agree on first journey's API, service, data, and tool interfaces | Unassigned | Ready | TBD | PLAN-01 |
 | WEB-01 | Scaffold Next.js, TypeScript, and responsive shell | Codex | Review | Current workspace | Starter implemented; design required for product-specific screens |
+| WEB-02 | Implement the Figma Future You dashboard at `/goals` in `apps/web` with synthetic goal fixtures | Codex | Review | `poon-future-you` | Figma `67:1974` and `54:1816` |
+| WEB-03 | Build editable goal details, the emergency fund box, glass tabs and time-machine entry in `apps/web` | Codex | Review | `poon-future-you` | WEB-02 |
+| WEB-04 | Refine interaction motion across Future You in `apps/web/src/features/goals` | Codex | Review | `poon-future-you` | WEB-03 |
+| WEB-05 | Redesign Edit goal input interactions in `apps/web/src/features/goals` | Codex | Review | `poon-future-you` | WEB-04 |
+| DOC-01 | Document Future You interaction and motion guidance in `.agents/skills/prik-thai-ai-design/SKILL.md` | Codex | Review | `poon-future-you` | WEB-04, WEB-05 |
+| WEB-06 | Replace the Future You hero picker with Future Talk and Future World actions | Codex | Review | `poon-future-you` | WEB-05 |
+| WEB-07 | Restore the pre-wave Future You launch controls | Codex | Review | `poon-future-you` | WEB-06 |
 | API-01 | Scaffold FastAPI, configuration, health route, and Python package | Codex | Review | Current workspace | Starter implemented; review before feature work |
 | DATA-01 | Implement MongoDB client lifecycle and agreed repository interfaces | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
 | AI-01 | Implement configurable OpenAI service and FastMCP entry point | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
