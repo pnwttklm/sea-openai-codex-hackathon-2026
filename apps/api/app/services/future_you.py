@@ -22,10 +22,10 @@ GENDER_VOICE_STYLES: dict[str, VoiceStyle] = {
 }
 
 
-def profile_voice_style(profile: FutureProfile | None) -> VoiceStyle:
+def profile_voice_style(profile: FutureProfile | None, *, fallback: VoiceStyle | None = None) -> VoiceStyle:
     if profile is None:
-        return "neutral"
-    return profile.voice_style or GENDER_VOICE_STYLES.get((profile.gender or "").casefold(), "neutral")
+        return fallback or "neutral"
+    return GENDER_VOICE_STYLES.get((profile.gender or "").strip().casefold()) or profile.voice_style or fallback or "neutral"
 
 
 def assess_plan(plan: FuturePlan) -> FutureAssessment:
