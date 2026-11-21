@@ -12,7 +12,7 @@ import type { PaperAccount } from "./paper-order";
 const ranges: Range[] = ["1Y", "3Y", "5Y", "10Y", "All"];
 const periodLabels: Record<Range, string> = { "1Y": "past 1 year", "3Y": "past 3 years", "5Y": "past 5 years", "10Y": "past 10 years", All: "all time" };
 const shades = ["#a45cff", "#676780", "#494950", "#696971", "#888893", "#38383b"];
-const logos: Record<string, string> = { NVDA: "nvda.jpg", AAPL: "aapl.svg", MSTR: "mstr.jpg", MSFT: "msft.svg" };
+const logos: Record<string, string> = { SGOV: "sgov.svg", VT: "vt.svg", SE: "se.svg", GLD: "gld.svg", BTC: "btc.svg", NVDA: "nvda.jpg", AAPL: "aapl.svg", MSTR: "mstr.jpg", MSFT: "msft.svg" };
 
 function Allocation({ items, value }: { items: PortfolioData["allocation"]; value: number }) {
   const [active, setActive] = useState(0);
