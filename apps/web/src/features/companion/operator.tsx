@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { components } from "@/lib/api/demo.generated";
 import { agents, Mascot, type Agent } from "./mascots";
+import { SystemMap } from "./system-map";
 import styles from "./operator.module.css";
 
 export type Run = components["schemas"]["Run"];
@@ -19,6 +20,8 @@ async function get<T>(path: string, signal: AbortSignal): Promise<T> {
 
 export function SignIn() {
   const [message, setMessage] = useState("");
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
   async function login(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const secret = new FormData(e.currentTarget).get("secret");
@@ -29,9 +32,9 @@ export function SignIn() {
       else setMessage((await res.json()).detail ?? "Sign-in failed.");
     } catch { setMessage("Operator service unavailable."); }
   }
-  return <form className={styles.login} onSubmit={login}>
+  return <form method="post" className={styles.login} onSubmit={login}>
     <label>Operator secret<input name="secret" type="password" required autoComplete="current-password" /></label>
-    <button>Sign in</button>{message && <p role="alert">{message}</p>}
+    <button type="submit" disabled={!ready}>Sign in</button>{message && <p role="alert">{message}</p>}
   </form>;
 }
 
@@ -116,7 +119,7 @@ export function OperatorConsole({ initial }: { initial: Run[] }) {
     {id ? <section className={styles.panel}><button onClick={() => { select(""); setDetail(null); }}>← Runs</button>
       {detail ? <><h2>Run at {time(detail.started)}</h2><p>{detail.status} · {detail.agents.length} agents · {detail.tools} tool calls · {detail.db_reads} DB reads</p>
         <h3>Execution graph</h3>{detail.spans.length ? <Tree nodes={detail.spans} parent={null} /> : <p>No trace events recorded yet.</p>}</> : <p role="status">Loading run…</p>}</section> :
-      <section><div className={styles.filters}><label>Agent<select aria-label="Agent" value={agent} onChange={e => setAgent(e.target.value)}><option value="">All agents</option>
+      <section><SystemMap /><div className={styles.filters}><label>Agent<select aria-label="Agent" value={agent} onChange={e => setAgent(e.target.value)}><option value="">All agents</option>
         {Object.entries(agents).map(([k,v]) => <option key={k} value={k}>{v}</option>)}</select></label>
         <label>Status<select aria-label="Status" value={status} onChange={e => setStatus(e.target.value)}><option value="">All states</option>
           {["running","completed","partial","failed","interrupted"].map(s => <option key={s}>{s}</option>)}</select></label></div>

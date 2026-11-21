@@ -26,7 +26,7 @@ async def seed() -> None:
         for field, value in preferences.items():
             await collection.update_one({"_id": subject, field: {"$exists": False}}, {"$set": {field: value}})
         await seed_plans(collection, subject)
-        await DemoRepository(mongo, database).get_paper_account()
+        await DemoRepository(mongo, database, shared_demo=True).get_paper_account()
     print("Shared demo profile, goal plans and paper account are ready.")
 
 

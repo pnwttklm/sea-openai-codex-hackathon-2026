@@ -1,3 +1,3 @@
 # MongoDB layer
 
-Future You uses the async PyMongo client owned by the API lifespan. The repository reads the configured profile and its goals. The opt-in seed writes only to `future_you_demo`. See the [collection contract](../../../../docs/contracts/future-you.md) and [local setup](../../../../docs/development.md).
+FastAPI manages the async PyMongo client. The shared demo seed initializes the synthetic profile and goals, market snapshot, and opening ledger. See the [integration and restore guide](../../../../database/README.md) for collection names, exports and commands.

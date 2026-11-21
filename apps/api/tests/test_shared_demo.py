@@ -28,6 +28,14 @@ def test_shared_goals_account_journal_and_ops(monkeypatch):
 
     try:
         asyncio.run(seed())
+        async def verify_opening_account():
+            async with AsyncMongoClient(uri) as client:
+                accounts = client[db_name]["paper_accounts"]
+                assert await accounts.distinct("_id") == ["nobita-500k-v1"]
+                opening = await accounts.find_one({"_id": "nobita-500k-v1"})
+                assert opening["revision"] == 0 and opening["fills"] == {}
+
+        asyncio.run(verify_opening_account())
         app = create_app()
         with TestClient(app, headers={"Origin": "http://localhost:3113"}) as client:
             base = "/api/v1"
@@ -59,6 +67,8 @@ def test_shared_goals_account_journal_and_ops(monkeypatch):
             assert receipt["status"] == "filled"
             assert receipt["account"]["positions"]["AMD"] == account["positions"].get("AMD", 0) + 1
             assert client.post(base + "/demo/paper-orders", json=order).json() == receipt
+            asyncio.run(seed())
+            assert client.get(base + "/demo/paper-account").json() == receipt["account"]
             portfolio = client.get(base + "/demo/portfolio").json()
             cash = receipt["account"]["cash_thb_satang"]/100
             assert portfolio["cash_thb"] == cash
