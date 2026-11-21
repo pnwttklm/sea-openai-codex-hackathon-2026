@@ -1,0 +1,30 @@
+# Local secrets (keep placeholder examples)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# JavaScript
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+
+# Local output
+.DS_Store
+*.log
+coverage/
+.worktrees/

@@ -1,0 +1,5 @@
+import Link from "next/link";
+const features = [{ href: "/goals", title: "Know your goals", description: "Give your future a direction. Start with what matters to you." }, { href: "/journal", title: "Reflect on decisions", description: "Create space to understand your investing habits." }, { href: "/companion", title: "Learn with a companion", description: "Explore a conversation built around your intentions." }];
+export default function Home() {
+  return <><section className="hero"><p className="eyebrow">Prik Thai AI · Development starter</p><h1>A little clarity.<br />A more intentional future.</h1><p>A financial companion centered on your goals, healthy habits, and informed decisions.</p><span className="badge">Proposed routes · MVP scope to be confirmed</span></section><section className="cards" aria-label="Explore the starter">{features.map(feature => <article className="card" key={feature.href}><h2>{feature.title}</h2><p>{feature.description}</p><Link href={feature.href}>Explore {feature.href.slice(1)}</Link></article>)}</section></>;
+}

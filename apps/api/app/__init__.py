@@ -1,0 +1,1 @@
+"""Prik Thai application package."""
