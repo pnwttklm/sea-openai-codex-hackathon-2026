@@ -1,0 +1,139 @@
+.page {
+  --ink: #f7f8fc;
+  --secondary: #adb2c1;
+  --line: #343640;
+  --sheet: #191a20;
+  --raised: #252630;
+  --blue: #0071d9;
+  --focus: #9ccbff;
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: #101114;
+  font: 400 14px/20px var(--font-sans);
+  color: var(--ink);
+  font-variant-numeric: lining-nums tabular-nums;
+  touch-action: none;
+}
+.canvas { display: block; width: 100%; height: 100%; }
+.page :is(button, a) { -webkit-tap-highlight-color: transparent; }
+.page :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.back, .iconButton, .travel button {
+  display: grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  padding: 0;
+  border: 1px solid #ffffff30;
+  border-radius: 50%;
+  background: var(--raised);
+  color: var(--ink);
+  font-size: 18px;
+}
+.back, .travel { position: absolute; top: max(16px, env(safe-area-inset-top)); }
+.back { left: max(16px, env(safe-area-inset-left)); }
+.travel { right: max(16px, env(safe-area-inset-right)); }
+.travel button[aria-pressed="true"] { color: var(--focus); border-color: var(--focus); }
+.stick {
+  position: absolute;
+  bottom: max(6%, calc(env(safe-area-inset-bottom) + 16px));
+  left: max(7%, calc(env(safe-area-inset-left) + 12px));
+  width: clamp(96px, 30vmin, 132px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid #ffffff80;
+  background: #191a2078;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.stick:active { cursor: grabbing; }
+.stick span {
+  width: 49%; aspect-ratio: 1; border-radius: 50%;
+  background: #f7f8fce6;
+  border: 1px solid #fff;
+  pointer-events: none;
+  transform: translate(var(--dx, 0px), var(--dy, 0px));
+}
+.interact, .answers button, .detailsFooter :is(a,button), .message button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 10px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--raised); color: var(--ink);
+  text-decoration: none; font: 600 14px/20px var(--font-sans);
+}
+.interact {
+  position: absolute; bottom: max(8%, calc(env(safe-area-inset-bottom) + 22px));
+  right: max(16px, env(safe-area-inset-right));
+  max-width: min(48%, 270px); overflow-wrap: anywhere;
+}
+.interact, .answers button:first-child, .detailsFooter :is(a, button):first-of-type, .message button {
+  background: var(--blue); color: #fff; border-color: #ffffff30;
+}
+@supports (backdrop-filter: blur(12px)) {
+  .back, .travel button { backdrop-filter: blur(12px); background: #191a20df; }
+}
+.sheet, .message {
+  box-sizing: border-box; position: fixed; inset: auto 0 max(12px, env(safe-area-inset-bottom));
+  width: min(420px, calc(100% - 24px)); max-height: 76vh; max-height: 76dvh;
+  margin: 0 auto; padding: 16px;
+  border: 1px solid var(--line); border-radius: 28px;
+  color: var(--ink); background: var(--sheet); color-scheme: dark;
+  overflow: auto; overscroll-behavior: contain; touch-action: pan-y;
+}
+.sheet::backdrop { background: rgb(12 13 20 / 42%); }
+.message { text-align: center; }
+.message button { display: flex; width: 100%; margin-block: 8px; }
+.detailsHeading { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.detailsHeading h2, .guideHeading h2 { margin: 0; font: 600 16px/24px var(--font-sans); overflow-wrap: anywhere; }
+.detailsHeading div > span, .funding dt, .detailsFooter > span { color: var(--secondary); font: 500 12px/16px var(--font-sans); }
+.landmarkIcon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; color: #191a20; font-size: 18px; }
+.funding { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 12px; }
+.funding dd { margin: 4px 0 0; font: 600 16px/24px var(--font-sans); overflow-wrap: anywhere; }
+.progress { height: 6px; overflow: hidden; background: var(--line); border-radius: 999px; }
+.progress span { display: block; height: 100%; border-radius: inherit; }
+.detailsFooter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.detailsFooter > span { margin-right: auto; }
+.guideHeading, .answers { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sheet p { margin: 8px 0 16px; line-height: 20px; }
+.answers { flex-wrap: wrap; justify-content: flex-start; }
+
+.invitation {
+  position: absolute;
+  top: calc(max(16px, env(safe-area-inset-top)) + 52px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(360px, calc(100% - 24px));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--sheet);
+  box-shadow: 0 4px 16px #10111430;
+}
+.portrait {
+  height: 36px;
+  background: url("/future-you/doraemon-tab.svg") center / contain no-repeat;
+}
+.goalMeter { display: grid; gap: 6px; margin-bottom: 16px; color: var(--ink); overflow-wrap: anywhere; }
+.goalMeter progress { width: 100%; height: 8px; accent-color: var(--focus); }
+
+.invitation strong { color: var(--focus); }
+.invitation p { margin: 4px 0 10px; overflow-wrap: anywhere; }
+.invitation .answers button { min-height: 44px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .sheet[open] { animation: arrive 220ms cubic-bezier(.22,1,.36,1); }
+  @keyframes arrive { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .page :is(button, a) { transition: transform 140ms ease; }
+  .page :is(button, a):active { transform: scale(.96); }
+}
