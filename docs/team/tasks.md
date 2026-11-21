@@ -78,6 +78,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | FUTURE-TALK-LINK | Connect Future Talk directly to the future-self voice screen | Codex | Review | codex/investor-health-ux | Future You |
 | TALK-PORTRAIT | Use the supplied adult Nobita portrait in Future Talk | Codex | Review | codex/investor-health-ux | FUTURE-TALK-LINK |
 | MARKET-CHARTS | Use sourced price history for every catalog instrument and add the research agent portrait to its stock action | Codex | Review | codex/investor-health-ux | Stock overview, research trigger and market data contract |
+| STOCK-COMPANION | Route stock questions to Doraemon and remove the separate research panel | Codex | Review | codex/investor-health-ux | Stock UI and companion turn context |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

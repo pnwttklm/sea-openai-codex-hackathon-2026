@@ -31,7 +31,7 @@ For the wedding fixture, the estimated five-year balance is THB 525,142.68. The 
 
 | Route under `/api/v1` | Contract |
 | --- | --- |
-| `POST /companion/turns` | Accepts `question` and optional `goal_id`. Returns `answer`, `presenters`, `evidence`, `status` and `mode`. The investor sees specialist mascots and source notes. |
+| `POST /companion/turns` | Accepts `question` and optional `goal_id` and `symbol`. For headline questions without a named ticker, the stock page supplies its symbol. Returns `answer`, `presenters`, `evidence`, `status` and `mode`. The investor sees specialist mascots and source notes. |
 | `GET /companion/goals`, `POST /companion/goals` | Read or explicitly confirm a plan with slug, title, saved/target/monthly THB, months and revision. Concurrent edits with a stale revision return 409. |
 | `GET /companion/journal`, `POST /companion/journal` | Read the latest 50 owned entries or submit a UUID and reflection text. |
 | `POST /ops/session`, `DELETE /ops/session` | Local operator login/logout. Login requires a server-only secret of at least 24 characters, issues an HttpOnly, SameSite=Strict signed one-hour cookie and rate-limits failed attempts. |

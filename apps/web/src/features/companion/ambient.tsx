@@ -2,42 +2,43 @@
 
 import { useEffect, useRef, useState } from "react";
 import { apiGet } from "@/lib/api/client";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { thbCash, type PortfolioData } from "../demo/data";
 import { Conversation } from "./conversation";
 import { Mascot } from "./mascots";
 import styles from "./companion.module.css";
 
-export function AmbientCompanion() {
-  const path = usePathname();
-  const match = /^\/stocks\/([A-Z]{1,5})$/.exec(path);
-  if (!match || process.env.NEXT_PUBLIC_SHARED_DEMO !== "1") return null;
-  return <StockCompanion key={path} symbol={match[1]} />;
+export function StockCompanion({ symbol, open, onOpen, onClose }: {
+  symbol: string; open: boolean; onOpen: () => void; onClose: () => void;
+}) {
+  return <>
+    <button type="button" className={styles.launcher} aria-label="Open Investor Companion" aria-haspopup="dialog"
+      aria-expanded={open} onClick={onOpen}><Mascot agent="companion" size={48} /></button>
+    {open && <StockDialog symbol={symbol} onClose={onClose} />}
+  </>;
 }
 
-function StockCompanion({ symbol }: { symbol: string }) {
-  const [view, setView] = useState<"chat" | "position" | null>(null);
-  const open = view !== null;
+function StockDialog({ symbol, onClose }: { symbol: string; onClose: () => void }) {
+  const [view, setView] = useState<"chat" | "position">("chat");
   const dialog = useRef<HTMLDialogElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (open && !dialog.current?.open) dialog.current?.showModal();
-  }, [open]);
+    const node = dialog.current;
+    node?.showModal();
+    return () => node?.close();
+  }, []);
   function close() {
-    dialog.current?.close(); setView(null); trigger.current?.focus();
+    dialog.current?.close();
+    onClose();
   }
-  return <>
-    <button className={styles.launcher} ref={trigger} aria-label="Open Investor Companion" onClick={() => setView("chat")}><Mascot agent="companion" size={48} /></button>
-    {open && <dialog className={styles.ambient} ref={dialog} aria-label="Investor Companion" onCancel={e => { e.preventDefault(); close(); }}
-      onClick={e => { if (e.target === e.currentTarget) close(); }}>
+  return <dialog className={styles.ambient} ref={dialog} aria-label="Investor Companion"
+    onCancel={event => { event.preventDefault(); close(); }}
+    onClick={event => { if (event.target === event.currentTarget) close(); }}>
       {view === "chat" ? <div className={styles.stage}>
         <div className={styles.actions}><button onClick={() => setView("position")}>View position</button>
           <button onClick={close}>Close</button></div>
         <Conversation symbol={symbol} />
       </div> : <StockPosition symbol={symbol} close={close} />}
-    </dialog>}
-  </>;
+  </dialog>;
 }
 
 const percent = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });

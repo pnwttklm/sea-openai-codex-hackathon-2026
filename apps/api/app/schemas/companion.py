@@ -19,6 +19,7 @@ class StrictModel(BaseModel):
 class Turn(StrictModel):
     question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=1500)]
     goal_id: MongoId | None = None
+    symbol: Symbol | None = None
 
 
 class Reply(StrictModel):

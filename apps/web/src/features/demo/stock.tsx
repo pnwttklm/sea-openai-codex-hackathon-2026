@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { DemoData, signed, usd, type StockData } from "./data";
+import { StockCompanion } from "../companion/ambient";
 import { StockNews } from "./stock-news";
 import { FundamentalChart } from "./fundamental-chart";
 import { BackLink } from "./shell";
@@ -14,6 +15,8 @@ type Mode = (typeof modes)[number];
 
 function Details({ stock }: { stock: StockData }) {
   const [selected, setSelected] = useState<Mode>(process.env.NEXT_PUBLIC_SHARED_DEMO === "1" ? "News" : "INVX");
+  const [chatOpen, setChatOpen] = useState(false);
+  const askDoraemon = process.env.NEXT_PUBLIC_SHARED_DEMO === "1" ? () => setChatOpen(true) : undefined;
   const up = stock.change_percent >= 0;
   return (
     <>
@@ -34,7 +37,8 @@ function Details({ stock }: { stock: StockData }) {
       {selected === "Options" && <OptionsChain stock={stock} />}
       {selected === "News" && (process.env.NEXT_PUBLIC_SHARED_DEMO === "1"
         ? <StockNews key={stock.symbol} symbol={stock.symbol} /> : <p className="demo-state">News is unavailable in this demo.</p>)}
-      {selected !== "Options" && <PaperTrade stock={stock} />}
+      {selected !== "Options" && <PaperTrade stock={stock} onAsk={askDoraemon} />}
+      {askDoraemon && <StockCompanion symbol={stock.symbol} open={chatOpen} onOpen={askDoraemon} onClose={() => setChatOpen(false)} />}
     </>
   );
 }

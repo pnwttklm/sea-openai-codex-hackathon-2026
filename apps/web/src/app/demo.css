@@ -303,36 +303,14 @@ body:has(.order-sheet[open]) { overflow: hidden; }
   font-weight: 600;
   text-align: left;
 }
-.stock-agent-action .agent-mark { flex: none; border-radius: 50%; background: #35324b; }
+.stock-agent-action > img { flex: none; border-radius: 50%; background: #35324b; }
 .stock-agent-action > svg { width: 10px; color: #beb8e1; }
 .demo-shell .stock-agent-action:hover { background: #34314b; border-color: #8a82b3; }
-.research-thread { min-height: 100px; }
-.research-answer { white-space: pre-wrap; overflow-wrap: anywhere; }
-.agent-thread .research-suggestion, .agent-actions .agent-research-link {
+.agent-actions .agent-research-link {
   min-height: 44px;
   border: 1px solid var(--edge);
   font-size: 13px;
 }
-.research-compose {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px;
-  padding: 10px;
-  border-top: 1px solid var(--edge);
-}
-.research-compose input {
-  min-width: 0;
-  min-height: 44px;
-  padding: 8px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid #54576b;
-  border-radius: 8px;
-  font: inherit;
-  font-size: 16px;
-}
-.research-compose button { min-height: 44px; background: #5146dc; }
-.research-compose button:disabled { opacity: .55; cursor: default; }
 .agent-panel[hidden] { display: none; }
 
 .order-wave { width: 100%; overflow: hidden; border-radius: 23px 23px 0 0; }

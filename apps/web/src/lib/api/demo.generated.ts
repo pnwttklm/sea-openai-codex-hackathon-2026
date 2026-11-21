@@ -1285,6 +1285,8 @@ export interface components {
             question: string;
             /** Goal Id */
             goal_id?: string | null;
+            /** Symbol */
+            symbol?: string | null;
         };
         /** ValidationError */
         ValidationError: {

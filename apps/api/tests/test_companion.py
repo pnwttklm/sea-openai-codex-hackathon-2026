@@ -99,3 +99,11 @@ def test_news_reading_keeps_articles_when_model_analysis_is_incomplete():
     assert len(result.items) == 2 and all("VT" in article.title for article in result.items)
     assert result.summary is None and all(article.tone is None for article in result.items)
     assert s.trace.store.finish.await_args.args[-1] == "partial"
+
+
+@pytest.mark.parametrize("question,expected", [("Any recent headlines?", "SE"), ("Recent NVDA news?", "NVDA")])
+def test_stock_chat_uses_page_symbol_unless_question_names_another(question, expected):
+    turn = Turn(question=question, symbol="SE")
+    result = asyncio.run(TurnRunner(services(question), turn).run())
+    assert result.status == "complete"
+    assert any(f"{expected}-1" in source for source in result.evidence)

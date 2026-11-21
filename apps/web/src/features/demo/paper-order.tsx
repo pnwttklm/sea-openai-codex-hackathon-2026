@@ -9,7 +9,7 @@ import type { components } from "@/lib/api/demo.generated";
 import { DemoData, signed, thbCash, toSatang, usd, type StockData } from "./data";
 import { TradePlanCheck, useTradeCheck } from "./trade-plan-check";
 import { AgentAvatar } from "./agent-avatar";
-import { ResearchPanel } from "./research-chat";
+import { Mascot } from "../companion/mascots";
 
 type Schemas = components["schemas"];
 type Side = Schemas["PaperOrder"]["side"];
@@ -20,9 +20,8 @@ const rateFormat = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, ma
 type OrderType = NonNullable<Schemas["PaperOrder"]["order_type"]>;
 export type PaperAccount = Schemas["PaperAccount"];
 
-export function PaperTrade({ stock }: { stock: StockData }) {
+export function PaperTrade({ stock, onAsk }: { stock: StockData; onAsk?: () => void }) {
   const [side, setSide] = useState<Side>();
-  const [research, setResearch] = useState(false);
   const [fill, setFill] = useState<PaperFill>();
   const [orderRevision, setOrderRevision] = useState(0);
   const [ordersOpen, setOrdersOpen] = useState(false);
@@ -36,13 +35,11 @@ export function PaperTrade({ stock }: { stock: StockData }) {
 
   function start(side: Side, button: HTMLButtonElement) {
     trigger.current = button;
-    setResearch(false);
     setSide(side);
   }
 
   function dismiss() {
     setSide(undefined);
-    setResearch(false);
     requestAnimationFrame(() => trigger.current?.focus());
   }
 
@@ -52,19 +49,11 @@ export function PaperTrade({ stock }: { stock: StockData }) {
         <button type="button" onClick={(event) => start("buy", event.currentTarget)}>Buy</button>
         <button type="button" onClick={(event) => start("sell", event.currentTarget)}>Sell</button>
       </div>
-      <button className="stock-agent-action" type="button" aria-haspopup="dialog" aria-expanded={research} onClick={(event) => {
-        trigger.current = event.currentTarget;
-        setSide(undefined);
-        setResearch(true);
-      }}>
-        <AgentAvatar />
-        <span>Ask Agent about {stock.symbol}</span>
+      {onAsk && <button className="stock-agent-action" type="button" aria-haspopup="dialog" onClick={onAsk}>
+        <Mascot agent="companion" size={40} />
+        <span>Ask Doraemon about {stock.symbol}</span>
         <FontAwesomeIcon icon={faChevronRight} aria-hidden="true" />
-      </button>
-      {research && <ResearchPanel symbol={stock.symbol} onDismiss={() => {
-        if (side) setResearch(false);
-        else dismiss();
-      }} />}
+      </button>}
       {fill && (
         <p className="paper-receipt" role="status">
           {fill.status === "open" ? `Limit order placed · ${fill.quantity} ${fill.symbol} · Open`
@@ -75,7 +64,7 @@ export function PaperTrade({ stock }: { stock: StockData }) {
       {ordersOpen && <OpenOrders key={orderRevision} symbol={stock.symbol} onCancelled={(id) => {
         if (fill?.order_id === id) setFill(undefined);
       }} />}
-      {side && <OrderSheet key={side} stock={stock} side={side} onDismiss={dismiss} onFill={recordFill} obscured={research} onResearch={() => setResearch(true)} />}
+      {side && <OrderSheet key={side} stock={stock} side={side} onDismiss={dismiss} onFill={recordFill} onAsk={onAsk} />}
     </>
   );
 }
@@ -121,13 +110,12 @@ function OpenOrders({ symbol, onCancelled }: { symbol: string; onCancelled: (id:
   </section>;
 }
 
-function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
+function OrderSheet({ stock, side, onDismiss, onFill, onAsk }: {
   stock: StockData;
   side: Side;
   onDismiss: () => void;
   onFill: (fill: PaperFill) => void;
-  onResearch: () => void;
-  obscured: boolean;
+  onAsk?: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const confirmButton = useRef<HTMLButtonElement>(null);
@@ -170,10 +158,6 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
       if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
     };
   }, [review]);
-
-  useEffect(() => {
-    if (!obscured && !review) closePanel.current?.focus();
-  }, [obscured, review]);
 
   useEffect(() => {
     if (review) return;
@@ -246,7 +230,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
   const prompt = reflection?.prompt;
   if (!review) {
     return (
-      <section className="agent-panel" hidden={obscured} role="dialog" aria-labelledby="agent-title"
+      <section className="agent-panel" role="dialog" aria-labelledby="agent-title"
         onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onDismiss(); } }}>
         <div className="agent-toolbar">
           <AgentAvatar busy={reflection === undefined} />
@@ -290,7 +274,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
             <button type="button" onClick={() => setReply("plan")}>Part of my plan</button>
             <button type="button" onClick={() => setReply("news")}>New information</button>
           </div>}
-          <button type="button" className="agent-research-link" onClick={onResearch}>Research this stock</button>
+          {onAsk && <button type="button" className="agent-research-link" onClick={onAsk}>Ask Doraemon about {stock.symbol}</button>}
           <button className="agent-continue" type="button" onClick={() => setReview(true)}>{reply ? "Continue to review" : "Skip to review"}</button>
         </div>
       </section>

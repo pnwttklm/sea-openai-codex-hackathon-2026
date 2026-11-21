@@ -27,7 +27,7 @@ export function Conversation({ symbol }: { symbol?: string }) {
     setBusy(true); setError("");
     try {
       const reply = await apiPost<Reply>("/api/v1/companion/turns",
-        { question: text.trim(), ...(goal ? { goal_id: goal } : {}) });
+        { question: text.trim(), ...(goal ? { goal_id: goal } : {}), ...(symbol ? { symbol } : {}) } satisfies components["schemas"]["Turn"]);
       setMessages(items => [...items, { question: text, reply }]);
       setQuestion("");
     } catch (e) {
