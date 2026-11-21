@@ -53,3 +53,7 @@ docker compose -p prik-agent-foundation exec -T -e AGENT_TEST_MONGODB_URI=mongod
 docker compose -p prik-agent-foundation exec -T web npm run typecheck
 docker compose -p prik-agent-foundation run --rm --no-deps web npm run build
 ```
+
+Authenticated `GET /api/v1/ops/future-context` returns the current synthetic overview scenario used to start Future You voice sessions. It includes the scenario horizon, allowed profile fields, goal projections, and optional dated portfolio with up to twelve largest holdings. Missing demo profiles return 404. Reads use the operator session and are never cached.
+
+Local demo `POST /api/v1/companion/news/{symbol}` reads the configured headline sample and returns its source, timestamp, dated articles, and analysis when available. Empty coverage returns an empty articles list. A feed error returns 503. Provider analysis failures preserve the headlines.

@@ -31,3 +31,30 @@
   .route { grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr); gap:2px; }
   .route > code, .route > div { padding:7px; }
 }
+
+.switcher, .workflowButtons { display: flex; flex-wrap: wrap; gap: 8px; }
+.switcher { padding-bottom: 15px; margin-bottom: 16px; border-bottom: 1px solid #393d52; }
+.workflowButtons { margin-bottom: 14px; }
+.switcher button[aria-pressed=true], .workflowButtons button[aria-pressed=true] { background: #40355b; border-color: #bc9ffd; }
+.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.steps li { position: relative; padding: 10px 12px; border-radius: 10px; background: #272b3e; border: 1px solid #484e66; overflow-wrap: anywhere; }
+.steps li + li::before { content: "↓"; position: absolute; bottom: 100%; left: 18px; color: #c7b5ff; line-height: 13px; }
+.steps li small { margin-top: 3px; font-size: 13px; }
+.apiRoutes { margin-top: 14px; color: #c8cee0; overflow-wrap: anywhere; }
+.apiRoutes summary { padding: 10px 0; color: #ddceff; }
+.apiRoutes p, .apiRoutes dl { font-size: 13px; }
+.apiRoutes dt { margin-top: 10px; font-family: monospace; }
+.apiRoutes dd { margin: 2px 0; }
+@media(min-width:800px) {
+  .steps { grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 18px; }
+  .steps li + li::before { content: "→"; left: auto; right: 100%; bottom: 50%; width: 18px; text-align: center; }
+}
+.context { margin-top: 16px; border: 1px solid #454a64; border-radius: 12px; padding: 14px; background: #202436; }
+.context header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.context header h3, .context dl { margin: 0; }
+.context h4 { margin: 16px 0 6px; color: #d7cafb; }
+.context dl > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px 12px; padding: 3px 0; }
+.context dt, .context dd { font-size: 13px; margin: 0; overflow-wrap: anywhere; }
+.context dt { color: #c6c9dc; }
+.context details { border-top: 1px solid #44495c; }
+.context summary { min-height: 44px; padding: 10px 0; cursor: pointer; }

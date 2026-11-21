@@ -288,6 +288,24 @@ body:has(.order-sheet[open]) { overflow: hidden; }
   margin-top: 8px;
   border: 1px solid var(--edge);
 }
+.demo-shell .stock-agent-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  padding: 4px 14px 4px 5px;
+  border: 1px solid #585673;
+  border-radius: 999px;
+  background: #242338;
+  color: #f2efff;
+  font-weight: 600;
+  text-align: left;
+}
+.stock-agent-action .agent-mark { flex: none; border-radius: 50%; background: #35324b; }
+.stock-agent-action > svg { width: 10px; color: #beb8e1; }
+.demo-shell .stock-agent-action:hover { background: #34314b; border-color: #8a82b3; }
 .research-thread { min-height: 100px; }
 .research-answer { white-space: pre-wrap; overflow-wrap: anywhere; }
 .agent-thread .research-suggestion, .agent-actions .agent-research-link {
@@ -377,3 +395,66 @@ body:has(.order-sheet[open]) { overflow: hidden; }
 .health-dimensions input { width: 100%; min-height: 44px; color: inherit; background: #111214; border: 1px solid var(--edge); border-radius: 10px; padding: 8px; }
 .health-dimensions button { min-height: 44px; padding-inline: 12px; }
 .health-dimensions [role="status"] { flex-basis: 100%; font-size: 13px; }
+
+.stock-news { margin: 14px 0; padding: 16px; border: 1px solid var(--edge); border-radius: 20px; background: var(--raised); overflow-wrap: anywhere; }
+.stock-news h2 { margin: 0; font-size: 20px; }
+.stock-news h3 { margin: 4px 0 0; font-size: 16px; line-height: 1.4; }
+.stock-news ul { list-style: none; padding: 0; margin: 12px 0; }
+.stock-news li { padding: 14px 0; border-top: 1px solid var(--edge); }
+.stock-news li small { color: var(--muted); }
+.stock-news li a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.news-analysis { padding: 12px; border: 1px solid #4e496a; border-radius: 14px; background: #242237; }
+.news-analysis > div { display: flex; align-items: center; gap: 8px; }
+.news-analysis p { margin: 8px 0 0; font-size: 14px; line-height: 1.5; }
+
+.trade-check { margin: 14px 0 8px; color: #f6f2ed; overflow-wrap: anywhere; }
+.ticket-goal { overflow: hidden; border: 1px solid #464147; border-radius: 16px; background: #28262c; }
+.ticket-scene { display: flex; align-items: center; gap: 12px; padding: 10px; background-size: cover; background-position: center 55%; }
+.ticket-scene small, .ticket-meter, .ambient-margin-note small, .ticket-compare small { font-size: 12px; color: #d1c9c0; }
+.ticket-scene h3 { margin: 3px 0 0; font-size: 16px; line-height: 1.25; }
+.ticket-scene > strong { margin-left: auto; font-size: 14px; }
+.ticket-thumb { flex: none; width: 48px; height: 44px; background: #44433c center / cover; border-radius: 9px; }
+.trade-check[data-side=sell] .ticket-scene { min-height: 128px; padding: 15px; display: grid; align-content: space-between; background-color: #34433b; }
+.trade-check[data-side=sell] .ticket-scene h3 { font-size: 22px; }
+.trade-check[data-side=sell] .ticket-scene > strong { margin: 0; font-size: 24px; }
+.ticket-meter { padding: 10px 15px; }
+.ticket-meter b { color: #f6f2ed; }
+.ticket-meter progress { display: block; width: 100%; height: 5px; margin-top: 6px; accent-color: #f4d895; }
+.ambient-margin-note { margin: 14px 0 4px; padding: 0 0 2px 12px; border-left: 2px solid #aa9277; }
+.ambient-margin-note > div { display: flex; gap: 6px; align-items: center; font-size: 13px; }
+.ambient-margin-note p { margin: 5px 0; font-size: 15px; line-height: 1.45; }
+.ticket-pause, .ticket-compare summary { cursor: pointer; min-height: 44px; align-content: center; font-size: 14px; color: #ead8b8; }
+.ticket-compare p { font-size: 14px; }
+.ticket-compare [role=group] { display: flex; gap: 6px; }
+.ticket-compare button { min-width: 54px; min-height: 44px; border: 1px solid var(--edge); border-radius: 10px; }
+.ticket-compare button[aria-pressed=true] { background: #dce6b0; color: #23251f; }
+.ticket-compare dl div { display: flex; flex-wrap: wrap; justify-content: space-between; padding: 6px 0; }
+.ticket-compare dd { margin: 0; font-variant-numeric: tabular-nums; }
+.order-sheet .order-primary { border-radius: 24px; }
+.order-sheet button.order-primary { color: #202417; background: #e0edac; }
+.instrument-rating { padding:18px; overflow-wrap:anywhere; }
+.instrument-rating header,.instrument-rating li > div { display:flex; align-items:center; gap:10px; }
+.instrument-rating h2 { margin:0; font-size:20px; }
+.instrument-rating small { color:#c1bed0; font-size:12px; }
+.instrument-rating .fit-total { display:inline-block; margin-top:14px; font-size:32px; color:#caddad; font-variant-numeric:tabular-nums; }
+.instrument-rating ul { list-style:none; padding:0; margin:12px 0; }
+.instrument-rating li { border-top:1px solid var(--edge); padding:9px 0; }
+.instrument-rating li > div { justify-content:space-between; }
+.instrument-rating li strong { color:#dce6ba; font-size:13px; }
+.price-overview { padding:16px; margin:14px 0; border:1px solid var(--edge); border-radius:20px; background:var(--raised); }
+.price-overview header,.price-line-head { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.price-overview h2,.price-overview h3 { margin:0; font-size:17px; }
+.price-overview header button { min-width:36px; min-height:44px; font-size:13px; border-radius:10px; }
+.price-overview [aria-pressed=true] { background:#424253; color:white; }
+.price-line-head { margin-top:12px; }
+.price-line-head strong { font-size:24px; font-variant-numeric:tabular-nums; }
+.minimal-line { display:block; width:100%; margin:12px 0; }
+.history-axis { display:flex; justify-content:space-between; margin:-6px 0 12px; font-size:11px; color:var(--subtle); }
+.price-overview p { font-size:14px; line-height:1.5; }
+.price-overview small { display:block; font-size:12px; color:#bdbecc; }
+.price-overview a { display:inline-flex; align-items:center; min-height:44px; color:#c6baff; font-size:13px; }
+.reference-facts { margin-top:16px; border-top:1px solid var(--edge); padding-top:14px; }
+.reference-facts dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.reference-facts dl > div { border-radius:12px; padding:10px 12px; background:#262936; }
+.reference-facts dt { font-size:12px; color:#c2c6d6; }
+.reference-facts dd { margin:3px 0 0; font-size:17px; }

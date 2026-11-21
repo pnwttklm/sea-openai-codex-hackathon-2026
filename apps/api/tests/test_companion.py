@@ -85,3 +85,17 @@ def test_openai_routing_uses_typed_output_and_validates_attribution():
     responses.parse.return_value = SimpleNamespace(output_parsed=None)
     with pytest.raises(ValueError):
         asyncio.run(model.route("A question", False))
+
+
+def test_news_reading_keeps_articles_when_model_analysis_is_incomplete():
+    from app.ai.stock_news import stock_news
+    from app.schemas.companion import NewsReading
+
+    s = services("")
+    s.model.client = object()
+    s.model.parse = AsyncMock(return_value=NewsReading(summary="This sample looks at fund overlap.", tones=["neutral"]))
+    result = asyncio.run(stock_news(s, "VT"))
+    assert result.source == "demo"
+    assert len(result.items) == 2 and all("VT" in article.title for article in result.items)
+    assert result.summary is None and all(article.tone is None for article in result.items)
+    assert s.trace.store.finish.await_args.args[-1] == "partial"

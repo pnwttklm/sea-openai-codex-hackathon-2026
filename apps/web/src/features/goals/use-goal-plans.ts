@@ -70,7 +70,16 @@ export function useGoalPlans() {
       setPlans(previous => [...previous.filter(p => p.id !== saved.id), saved]
         .sort((a,b) => order(a.id) - order(b.id) || a.id.localeCompare(b.id)));
     } else {
-      localStorage.setItem(prefix + plan.id, JSON.stringify(plan));
+      const write = () => {
+        const current = readPlan(plan.id);
+        if ((current?.revision ?? 0) !== (plan.revision ?? 0)) {
+          setPlans(readPlans());
+          throw new Error("This goal changed. Review the latest balance.");
+        }
+        localStorage.setItem(prefix + plan.id, JSON.stringify({ ...plan, revision: (plan.revision ?? 0) + 1 }));
+      };
+      if (navigator.locks) await navigator.locks.request(prefix + plan.id, write);
+      else write();
       setPlans(readPlans());
     }
   }

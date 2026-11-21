@@ -8,6 +8,7 @@ import Image from "next/image";
 import { DemoNav } from "../demo/shell";
 import { useRef, useState } from "react";
 import { duration, compactMoney, type GoalPlan } from "./demo-goals";
+import { VaultDoor } from "./emergency-vault";
 import { GoalDetails } from "./goal-details";
 import { useGoalPlans } from "./use-goal-plans";
 import styles from "./future-you.module.css";
@@ -126,10 +127,10 @@ export function FutureYou() {
         {goals.map(goal => <GoalCard key={goal.id} goal={goal} open={button => openDetails(goal.id, button)} />)}
         <article className={styles.reserve}>
           <button className={styles.openCard} aria-haspopup="dialog" aria-label={`View ${reserve.title} details`} onClick={e => openDetails(reserve.id, e.currentTarget)} />
-          <Image src="/future-you/emergency-vault.webp" alt="" width={335} height={137} className={styles.vault} />
+          <div className="reserve-mini"><VaultDoor /></div>
           <div className={styles.cardContent}>
             <h2>{reserve.title}</h2>
-            <div className={styles.saved}><Amount value={numberFormat.format(reserve.saved)} /><p>Use during emergency only</p></div>
+            <div className={styles.saved}><Amount value={numberFormat.format(reserve.saved)} /><p>Available in cash</p></div>
           </div>
         </article>
       </section>

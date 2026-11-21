@@ -76,7 +76,7 @@ function Tree({ nodes, parent }: { nodes: Span[]; parent: string | null }) {
   })}</ul>;
 }
 
-export function OperatorConsole({ initial }: { initial: Run[] }) {
+export function OperatorConsole({ initial, futureView }: { initial: Run[]; futureView: boolean }) {
   const [runs, setRuns] = useState(initial);
   const [id, select] = useState("");
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -119,7 +119,7 @@ export function OperatorConsole({ initial }: { initial: Run[] }) {
     {id ? <section className={styles.panel}><button onClick={() => { select(""); setDetail(null); }}>← Runs</button>
       {detail ? <><h2>Run at {time(detail.started)}</h2><p>{detail.status} · {detail.agents.length} agents · {detail.tools} tool calls · {detail.db_reads} DB reads</p>
         <h3>Execution graph</h3>{detail.spans.length ? <Tree nodes={detail.spans} parent={null} /> : <p>No trace events recorded yet.</p>}</> : <p role="status">Loading run…</p>}</section> :
-      <section><SystemMap /><div className={styles.filters}><label>Agent<select aria-label="Agent" value={agent} onChange={e => setAgent(e.target.value)}><option value="">All agents</option>
+      <section><SystemMap futureView={futureView} /><div className={styles.filters}><label>Agent<select aria-label="Agent" value={agent} onChange={e => setAgent(e.target.value)}><option value="">All agents</option>
         {Object.entries(agents).map(([k,v]) => <option key={k} value={k}>{v}</option>)}</select></label>
         <label>Status<select aria-label="Status" value={status} onChange={e => setStatus(e.target.value)}><option value="">All states</option>
           {["running","completed","partial","failed","interrupted"].map(s => <option key={s}>{s}</option>)}</select></label></div>

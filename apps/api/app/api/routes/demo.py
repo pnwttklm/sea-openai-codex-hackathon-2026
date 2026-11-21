@@ -6,9 +6,13 @@ from pydantic import UUID4
 from app.ai.behavior_assessment import AssessmentUnavailable, assess_behavior
 from app.api.routes.future_you import local_origin_allowed
 from app.data.agent_traces import Trace
+from app.ai.instrument_rating import rate_instrument
+from app.ai.trade_review import review_trade
+from app.schemas.demo import InstrumentRating, TradeDraft, TradeReview
 from app.ai.research import research_chat
 from app.schemas.demo import AgentChat, AgentQuestion, AgentReply, AgentTurn, Behavior, MonthlyTarget, PaperAccount, PaperFill, PaperFX, PaperOrder, Portfolio, SellReflection, Stock
 from app.services.demo import DemoService
+from app.services.price_history import HistoryUnavailable, Period, PriceSeries, price_series
 from app.services.paper import PaperConflict, PaperService
 from app.services.research import ResearchService
 
@@ -77,6 +81,17 @@ async def stock(symbol: Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")], service: 
     return result
 
 
+@router.get("/stocks/{symbol}/history")
+async def stock_history(symbol: Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")], period: Period, service: Demo) -> PriceSeries:
+    instrument = await service.stock(symbol)
+    if instrument is None:
+        raise HTTPException(404, "Symbol is not in the demo")
+    try:
+        return await price_series(instrument.symbol, period)
+    except HistoryUnavailable as error:
+        raise HTTPException(503, str(error)) from error
+
+
 @router.get("/stocks/{symbol}/sell-reflection")
 async def sell_reflection(
     symbol: Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")], service: Demo,
@@ -103,6 +118,28 @@ async def paper_account(service: Paper) -> PaperAccount:
         return await service.account()
     except PaperConflict as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
+
+
+@router.post("/stocks/{symbol}/agent-rating")
+async def agent_rating(symbol: Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")], service: Demo, request: Request) -> InstrumentRating:
+    state = request.app.state
+    if not state.future_you_is_demo or not local_origin_allowed(request):
+        raise HTTPException(403, "Open the local demo for a portfolio rating.")
+    report = await rate_instrument(symbol, service, state.companion_model, Trace(state.agent_traces))
+    if report is None:
+        raise HTTPException(404, "Symbol is not in the demo")
+    return report
+
+
+@router.post("/order-review")
+async def order_review(draft: TradeDraft, service: Demo, request: Request) -> TradeReview:
+    state = request.app.state
+    if not state.future_you_is_demo or not local_origin_allowed(request):
+        raise HTTPException(403, "Open the local demo to review your plan.")
+    result = await review_trade(draft, service, state.companion_model, Trace(state.agent_traces))
+    if result is None:
+        raise HTTPException(404, "Symbol is not in the demo")
+    return result
 
 
 @router.post("/paper-orders")

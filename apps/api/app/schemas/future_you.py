@@ -1,6 +1,8 @@
 from decimal import Decimal
 from typing import Annotated, Literal
 
+from typing_extensions import NotRequired, TypedDict
+
 from pydantic import AwareDatetime, BaseModel, Field, StringConstraints
 
 Goal = Literal["wedding", "retirement", "time-machine", "home", "other"]
@@ -95,3 +97,23 @@ class VoiceOffer(BaseModel):
     goal_id: MongoId | None = None
     sdp: str = Field(min_length=10, max_length=24_000, pattern=r"^v=0\r?\n")
     voice_style: VoiceStyle | None = None
+
+class ScenarioHolding(TypedDict):
+    symbol: str
+    weight_pct: str
+
+
+class ScenarioPortfolio(TypedDict):
+    as_of: str
+    total_value_thb: str
+    cash_thb: NotRequired[str]
+    holdings_count: int
+    largest_holdings: list[ScenarioHolding]
+
+
+class VoiceScenario(TypedDict):
+    years_from_now: int
+    age_in_scenario: int | None
+    profile_today: dict[str, str | int]
+    portfolio_today: ScenarioPortfolio | None
+    goals: list[dict[str, str | float]]

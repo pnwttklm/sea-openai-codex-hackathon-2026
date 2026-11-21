@@ -61,7 +61,7 @@ export function FuturePortrait({ demo, available, speaking, callActive, pending,
           {portrait ? (
             <Image src={portrait} alt="AI-generated older portrait of you" width={480} height={480} unoptimized />
           ) : demo ? (
-            <Image src="/future-you-demo-portrait.png" alt="Imagined older portrait of the demo profile" width={480} height={480} priority />
+            <Image src="/future-you/adult-nobita.webp" alt="Adult Nobita holding a book" width={1920} height={1080} sizes="220px" priority />
           ) : (
             <div className={styles.avatarPlaceholder} aria-hidden="true" />
           )}

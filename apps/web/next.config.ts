@@ -6,7 +6,7 @@ const config: NextConfig = {
   async rewrites() {
     const target = process.env.INTERNAL_API_URL ?? "http://localhost:8000";
     const demoReads = process.env.NEXT_PUBLIC_SHARED_DEMO === "1"
-      ? ["portfolio", "behavior", "paper-account", "stocks", "stocks/:symbol([A-Z]{1,5})"].map(resource => ({
+      ? ["portfolio", "behavior", "paper-account", "stocks", "stocks/:symbol([A-Z]{1,5})", "stocks/:symbol([A-Z]{1,5})/history"].map(resource => ({
         source: "/preview/demo/" + resource,
         destination: target + "/api/v1/demo/" + resource.replace(":symbol([A-Z]{1,5})", ":symbol")
           + (resource === "behavior" ? "?include_assessment=true" : ""),

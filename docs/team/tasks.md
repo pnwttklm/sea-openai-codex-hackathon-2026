@@ -68,6 +68,16 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | HEALTH-UX | Integrate the investor health v2 experience with measured scores and Doraemon | Codex | Review | codex/investor-health-ux | Behavior report and human-agent interactions |
 | WORLD-SYNC | Fix merged frontend manifests and verify Future World with investor health | Codex | Review | codex/investor-health-ux | Frontend integration |
 | AGENT-ART | Replace agent portraits with the four supplied Doraemon illustrations | Codex | Review | codex/investor-health-ux | Companion, research and operator views |
+| OPS-FUTURE | Map Future You tools and data flows in the private operator console | Codex | Review | codex/investor-health-ux | OPS-MAP |
+| TRADE-PLAN | Review a draft buy or sell with Doraemon and apply the supplied team portraits | Codex | Review | codex/investor-health-ux | Shared goals and trading demo |
+| OPS-CONTEXT | Inspect the saved Future You session context in the authenticated operator dashboard | Codex | Review | codex/investor-health-ux | OPS-FUTURE |
+| STOCK-NEWS | Show ticker headlines and analysis directly, and open stock chat from Doraemon | Codex | Review | codex/investor-health-ux | Companion news tool |
+| AMBIENT-TICKETS | Adapt trade tickets and animate a reviewed reserve withdrawal using the supplied ambient prototype | Codex | Review | codex/investor-health-ux | TRADE-PLAN |
+| INVX-AGENT | Ground missing INVX ratings in shared demo goal-fit evidence and a Portfolio Analyst review | Codex | Review | codex/investor-health-ux | TRADE-PLAN |
+| STOCK-OVERVIEW | Minimal time-range chart and basic analysis | Codex | Review | codex/investor-health-ux | Demo stock data |
+| FUTURE-TALK-LINK | Connect Future Talk directly to the future-self voice screen | Codex | Review | codex/investor-health-ux | Future You |
+| TALK-PORTRAIT | Use the supplied adult Nobita portrait in Future Talk | Codex | Review | codex/investor-health-ux | FUTURE-TALK-LINK |
+| MARKET-CHARTS | Use sourced price history for every catalog instrument and add the research agent portrait to its stock action | Codex | Review | codex/investor-health-ux | Stock overview, research trigger and market data contract |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

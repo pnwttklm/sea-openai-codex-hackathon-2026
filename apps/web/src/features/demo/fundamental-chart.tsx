@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { InstrumentRating } from "./instrument-rating";
 import type { Factor } from "./data";
 
 const axes = [
@@ -29,6 +30,7 @@ export function FundamentalChart({ symbol, factors }: { symbol: string; factors:
   const [selected, setSelected] = useState("Quality");
   const scores = axes.map(axis => factors.find(f => f.name === axis.name)?.score ?? null);
   const active = factors.find(f => f.name === selected);
+  if (!factors.length && process.env.NEXT_PUBLIC_SHARED_DEMO === "1") return <InstrumentRating key={symbol} symbol={symbol} />;
   return <section className="fundamentals factor-card-chart" aria-label={symbol + " fundamental ratings"}>
     <div className="factor-title"><h2>INVX Fundamentals</h2>
       <div className="factor-switch" role="group" aria-label="Chart style">{(["Radar", "Bars"] as const).map(v =>

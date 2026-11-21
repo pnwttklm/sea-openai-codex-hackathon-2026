@@ -13,7 +13,7 @@ export class ApiError extends Error {
 
 /** Use agreed response types at call sites. Failed requests never resolve to fixtures. */
 export async function apiGet<T>(path: `/${string}`, signal?: AbortSignal): Promise<T> {
-  const sharedRead = /^\/api\/v1\/demo\/(portfolio|behavior|paper-account|stocks(?:\/[A-Z]{1,5})?)$/.test(path);
+  const sharedRead = /^\/api\/v1\/demo\/(portfolio|behavior|paper-account|stocks(?:\/[A-Z]{1,5}(?:\/history\?period=(?:1D|1W|1M|1Y))?)?)$/.test(path);
   const url = sharedRead && isRemoteDemoPreview() ? path.replace("/api/v1/", "/preview/") : baseUrl + path;
   const response = await fetch(url, { signal, cache: "no-store" });
   if (!response.ok) throw new ApiError(response.status);

@@ -66,10 +66,18 @@ class CompanionServices:
         now = datetime.now(UTC)
         if self.fixture_news:
             async with self.trace.span(parent, "fixture", "news.sample"):
-                articles = [NewsHeadline(title=f"{symbol} beats quarterly earnings estimates",
-                                         published_at=(now - timedelta(days=1)).isoformat()),
-                            NewsHeadline(title=f"{symbol} cuts guidance for next quarter",
-                                         published_at=(now - timedelta(days=2)).isoformat())]
+                samples = {
+                    "VT": ("How VT spreads its holdings across global stock markets", "Where VT and VOO overlap in US equities"),
+                    "VOO": ("Inside VOO’s exposure to the S&P 500", "Portfolio review compares VOO with global equity funds"),
+                    "SGOV": ("Inside SGOV’s short-term Treasury holdings", "How Treasury bill yields affect SGOV income"),
+                    "GLD": ("How GLD tracks the price of gold", "Portfolio review examines gold exposure through GLD"),
+                    "QQQ": ("Portfolio review examines concentration in QQQ", "How the Nasdaq-100 determines QQQ holdings"),
+                    "BTC": ("Bitcoin volatility draws attention in portfolio review", "How Bitcoin exposure changes portfolio risk"),
+                }
+                titles = samples.get(symbol, (f"{symbol} beats quarterly earnings estimates",
+                                              f"{symbol} cuts guidance for next quarter"))
+                articles = [NewsHeadline(title=title, published_at=(now - timedelta(days=i)).isoformat())
+                            for i, title in enumerate(titles, 1)]
         else:
             async with self.trace.span(parent, "provider", "news.fetch"):
                 articles = await fetch_news(symbol)

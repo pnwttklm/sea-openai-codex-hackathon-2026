@@ -4,7 +4,8 @@ import styles from "@/features/companion/operator.module.css";
 
 export const dynamic = "force-dynamic";
 
-export default async function AgentOperations() {
+export default async function AgentOperations({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
+  const futureView = (await searchParams).view === "future-you";
   const session = (await cookies()).get("prik_agent_operator")?.value;
   let runs: Run[] | null = null;
   let unavailable = false;
@@ -20,6 +21,6 @@ export default async function AgentOperations() {
   return <main id="main" className={styles.console}>
     <h1>Agent operations</h1>
     {unavailable ? <p role="alert">Trace storage is unavailable. Reload to reconnect.</p> :
-      runs ? <OperatorConsole initial={runs} /> : <SignIn />}
+      runs ? <OperatorConsole initial={runs} futureView={futureView} /> : <SignIn />}
   </main>;
 }

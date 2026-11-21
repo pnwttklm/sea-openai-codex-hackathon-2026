@@ -724,3 +724,5 @@
 
 .preview .storageNote:empty { margin: 0; }
 .previewHeading h2:focus { outline: none; }
+.reserve { min-height:142px; padding:16px; background:radial-gradient(ellipse at 96% 112%,#417c71,transparent 62%),#233d3b; }
+.reserve > .cardContent { max-width:70%; padding:4px 6px; }

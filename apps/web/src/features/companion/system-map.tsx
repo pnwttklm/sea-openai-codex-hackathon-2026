@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { agents, Mascot, type Agent } from "./mascots";
+import { FutureYouMap } from "./future-you-map";
 import styles from "./system-map.module.css";
 
 const routes: Record<Agent, { tool: string; destination: string; detail: string }[]> = {
@@ -24,10 +25,9 @@ function Arrow() {
   return <span className={styles.arrow} aria-hidden="true">→</span>;
 }
 
-export function SystemMap() {
+function CompanionMap() {
   const [selected, setSelected] = useState<Agent>("companion");
-  return <section className={styles.map} aria-labelledby="map-title">
-    <h2 id="map-title">System connections</h2>
+  return <>
     <div className={styles.flow} aria-label="Request path">
       <div><strong>Next.js</strong><small>Investor interface</small></div><Arrow />
       <div><strong>FastAPI</strong><small>Companion turns</small></div><Arrow />
@@ -48,5 +48,17 @@ export function SystemMap() {
     <div className={styles.telemetry}><strong>Run telemetry</strong>
       <span>Agent spans → MongoDB (agent_runs, agent_spans) → private Operator dashboard</span>
     </div>
+  </>;
+}
+
+export function SystemMap({ futureView }: { futureView: boolean }) {
+  const [view, setView] = useState(futureView ? "Future You" : "Companion agents");
+  return <section className={styles.map} aria-labelledby="map-title">
+    <h2 id="map-title">System connections</h2>
+    <div className={styles.switcher} role="group" aria-label="Choose a system">
+      {["Companion agents", "Future You"].map(name => <button key={name} type="button"
+        aria-pressed={view === name} aria-controls="system-connections" onClick={() => setView(name)}>{name}</button>)}
+    </div>
+    <div id="system-connections">{view === "Future You" ? <FutureYouMap /> : <CompanionMap />}</div>
   </section>;
 }
