@@ -48,6 +48,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | TUNNEL-01 | Read the demo portfolio and score through the frontend port | Codex | Review | codex/agent-foundation | Shared demo preview |
 | SCORE-ART | Show the Doraemon portrait on the assessment control | Codex | Review | codex/agent-foundation | Behavior screen |
 | ORDER-BAL | Lead stock order tickets with the current paper balance | Codex | Review | codex/agent-foundation | Stock order sheet |
+| ORDER-COPY | Simplify user-facing trading and balance labels | Codex | Review | codex/agent-foundation | Order sheet, portfolio and order errors |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

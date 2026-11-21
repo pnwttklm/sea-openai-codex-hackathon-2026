@@ -34,7 +34,7 @@ class PaperService:
             await self.repository.initialize_thb(
                 state["revision"], to_satang(state["cash_cents"], rate.rate_micros), rate.rate_micros,
             )
-        raise PaperConflict("The paper account changed. Please try again.")
+        raise PaperConflict("The account changed. Please try again.")
 
     async def account(self) -> PaperAccount:
         return PaperAccount.model_validate(await self._balance_state())
@@ -63,7 +63,7 @@ class PaperService:
             ):
                 return cancelled
 
-        raise PaperConflict("The paper account changed. Please try again.")
+        raise PaperConflict("The account changed. Please try again.")
 
     async def fill(self, order: PaperOrder) -> PaperFill | None:
         stock = (await self.repository.get())["stocks"].get(order.symbol)
@@ -110,9 +110,9 @@ class PaperService:
             )
             shares = before.positions.get(order.symbol, 0)
             if buying and total_thb > cash_thb - reserved_cash:
-                raise PaperConflict("Insufficient paper cash")
+                raise PaperConflict("Insufficient cash")
             if not buying and order.quantity > shares - reserved_shares:
-                raise PaperConflict("Insufficient paper shares")
+                raise PaperConflict("Insufficient shares")
 
             after = before.model_copy(update={"revision": before.revision + 1})
             if fills_now:
@@ -129,4 +129,4 @@ class PaperService:
             ):
                 return fill
 
-        raise PaperConflict("The paper account changed. Please try again.")
+        raise PaperConflict("The account changed. Please try again.")

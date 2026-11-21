@@ -130,9 +130,9 @@ export function Portfolio() {
                 </ul>
                 <p className="source-label">VT includes US stocks also held in VOO. Portfolio total · {thb.format(data.value_thb)}</p>
               </section>
-              <section className="paper-account" aria-label="Paper account">
+              <section className="paper-account" aria-label="Trading account">
                 <h2>Paper account</h2>
-                <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="paper account">
+                <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="trading account">
                   {(account) => (
                     <>
                       <p>Cash balance · <strong>{account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"}</strong></p>

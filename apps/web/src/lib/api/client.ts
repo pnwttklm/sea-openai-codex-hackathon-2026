@@ -29,7 +29,7 @@ export async function apiPost<T>(path: `/${string}`, body: unknown, signal?: Abo
   });
   if (!response.ok) {
     const failure = await response.json().catch(() => null);
-    throw new ApiError(response.status, typeof failure?.detail === "string" ? failure.detail : "Could not complete the paper order.");
+    throw new ApiError(response.status, typeof failure?.detail === "string" ? failure.detail : "Could not complete the order.");
   }
   return response.json() as Promise<T>;
 }

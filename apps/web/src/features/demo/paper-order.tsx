@@ -47,7 +47,7 @@ export function PaperTrade({ stock }: { stock: StockData }) {
 
   return (
     <>
-      <div className="trade-preview" aria-label="Paper trading">
+      <div className="trade-preview" aria-label="Demo trading">
         <button type="button" onClick={(event) => start("buy", event.currentTarget)}>Buy</button>
         <button type="button" onClick={(event) => start("sell", event.currentTarget)}>Sell</button>
       </div>
@@ -63,7 +63,7 @@ export function PaperTrade({ stock }: { stock: StockData }) {
       {fill && (
         <p className="paper-receipt" role="status">
           {fill.status === "open" ? `Limit order placed · ${fill.quantity} ${fill.symbol} · Open`
-            : `Paper order filled · ${fill.side === "buy" ? "Bought" : "Sold"} ${fill.quantity} ${fill.symbol} at USD ${usd.format((fill.price_cents ?? 0) / 100)}.`}
+            : `Order filled · ${fill.side === "buy" ? "Bought" : "Sold"} ${fill.quantity} ${fill.symbol} at USD ${usd.format((fill.price_cents ?? 0) / 100)}.`}
         </p>
       )}
       <button type="button" className="stock-research" aria-expanded={ordersOpen} onClick={() => setOrdersOpen(!ordersOpen)}>Open orders</button>
@@ -94,7 +94,7 @@ function OpenOrders({ symbol, onCancelled }: { symbol: string; onCancelled: (id:
     }
   }
 
-  return <section className="paper-account" aria-label="Open paper orders">
+  return <section className="paper-account" aria-label="Open orders">
     <h2>Open orders · {symbol}</h2>
     <DemoData<PaperFill[]> path="/api/v1/demo/paper-orders/open" title="open orders">
       {(orders) => {
@@ -149,7 +149,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
     && (orderType === "market" || (limit >= 1 && limit <= 100_000_000));
   const isMarketable = orderType === "market" || (side === "buy" ? stock.price_cents <= limit : stock.price_cents >= limit);
   const estimatedPrice = orderType === "market" ? stock.price_cents : limit;
-  const statusTitle = receipt?.status === "open" ? "Paper limit order placed" : "Paper order filled";
+  const statusTitle = receipt?.status === "open" ? "Limit order placed" : "Order filled";
 
   useEffect(() => {
     const node = dialog.current;
@@ -228,7 +228,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
       setBusy(false);
       inFlight.current = false;
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not complete the paper order.");
+      setError(reason instanceof Error ? reason.message : "Could not complete the order.");
       setBusy(false);
       inFlight.current = false;
     }
@@ -292,7 +292,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
     <dialog
       ref={dialog}
       className="order-sheet"
-      aria-label={receipt ? statusTitle : reviewingOrder ? `Review paper ${side}` : `Paper ${side} order`}
+      aria-label={receipt ? statusTitle : reviewingOrder ? `Review ${side} order` : `${side === "buy" ? "Buy" : "Sell"} order`}
       onCancel={(event) => { event.preventDefault(); if (!inFlight.current) onDismiss(); }}
       onClick={(event) => { if (event.target === event.currentTarget && !inFlight.current) onDismiss(); }}
     >
@@ -314,7 +314,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
               disabled={!receipt && (!valid || !fx || busy)}
               onClick={receipt ? onDismiss : undefined}
             >
-              {receipt ? "Done" : busy ? "Submitting…" : reviewingOrder ? `Confirm paper ${side}` : "Review order"}
+              {receipt ? "Done" : busy ? "Submitting…" : reviewingOrder ? `Confirm ${side}` : "Review order"}
             </button>
           </div>
         }
@@ -357,9 +357,9 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
               </dl>
             ) : (
               <>
-                <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="paper account">
+                <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="trading account">
                   {(account) => <dl className="order-details order-account-context">
-                    <div><dt>{side === "buy" ? "Paper cash balance" : "Paper share balance"}</dt><dd>{side === "buy"
+                    <div><dt>{side === "buy" ? "Cash balance" : "Share balance"}</dt><dd>{side === "buy"
                       ? account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"
                       : `${account.positions[stock.symbol]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? 0} ${stock.symbol}`}</dd></div>
                   </dl>}

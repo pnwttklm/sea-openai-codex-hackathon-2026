@@ -90,7 +90,7 @@ async def sell_reflection(
 def paper_service(request: Request) -> PaperService:
     service = request.app.state.paper
     if service is None:
-        raise HTTPException(status_code=503, detail="Paper accounts are not configured")
+        raise HTTPException(status_code=503, detail="Trading accounts are not configured")
     return service
 
 
@@ -164,7 +164,7 @@ async def cancel_paper_order(order_id: UUID4, service: Paper) -> PaperFill:
     except PaperConflict as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     if result is None:
-        raise HTTPException(status_code=404, detail="Paper order not found")
+        raise HTTPException(status_code=404, detail="Order not found")
     return result
 
 
