@@ -48,10 +48,16 @@ def test_shared_goals_account_journal_and_ops(monkeypatch):
             assert ask("Am I on track?", goal_id=str(ObjectId()))["status"] == "partial"
 
             account = client.get(base + "/demo/paper-account").json()
+            opening = client.get(base + "/demo/portfolio").json()
+            assert opening["value_thb"] == 500_000 and account["cash_thb_satang"] == 0
+            assert [(h["symbol"], h["weight"]) for h in opening["holdings"]] == [
+                ("VOO", 35), ("NVDA", 15), ("SGOV", 15), ("VT", 10), ("SE", 10), ("GLD", 10), ("BTC", 5)]
+            sale = dict(symbol="VOO", side="sell", quantity=1, order_id=str(uuid4()))
+            assert client.post(base + "/demo/paper-orders", json=sale).json()["status"] == "filled"
             order = dict(symbol="AMD", side="buy", quantity=1, order_id=str(uuid4()))
             receipt = client.post(base + "/demo/paper-orders", json=order).json()
             assert receipt["status"] == "filled"
-            assert receipt["account"]["positions"]["AMD"] == account["positions"]["AMD"] + 1
+            assert receipt["account"]["positions"]["AMD"] == account["positions"].get("AMD", 0) + 1
             assert client.post(base + "/demo/paper-orders", json=order).json() == receipt
             portfolio = client.get(base + "/demo/portfolio").json()
             cash = receipt["account"]["cash_thb_satang"]/100

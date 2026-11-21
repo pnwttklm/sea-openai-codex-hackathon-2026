@@ -45,7 +45,7 @@ async def lifespan(application: FastAPI):
     database = os.getenv("MONGODB_DATABASE", "prik_thai_dev")
     async with AsyncMongoClient(uri, serverSelectionTimeoutMS=3000, timeoutMS=5000) as client:
         application.state.future_you_repository = FutureYouRepository(client[database], demo=demo)
-        repository = DemoRepository(client, database)
+        repository = DemoRepository(client, database, shared_demo=demo)
         shared = SharedPortfolio(repository) if demo else None
         application.state.future_you_repository.shared_portfolio = shared
 

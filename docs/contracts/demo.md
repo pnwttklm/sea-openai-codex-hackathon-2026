@@ -27,7 +27,7 @@ npm exec --yes --package=openapi-typescript@7.10.1 -- openapi-typescript /tmp/pr
 
 ## Paper orders (DEMO-02)
 
-`GET /paper-account` returns a local demo account with USD cash in cents, whole-share positions keyed by symbol, and a revision. `POST /paper-orders` accepts `order_id` (UUID), `symbol`, `side` (`buy` or `sell`), and `quantity` (positive integer shares). The backend uses the synthetic stock price, verifies cash or shares, and atomically saves the fill and balance update. Duplicate order IDs replay the original fill if inputs match, and return 409 otherwise. Insufficient cash or shares returns 409. An unknown symbol returns 404. This shared synthetic account is for localhost demos.
+`GET /paper-account` returns a local demo account with USD cash in cents, positions keyed by symbol, and a revision. `POST /paper-orders` accepts `order_id` (UUID), `symbol`, `side` (`buy` or `sell`), and `quantity` (positive integer shares). The backend uses the synthetic stock price, verifies cash or shares, and atomically saves the fill and balance update. Duplicate order IDs replay the original fill if inputs match, and return 409 otherwise. Insufficient cash or shares returns 409. An unknown symbol returns 404. This shared synthetic account is for localhost demos.
 
 ## Research chat (DEMO-04)
 
@@ -38,3 +38,9 @@ The browser uses `GET /agent/chat/{conversation_id}/{symbol}` to load saved turn
 Market orders use the demo quote. Limit orders accept `limit_price_cents` and fill immediately at the quote if the buy price is at or below the limit or the sell price is at or above it. Otherwise they are stored as open, reserve cash or shares, and do not change ledger cash or holdings. The static demo quote does not run a market feed or re-match orders later. `GET /paper-orders/open` lists open orders. `POST /paper-orders/{order_id}/cancel` releases the reservation and returns the cancelled order; cancelling an already cancelled order is idempotent. A filled order cannot be cancelled. Old order requests still default to market.
 
 `GET /paper-fx` returns the latest published USD/THB reference rate in millionths of one THB per USD, with source and date. The UI sends the reviewed `fx_rate_micros`; confirmation rejects a changed rate. Paper accounts migrate their existing USD cash once at the first rate used and subsequently settle in THB satang. Filled and open orders snapshot the rate and their THB amount. USD prices and limits stay in cents. If the rate is unavailable, the UI blocks confirmation and retains the order details.
+
+### Investing behavior assessment
+
+`POST /api/v1/demo/behavior/assessment` reads the current shared synthetic portfolio and health plan on the server. Only the local demo origin can request a model assessment. The response uses the same four rubric scores and measurements as the behavior endpoint, with an optional `ai_assessment` on the report and each factor. Regular reads and target edits return these fields empty. A provider failure or missing model returns 503. The operator dashboard records the assessment run.
+
+In shared demo mode the paper ledger opens fully invested at THB 500,000 with fractional holding quantities at the synthetic USD prices and fixed THB 35/USD rate. Cash starts at zero. Positions can be fractional; order quantities remain whole units. A versioned account keeps prior demo trades in their original ledger.

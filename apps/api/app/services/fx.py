@@ -11,8 +11,8 @@ class FXUnavailable(Exception):
     pass
 
 
-def to_satang(usd_cents: int, rate_micros: int) -> int:
-    return (usd_cents * rate_micros + 500_000) // 1_000_000
+def to_satang(usd_cents: int | Decimal, rate_micros: int) -> int:
+    return int((usd_cents * rate_micros + 500_000) // 1_000_000)
 
 
 class FXRates:

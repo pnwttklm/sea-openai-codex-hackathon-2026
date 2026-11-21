@@ -100,7 +100,7 @@ export function Portfolio() {
                 ) : <Allocation items={data.allocation} value={data.value_thb} />}
               </section>
               <Link href="/behavior" className="health-card">
-                <div className="card-heading"><h2>Investor Health Score</h2><span>This month <FontAwesomeIcon icon={faChevronRight} /></span></div>
+                <div className="card-heading"><h2>Investing Behavior Score</h2><span>This month <FontAwesomeIcon icon={faChevronRight} /></span></div>
                 <div className="score-summary"><div>{data.score_label}<small>{data.score} / 100 · 4 dimensions</small></div><Ring score={data.score} /></div>
               </Link>
               <section className="insights">
@@ -137,7 +137,7 @@ export function Portfolio() {
                     <>
                       <p>Cash balance · <strong>{account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"}</strong></p>
                       <ul>{Object.keys(account.positions).sort().map((symbol) => (
-                        <li key={symbol}><Link href={`/stocks/${symbol}`}>{symbol} <strong>{account.positions[symbol] ?? 0}</strong> shares</Link></li>
+                        <li key={symbol}><Link href={`/stocks/${symbol}`}>{symbol} <strong>{account.positions[symbol]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? 0}</strong> shares</Link></li>
                       ))}</ul>
                     </>
                   )}

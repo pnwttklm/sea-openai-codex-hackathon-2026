@@ -39,6 +39,7 @@ class Factor(BaseModel):
 class HealthDimension(Factor):
     question: str
     measurement: str
+    ai_assessment: str | None = None
 
 
 class MonthlyTarget(BaseModel):
@@ -50,6 +51,7 @@ class Behavior(MonthlyTarget):
     score: int = Field(ge=0, le=100)
     label: str
     explanation: str
+    ai_assessment: str | None = None
     factors: list[HealthDimension] = Field(min_length=4, max_length=4)
 
 
@@ -99,7 +101,7 @@ class PaperFX(BaseModel):
 class PaperAccount(BaseModel):
     cash_cents: int = Field(ge=0)
     cash_thb_satang: int | None = Field(default=None, ge=0)
-    positions: dict[str, int]
+    positions: dict[str, float]
     revision: int = Field(ge=0)
 
 

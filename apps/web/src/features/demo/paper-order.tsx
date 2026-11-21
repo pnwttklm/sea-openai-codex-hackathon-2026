@@ -362,7 +362,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
                   {(account) => <dl className="order-details order-account-context">
                     <div><dt>{side === "buy" ? "Cash balance" : "Shares held"}</dt><dd>{side === "buy"
                       ? account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"
-                      : `${account.positions[stock.symbol] ?? 0} ${stock.symbol}`}</dd></div>
+                      : `${account.positions[stock.symbol]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? 0} ${stock.symbol}`}</dd></div>
                   </dl>}
                 </DemoData>
                 <fieldset className="order-types">

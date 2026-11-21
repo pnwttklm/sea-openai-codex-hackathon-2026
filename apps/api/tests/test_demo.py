@@ -98,3 +98,17 @@ def test_sell_reflection_falls_back_without_webull(monkeypatch):
         assert prompt["news_status"] == "unavailable"
         assert prompt["headlines"] == []
         assert "original plan" in prompt["question"]
+
+
+def test_assessment_requires_local_demo_and_online_model(monkeypatch):
+    monkeypatch.delenv("MONGODB_URI", raising=False)
+    monkeypatch.delenv("FUTURE_YOU_USER_ID", raising=False)
+    monkeypatch.setenv("FUTURE_YOU_DEMO", "1")
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3113")
+    app = create_app()
+    path = "/api/v1/demo/behavior/assessment"
+    with TestClient(app) as client:
+        app.state.demo = DemoService(FixtureRepository())
+        assert client.post(path).status_code == 403
+        assert client.post(path, headers={"Origin": "http://localhost:3113"}).status_code == 503
+        assert client.get("/api/v1/demo/behavior").json()["ai_assessment"] is None

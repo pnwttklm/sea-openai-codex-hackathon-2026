@@ -2,6 +2,8 @@
 
 from app.schemas.demo import Factor, Stock
 
+DEMO_RATE = 35_000_000
+
 # Illustrative fund look-through and risk assumptions for the demo, not market data.
 HEALTH_PLAN = {
     "monthly_target_thb": 30000,

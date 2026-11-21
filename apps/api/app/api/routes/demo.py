@@ -3,6 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from pydantic import UUID4
 
+from app.ai.behavior_assessment import AssessmentUnavailable, assess_behavior
+from app.api.routes.future_you import local_origin_allowed
+from app.data.agent_traces import Trace
 from app.ai.research import research_chat
 from app.schemas.demo import AgentChat, AgentQuestion, AgentReply, AgentTurn, Behavior, MonthlyTarget, PaperAccount, PaperFill, PaperFX, PaperOrder, Portfolio, SellReflection, Stock
 from app.services.demo import DemoService
@@ -30,6 +33,19 @@ async def portfolio(service: Demo) -> Portfolio:
 @router.get("/behavior")
 async def behavior(service: Demo) -> Behavior:
     return await service.behavior()
+
+
+@router.post("/behavior/assessment")
+async def behavior_assessment(service: Demo, request: Request) -> Behavior:
+    state = request.app.state
+    if not state.future_you_is_demo or not local_origin_allowed(request):
+        raise HTTPException(403, "Open the local demo to request an assessment.")
+    if not state.companion_model.client or state.agent_traces is None:
+        raise HTTPException(503, "AI assessment is unavailable in this session.")
+    try:
+        return await assess_behavior(service, state.companion_model, Trace(state.agent_traces))
+    except AssessmentUnavailable:
+        raise HTTPException(503, "Doraemon could not complete the assessment. Try again.") from None
 
 
 @router.post("/behavior/target")

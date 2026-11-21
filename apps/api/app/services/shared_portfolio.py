@@ -4,12 +4,12 @@ from decimal import Decimal
 
 from bson import ObjectId
 
+from app.data.demo_seed import DEMO_RATE
 from app.data.future_you import DEMO_PROFILE_ID
 from app.schemas.demo import PaperFX
 from app.schemas.future_you import PortfolioSnapshot
 from app.services.fx import to_satang
 
-DEMO_RATE = 35_000_000
 
 
 class DemoFX:
@@ -33,7 +33,7 @@ class SharedPortfolio:
             if quantity <= 0:
                 continue
             quote = data["stocks"][symbol]
-            value = to_satang(quantity * quote["price_cents"], DEMO_RATE)
+            value = to_satang(Decimal(str(quantity)) * quote["price_cents"], DEMO_RATE)
             bucket = {"BTC": "Bitcoin", "SGOV": "Treasury bills", "GLD": "Gold"}.get(symbol, "Equities")
             buckets[bucket] = buckets.get(bucket, 0) + value
             holdings.append((originals.get(symbol, {**quote, "trend": [0, round(100 * quote["change_percent"])]}), value))

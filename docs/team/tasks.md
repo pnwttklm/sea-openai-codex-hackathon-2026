@@ -42,6 +42,9 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | POPUP-01 | Show the current stock in the investor’s portfolio in the stock companion popup | Codex | Review | codex/agent-foundation | AGENT-01 |
 | INVEST-01 | Open the searchable demo market from the Invest tab | Codex | Review | codex/agent-foundation | Demo stock catalog, stock detail and shared tab bar |
 | OPTIONS-01 | Add a read-only interactive option-chain mockup to stock detail | Codex | Review | codex/agent-foundation | Stock detail synthetic quote |
+| PORT-DEMO | Seed the shared paper portfolio from the seven-holding THB 500,000 example | Codex | Review | codex/agent-foundation | Shared portfolio, paper account and Mongo seed |
+| VOICE-LOCAL | Enable Future You voice in the running demo | Codex | Review | codex/agent-foundation | Local API configuration |
+| SCORE-01 | Open the reference behavior score from Portfolio and preserve the monthly health report | Codex | Review | codex/agent-foundation | Portfolio, behavior, shared health rubric and server-side AI assessment |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.
