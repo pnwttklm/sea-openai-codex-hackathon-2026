@@ -73,7 +73,7 @@ export function Portfolio() {
           return (
             <>
               <header className="portfolio-profile">
-                <Link href="/companion" aria-label="Open Investor Companion" className="investor-avatar"><Character name="nobita" /><img className="companion-badge" src="/demo/doraemon-badge.svg" alt="" /></Link>
+                <Link href="/companion" aria-label="Open Investor Companion" className="investor-avatar"><Character name="nobita" /><img className="companion-badge" src="/agents/companion.webp" alt="" /></Link>
                 <span className="muted">Investor</span><h1>{data.investor}</h1>
               </header>
               <section ref={chart} aria-label="Portfolio value">

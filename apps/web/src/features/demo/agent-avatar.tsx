@@ -1,11 +1,11 @@
 "use client";
 
-import { BotAvatar } from "bot-avatars";
+import { Mascot } from "../companion/mascots";
 
 export function AgentAvatar({ busy = false }: { busy?: boolean }) {
   return (
-    <span className="agent-mark" aria-hidden="true">
-      <BotAvatar type="clover" state={busy ? "working" : "default"} size={40} theme="dark" interactive={false} />
+    <span className="agent-mark" aria-hidden="true" data-busy={busy}>
+      <Mascot agent="portfolio_analyst" size={40} />
     </span>
   );
 }

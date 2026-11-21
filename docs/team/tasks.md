@@ -66,6 +66,8 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | DB-HANDOFF | Ship the opening MongoDB dataset and integration guide | Codex | Review | codex/agent-foundation | Seed, data export and README |
 | OPS-MAP | Diagram the connections between the API, agents, MCP tools and data sources | Codex | Review | codex/agent-foundation | Private operator dashboard |
 | HEALTH-UX | Integrate the investor health v2 experience with measured scores and Doraemon | Codex | Review | codex/investor-health-ux | Behavior report and human-agent interactions |
+| WORLD-SYNC | Fix merged frontend manifests and verify Future World with investor health | Codex | Review | codex/investor-health-ux | Frontend integration |
+| AGENT-ART | Replace agent portraits with the four supplied Doraemon illustrations | Codex | Review | codex/investor-health-ux | Companion, research and operator views |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

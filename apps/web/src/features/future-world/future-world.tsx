@@ -74,7 +74,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const [reminder, setReminder] = useState<GoalReminder | null>(null);
   const [conversationGoalId, setConversationGoalId] = useState<string | undefined>(undefined);
   const [guideReply, setGuideReply] = useState("");
-  const { plans, loaded } = useGoalPlans();
+  const { plans, ready: loaded, error } = useGoalPlans();
   const landmarks = useMemo(() => worldLandmarks(plans), [plans]);
   const [selectedId, setSelectedId] = useState(initialGoal ?? null);
   const [nearbyId, setNearbyId] = useState<string | null>(null);
@@ -227,6 +227,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
 
   return (
     <main id="main" className={styles.page} aria-label="Future World">
+      {error && <p role="alert">{error}</p>}
       <canvas ref={canvas} className={styles.canvas} aria-label={town ? "Walk through your goal town" : "Walk through your future home"}
         onClick={event => { if (!panelOpen) scene.current?.inspect(event.clientX, event.clientY); }} />
       <Link href="/goals" className={styles.back} aria-label="Back to Future You"><FontAwesomeIcon icon={faArrowLeft} /></Link>
