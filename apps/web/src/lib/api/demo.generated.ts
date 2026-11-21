@@ -487,6 +487,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/future-world/turns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** World Turn */
+        post: operations["world_turn_api_v1_future_world_turns_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/future-world/landmarks/{goal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Landmark */
+        post: operations["landmark_api_v1_future_world_landmarks__goal_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -538,6 +572,23 @@ export interface components {
             /** Percent */
             percent: number;
         };
+        /** Appearance */
+        Appearance: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "house" | "car" | "wedding" | "retreat" | "machine" | "travel" | "personal";
+            /** Color */
+            color: string;
+            /**
+             * Accessory
+             * @enum {string}
+             */
+            accessory: "none" | "flowers" | "flag";
+            /** Revision */
+            revision: number;
+        };
         /** Behavior */
         Behavior: {
             /** Monthly Target Thb */
@@ -558,6 +609,32 @@ export interface components {
             ai_assessment?: string | null;
             /** Factors */
             factors: components["schemas"]["HealthDimension"][];
+        };
+        /** Comparison */
+        Comparison: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "comparison";
+            /** Title */
+            title: string;
+            /**
+             * Unit
+             * @default THB
+             * @constant
+             */
+            unit: "THB";
+            /**
+             * Assumption
+             * @default Monthly contributions, zero growth.
+             * @constant
+             */
+            assumption: "Monthly contributions, zero growth.";
+            /** Target */
+            target: number;
+            current: components["schemas"]["SavingsPath"];
+            proposed: components["schemas"]["SavingsPath"];
         };
         /** Factor */
         Factor: {
@@ -657,6 +734,23 @@ export interface components {
             is_demo: boolean;
             /** Goals */
             goals?: components["schemas"]["SavedGoalSummary"][];
+        };
+        /** GoalCard */
+        GoalCard: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+        };
+        /** GoalCards */
+        GoalCards: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "goals";
+            /** Goals */
+            goals: components["schemas"]["GoalCard"][];
         };
         /** GoalPlan */
         GoalPlan: {
@@ -875,6 +969,13 @@ export interface components {
             /** Limit Price Cents */
             limit_price_cents?: number | null;
         };
+        /** Point */
+        Point: {
+            /** Month */
+            month: number;
+            /** Balance */
+            balance: number;
+        };
         /** Portfolio */
         Portfolio: {
             /**
@@ -901,6 +1002,26 @@ export interface components {
             score: number;
             /** Score Label */
             score_label: string;
+        };
+        /** Progress */
+        Progress: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "progress";
+            /** Title */
+            title: string;
+            /** Saved */
+            saved: number;
+            /** Target */
+            target: number;
+            /** Remaining */
+            remaining: number;
+            /** Monthly */
+            monthly: number;
+            /** Months To Target */
+            months_to_target: number | null;
         };
         /** Reply */
         Reply: {
@@ -980,6 +1101,17 @@ export interface components {
             /** Future Age */
             future_age?: number | null;
         };
+        /** SavingsPath */
+        SavingsPath: {
+            /** Label */
+            label: string;
+            /** Monthly */
+            monthly: number;
+            /** Months To Target */
+            months_to_target: number | null;
+            /** Points */
+            points: components["schemas"]["Point"][];
+        };
         /** SellPrompt */
         SellPrompt: {
             /** Demo Change Percent */
@@ -1051,6 +1183,27 @@ export interface components {
             /** Factors */
             factors?: components["schemas"]["Factor"][];
         };
+        /** TownGoalPlan */
+        TownGoalPlan: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /** Saved */
+            saved: number;
+            /** Target */
+            target: number;
+            /** Monthly */
+            monthly: number;
+            /** Months */
+            months: number;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
+            appearance?: components["schemas"]["Appearance"] | null;
+        };
         /** Turn */
         Turn: {
             /** Question */
@@ -1079,6 +1232,43 @@ export interface components {
             sdp: string;
             /** Voice Style */
             voice_style?: ("masculine" | "feminine" | "neutral") | null;
+        };
+        /** WorldReply */
+        WorldReply: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "openai" | "offline";
+            /** Goal Id */
+            goal_id: string | null;
+            /** Answer */
+            answer: string;
+            /** Caption */
+            caption: string;
+            /** Visual */
+            visual: components["schemas"]["GoalCards"] | components["schemas"]["Progress"] | components["schemas"]["Comparison"];
+        };
+        /** WorldTurn */
+        WorldTurn: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Offline
+             * @default false
+             */
+            offline: boolean;
+            /** Turn */
+            turn: number;
+            /** Goal Id */
+            goal_id?: string | null;
+            /** Question */
+            question?: string | null;
+            /** Extra Monthly */
+            extra_monthly?: number | null;
         };
     };
     responses: never;
@@ -1875,7 +2065,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GoalPlan"][];
+                    "application/json": components["schemas"]["TownGoalPlan"][];
                 };
             };
         };
@@ -1889,7 +2079,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["GoalPlan"];
+                "application/json": components["schemas"]["TownGoalPlan"];
             };
         };
         responses: {
@@ -1953,6 +2143,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JournalEntry"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    world_turn_api_v1_future_world_turns_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorldTurn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorldReply"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    landmark_api_v1_future_world_landmarks__goal_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Appearance"];
                 };
             };
             /** @description Validation Error */

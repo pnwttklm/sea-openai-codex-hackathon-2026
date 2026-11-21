@@ -8,9 +8,11 @@ import { duration, initialPlans, money } from "../goals/demo-goals";
 import { useGoalPlans } from "../goals/use-goal-plans";
 import { landmarkStyles, worldLandmarks, type Landmark } from "./landmarks";
 import { goalFollowUp, reminderMessage, type GoalReminder } from "./goal-reminder";
+import { useWorldChat, WorldChat } from "./world-chat";
 import type { WorldScene } from "./world-scene";
 import styles from "./future-world.module.css";
 
+const shared = process.env.NEXT_PUBLIC_SHARED_DEMO === "1";
 const ticketGoals = new Set(initialPlans.filter(plan => plan.id !== "emergency").map(plan => plan.id));
 
 function WorldSheet({ label, onClose, children }: { label: string; onClose: () => void; children: ReactNode }) {
@@ -74,9 +76,11 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const [reminder, setReminder] = useState<GoalReminder | null>(null);
   const [conversationGoalId, setConversationGoalId] = useState<string | undefined>(undefined);
   const [guideReply, setGuideReply] = useState("");
-  const { plans, loaded } = useGoalPlans();
+  const chat = useWorldChat();
+  const { open: openChat, close: closeChat } = chat;
+  const { plans, ready, error } = useGoalPlans(true);
   const landmarks = useMemo(() => worldLandmarks(plans), [plans]);
-  const [selectedId, setSelectedId] = useState(initialGoal ?? null);
+  const [selectedId, setSelectedId] = useState(initialGoal === "town-guide" || initialGoal === "shopee-dog" ? null : initialGoal ?? null);
   const [nearbyId, setNearbyId] = useState<string | null>(null);
   const [availability, setAvailability] = useState<"loading" | "ready" | "fallback">("loading");
   const pointer = useRef<number | null>(null);
@@ -99,23 +103,27 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
     : nearbyId === "shopee-dog" ? "Say hi to Shopee dog"
     : nearbyId === "town-guide" ? "Talk to Doraemon"
     : town && nearby ? "Explore " + nearby.plan.title : null;
-  const discover = useCallback((id: string, trigger?: HTMLElement) => {
+  const discover = useCallback((id: string, trigger?: HTMLElement, invitedGoal?: string) => {
     if (id === "shopee-dog") {
       scene.current?.startConversation(id);
       setGuideReply("Woof! The little dog perks up and wags his tail at Nobita.");
     } else if (id === "town-guide") {
-      const subject = scene.current?.startConversation(id);
-      const plan = latestLandmarks.current.find(plot => plot.plan.id === subject)?.plan;
-      setConversationGoalId(subject);
-      setGuideReply(plan
-        ? goalFollowUp(plan)
-        : "Hi! I’m taking a walk around your town. Come look at the goals with me!");
+      const nearbyGoal = scene.current?.startConversation(id);
+      const subject = invitedGoal ?? nearbyGoal;
+      if (shared) openChat(subject);
+      if (!shared) {
+        const plan = latestLandmarks.current.find(plot => plot.plan.id === subject)?.plan;
+        setConversationGoalId(subject);
+        setGuideReply(plan
+          ? goalFollowUp(plan)
+          : "Hi! I’m taking a walk around your town. Come look at the goals with me!");
+      }
     }
     activeTrigger.current = trigger ?? null;
     setSelectedId(id);
     releaseStick();
     scene.current?.stop();
-  }, []);
+  }, [openChat]);
 
   useEffect(() => {
     latestLandmarks.current = landmarks;
@@ -123,7 +131,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   }, [landmarks]);
 
   useEffect(() => {
-    if (!loaded || !canvas.current) return;
+    if (!ready || !canvas.current) return;
     const element = canvas.current;
     let cancelled = false;
     const dogImage = new Image();
@@ -147,7 +155,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
       scene.current?.dispose();
       scene.current = null;
     };
-  }, [houseId, discover, loaded]);
+  }, [houseId, discover, ready]);
 
   useEffect(() => {
     if (town && availability === "ready") scene.current?.setNight(night);
@@ -158,13 +166,14 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   }, [availability, panelOpen]);
 
   const closeDetails = useCallback(() => {
+    closeChat();
     scene.current?.endConversation();
     setConversationGoalId(undefined);
     setSelectedId(null);
     const trigger = activeTrigger.current;
     activeTrigger.current = null;
     requestAnimationFrame(() => (trigger?.isConnected ? trigger : pad.current)?.focus({ preventScroll: true }));
-  }, []);
+  }, [closeChat]);
 
   const interactNearby = useCallback((trigger?: HTMLElement) => {
     if (!nearbyId) return;
@@ -242,7 +251,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
             <strong>Doraemon</strong>
             <p role="status">{reminderMessage(invitation.plan, reminder.reason)}</p>
             <div className={styles.answers}>
-              <button onClick={() => discover("town-guide")}>Let’s talk</button>
+              <button onClick={event => discover("town-guide", event.currentTarget, invitation.plan.id)}>Let’s talk</button>
               <button onClick={() => scene.current?.dismissReminder()}>Maybe later</button>
             </div>
           </div>
@@ -267,9 +276,10 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
           <span />
         </div>
       )}
-      {availability === "loading" && <p className={styles.message} role="status">Opening your world…</p>}
-      {availability === "fallback" && !selected && (
+      {availability === "loading" && <p className={styles.message} role="status">{error || "Opening your world…"}</p>}
+      {availability === "fallback" && !panelOpen && (
         <section className={styles.message}><h2>3D view unavailable</h2><p>Explore your saved goals here.</p>
+          <button onClick={event => discover("town-guide", event.currentTarget)}>Talk to Doraemon</button>
           {landmarks.map(({ plan }) => <button key={plan.id} onClick={event => discover(plan.id, event.currentTarget)}>{plan.title}</button>)}
         </section>
       )}
@@ -277,21 +287,23 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
         <div className={styles.guideHeading}><h2>{companionName}</h2>
           <button className={styles.iconButton} onClick={closeDetails} aria-label="Close conversation"><FontAwesomeIcon icon={faXmark} /></button>
         </div>
-        <p aria-live="polite">{guideReply}</p>
-        {!dogOpen && conversationGoal && <label className={styles.goalMeter}>
-          <span>{conversationGoal.plan.title} · ฿{money.format(conversationGoal.plan.saved)} of ฿{money.format(conversationGoal.plan.target)}</span>
-          <progress value={Math.min(conversationGoal.plan.saved, conversationGoal.plan.target)} max={conversationGoal.plan.target} />
-        </label>}
-        <div className={styles.answers}>
-          {dogOpen ? <button onClick={() => setGuideReply("The little dog leans into your hand. Woof!")}>Pet the dog</button> :
-          conversationGoal ? <button onClick={() => {
-            scene.current?.endConversation();
-            setSelectedId(conversationGoal.plan.id);
-            setConversationGoalId(undefined);
-          }}>Show my progress</button> :
-          <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>}
-          <button onClick={closeDetails}>Back to exploring</button>
-        </div>
+        {shared && !dogOpen ? <WorldChat chat={chat} landmarks={landmarks} /> : <>
+          {!dogOpen && <small>Browser demo</small>}
+          <p aria-live="polite">{guideReply}</p>
+          {!dogOpen && conversationGoal && <label className={styles.goalMeter}>
+            <span>{conversationGoal.plan.title} · ฿{money.format(conversationGoal.plan.saved)} of ฿{money.format(conversationGoal.plan.target)}</span>
+            <progress value={Math.min(conversationGoal.plan.saved, conversationGoal.plan.target)} max={conversationGoal.plan.target} />
+          </label>}
+          <div className={styles.answers}>
+            {dogOpen ? <button onClick={() => setGuideReply("The little dog leans into your hand. Woof!")}>Pet the dog</button> :
+            conversationGoal ? <button onClick={() => {
+              scene.current?.endConversation();
+              setSelectedId(conversationGoal.plan.id);
+              setConversationGoalId(undefined);
+            }}>Show my progress</button> :
+            <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>}
+          </div></>}
+        <div className={styles.answers}><button onClick={closeDetails}>Back to exploring</button></div>
       </WorldSheet>}
       {selected && <FundingDetails landmark={selected} onEnter={town && selected.kind === "house" && availability === "ready" ? () => {
         setSelectedId(null);

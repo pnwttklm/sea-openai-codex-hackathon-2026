@@ -86,7 +86,7 @@ function GoalCard({ goal, open }: { goal: GoalPlan; open: (trigger: HTMLButtonEl
 export function FutureYou() {
   const { plans, savePlan, ready, error } = useGoalPlans();
   const goals = plans.filter(plan => plan.id !== "emergency");
-  const reserve = plans.find(plan => plan.id === "emergency")!;
+  const reserve = plans.find(plan => plan.id === "emergency");
   const [detailId, setDetailId] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
   const [draft, setDraft] = useState<GoalPlan | null>(null);
@@ -119,19 +119,19 @@ export function FutureYou() {
       <section className={styles.goals} aria-label="Your life goals">
         <header className={styles.goalsHeading}>
           <h2>Life goals</h2>
-          <button type="button" aria-haspopup="dialog" onClick={e => addGoal(e.currentTarget)}>
+          <button id="add-goal" type="button" aria-haspopup="dialog" onClick={e => addGoal(e.currentTarget)}>
             <FontAwesomeIcon icon={faPlus} /> Add goal
           </button>
         </header>
         {goals.map(goal => <GoalCard key={goal.id} goal={goal} open={button => openDetails(goal.id, button)} />)}
-        <article className={styles.reserve}>
+        {reserve && <article className={styles.reserve}>
           <button className={styles.openCard} aria-haspopup="dialog" aria-label={`View ${reserve.title} details`} onClick={e => openDetails(reserve.id, e.currentTarget)} />
           <Image src="/future-you/emergency-vault.webp" alt="" width={335} height={137} className={styles.vault} />
           <div className={styles.cardContent}>
             <h2>{reserve.title}</h2>
             <div className={styles.saved}><Amount value={numberFormat.format(reserve.saved)} /><p>Use during emergency only</p></div>
           </div>
-        </article>
+        </article>}
       </section>
 
       <DemoNav active="goals" />

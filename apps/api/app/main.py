@@ -20,6 +20,7 @@ from app.data.demo import DemoRepository
 from app.data.research import ResearchRepository
 from app.services.demo import DemoService
 from app.services.paper import PaperService
+from app.services.future_world import WorldLandmarks
 from app.services.fx import FXUnavailable
 from app.services.research import ResearchService
 
@@ -37,6 +38,7 @@ async def lifespan(application: FastAPI):
     application.state.future_you_repository = None
     application.state.agent_traces = None
     application.state.operator_failures = []
+    application.state.world_landmarks = WorldLandmarks()
     application.state.companion_model = CompanionModel()
     if not uri:
         yield

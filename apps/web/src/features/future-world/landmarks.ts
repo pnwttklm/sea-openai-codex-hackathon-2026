@@ -35,7 +35,7 @@ const townPlots = [[-4.65, 2.65], [4.65, -2.8], [4.65, 2.65], [0, -2.8], [-4.65,
 
 export function worldLandmarks(plans: GoalPlan[]): Landmark[] {
   return plans.filter(plan => plan.id !== "emergency").map((plan, index) => {
-    const kind = goalKind(plan);
+    const kind = plan.appearance?.kind ?? goalKind(plan);
     const [x, z] = townPlots[index] ?? [(index % 3 - 1) * 4.65, -8.25 - Math.floor((index - 6) / 3) * 5.45];
     return { plan, kind, x, z, radius: kind === "house" ? 1.75 : 1.45 };
   });

@@ -65,6 +65,8 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | OPS-GRAPH | Visualize agent activity and the parent-child trace of each run | Codex | Review | codex/agent-foundation | Private operator console |
 | DB-HANDOFF | Ship the opening MongoDB dataset and integration guide | Codex | Review | codex/agent-foundation | Seed, data export and README |
 | OPS-MAP | Diagram the connections between the API, agents, MCP tools and data sources | Codex | Review | codex/agent-foundation | Private operator dashboard |
+| INT-02 | Repair merged frontend dependencies and goal loading, verify local startup | Codex | Review | `poon-future-you` | WEB-21 |
+| WORLD-01 | Connect Future You goals, Future World conversations, visuals and landmark appearances across `apps/web`, `apps/api`, and `docs/contracts` | Codex | Review | `poon-future-you` | Live OpenAI, MongoDB, 42 API tests, browser journeys, typecheck and production build verified. [Integration handoff](future-world-integration.md) |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

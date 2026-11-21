@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { landmarkStyles, type LandmarkKind } from "./landmarks";
 
+import type { GoalPlan } from "../goals/demo-goals";
+
 type Group = THREE.Group;
 const cream = "#fff2db";
 const bark = "#b8885c";
@@ -304,13 +306,13 @@ export function createWorldArt() {
     return { group: g, obstacles };
   }
 
-  function house(group: Group) {
+  function house(group: Group, color = "#b4d5eb") {
     box(group, "#e7b987", 0, 0.22, 0, 3.05, 0.33, 2.48, 0.14);
     box(group, "#f2cc9c", 0, 0.42, 0.05, 2.90, 0.11, 2.26);
-    box(group, "#b4d5eb", 0, 1.11, -1.1, 3.02, 1.36, 0.16);
+    box(group, color, 0, 1.11, -1.1, 3.02, 1.36, 0.16);
     box(group, cream, 0, 1.80, -1.1, 3.10, 0.12, 0.23);
     for (const x of [-1.43, 1.43]) {
-      box(group, "#b4d5eb", x, 0.95, -0.35, 0.17, 1.04, 1.51);
+      box(group, color, x, 0.95, -0.35, 0.17, 1.04, 1.51);
       box(group, cream, x, 1.51, -0.35, 0.23, 0.10, 1.62);
     }
     box(group, cream, -0.56, 1.28, -0.991, 0.99, 0.72, 0.07);
@@ -332,7 +334,7 @@ export function createWorldArt() {
     sphere(group, "#78ab72", 1.13, 0.86, 0.83, 0.21, 0.33, 0.18);
   }
 
-  function car(group: Group) {
+  function car(group: Group, color?: string) {
     box(group, "#7e8c9c", 0, 0.20, 0, 2.7, 0.18, 1.67, 0.13);
     for (const x of [-0.68, 0.68]) {
       for (const z of [-0.57, 0.57]) {
@@ -340,18 +342,18 @@ export function createWorldArt() {
         cylinder(group, cream, x, 0.47, z * 1.21, 0.125, 0.045, 16).rotation.x = Math.PI / 2;
       }
     }
-    box(group, "#f68479", 0, 0.63, 0, 2.15, 0.43, 1.15, 0.18);
-    box(group, "#f99e91", 0, 0.87, 0, 1.12, 0.46, 1.03, 0.20);
+    box(group, color ?? "#f68479", 0, 0.63, 0, 2.15, 0.43, 1.15, 0.18);
+    box(group, color ?? "#f99e91", 0, 0.87, 0, 1.12, 0.46, 1.03, 0.20);
     box(group, "#567c9c", 0.06, 0.96, 0.511, 0.76, 0.22, 0.045, 0.02);
-    box(group, "#f99e91", 0.04, 0.96, 0.54, 0.062, 0.22, 0.04);
+    box(group, color ?? "#f99e91", 0.04, 0.96, 0.54, 0.062, 0.22, 0.04);
     box(group, "#567c9c", 0.49, 0.96, 0, 0.10, 0.21, 0.82).rotation.z = 0.26;
     for (const z of [-0.36, 0.36]) box(group, "#fff4c0", 1.075, 0.70, z, 0.06, 0.13, 0.19);
     box(group, cream, 1.02, 0.49, 0, 0.15, 0.105, 0.99);
   }
 
-  function wedding(group: Group) {
+  function wedding(group: Group, color = "#e79eb3") {
     cylinder(group, "#f1d5c6", 0, 0.22, 0, 1.22, 0.18, 24);
-    box(group, "#e79eb3", 0, 0.26, 0.80, 0.65, 0.11, 1.3);
+    box(group, color, 0, 0.26, 0.80, 0.65, 0.11, 1.3);
     const arch = ring(group, cream, 0, 1.36, -0.42, 0.72, 0.085);
     arch.scale.y = 1.09;
     for (const x of [-0.72, 0.72]) {
@@ -367,14 +369,14 @@ export function createWorldArt() {
     }
   }
 
-  function retreat(group: Group) {
+  function retreat(group: Group, color = "#b1c77e") {
     const water = cylinder(group, "#80c9cb", 0.40, 0.17, 0.15, 0.84, 0.08, 28);
     water.scale.set(1, 1, 0.77);
     for (const [x, z] of [[1, 0.63], [0.19, 0.63], [0.38, -0.36]]) {
       cylinder(group, "#79a96e", x, 0.225, z, 0.15, 0.035, 12);
       sphere(group, "#f2add0", x, 0.29, z, 0.085, 0.06, 0.085);
     }
-    tree(group, -0.78, -0.4, 0.93, "#b1c77e");
+    tree(group, -0.78, -0.4, 0.93, color);
     box(group, "#ce936c", -0.43, 0.41, 0.75, 0.80, 0.13, 0.32);
     box(group, "#e5af83", -0.43, 0.61, 0.61, 0.80, 0.24, 0.09);
     for (const x of [-0.70, -0.17]) box(group, bark, x, 0.26, 0.75, 0.08, 0.31, 0.27);
@@ -382,8 +384,8 @@ export function createWorldArt() {
     sphere(group, stone, 0.91, 0.19, -0.66, 0.16, 0.11, 0.14);
   }
 
-  function machine(group: Group) {
-    cylinder(group, "#a9a4d8", 0, 0.23, 0, 1.1, 0.27, 12);
+  function machine(group: Group, color = "#a9a4d8") {
+    cylinder(group, color, 0, 0.23, 0, 1.1, 0.27, 12);
     cylinder(group, "#6265a8", 0, 0.43, 0, 0.91, 0.22);
     ring(group, "#a3e8f1", 0, 0.49, 0, 0.88, 0.055).rotation.x = -Math.PI / 2;
     ring(group, "#7a72c9", 0, 1.31, -0.17, 0.72, 0.13);
@@ -397,7 +399,7 @@ export function createWorldArt() {
     }
   }
 
-  function travel(group: Group) {
+  function travel(group: Group, color = "#86bae1") {
     box(group, "#b1c7dc", 0, 0.18, 0, 2.22, 0.17, 1.45, 0.12);
     box(group, cream, 0, 0.28, 0.16, 1.9, 0.033, 0.065);
     const plane = new THREE.Group();
@@ -405,25 +407,31 @@ export function createWorldArt() {
     group.add(plane);
     sphere(plane, cream, 0, 0.80, 0, 0.91, 0.23, 0.25);
     sphere(plane, "#6ca8d5", 0.48, 0.94, 0, 0.28, 0.14, 0.19);
-    box(plane, "#86bae1", -0.15, 0.76, 0, 0.41, 0.09, 1.85).rotation.y = -0.24;
-    box(plane, "#86bae1", -0.68, 0.98, 0, 0.35, 0.47, 0.09).rotation.z = 0.27;
+    box(plane, color, -0.15, 0.76, 0, 0.41, 0.09, 1.85).rotation.y = -0.24;
+    box(plane, color, -0.68, 0.98, 0, 0.35, 0.47, 0.09).rotation.z = 0.27;
   }
 
-  function personal(group: Group) {
+  function personal(group: Group, color = "#f7c26b") {
     cylinder(group, "#d9b29a", 0, 0.22, 0, 0.91, 0.20, 12);
     cylinder(group, "#7b6b9b", -0.23, 0.94, 0, 0.05, 1.22, 12);
-    box(group, "#f7c26b", 0.18, 1.36, 0, 0.78, 0.40, 0.08).rotation.y = 0.16;
+    box(group, color, 0.18, 1.36, 0, 0.78, 0.40, 0.08).rotation.y = 0.16;
     sphere(group, "#fff0b2", -0.23, 1.58, 0, 0.08);
     for (const x of [-0.65, 0.38, 0.62]) flower(group, x, 0.54, "#fff0ba");
   }
 
   const models = { house, car, wedding, retreat, machine, travel, personal };
 
-  function landmark(kind: LandmarkKind) {
+  function landmark(kind: LandmarkKind, appearance: GoalPlan["appearance"]) {
     const group = new THREE.Group();
     const base = cylinder(group, "#a2c874", 0, 0.083, 0, 1.75, 0.15, 32);
     base.scale.z = 0.86;
-    models[kind](group);
+    models[kind](group, appearance?.color);
+    if (appearance?.accessory === "flowers") {
+      for (const x of [-0.6, 0, 0.6]) flower(group, x, 1.12, "#fdadd1");
+    } else if (appearance?.accessory === "flag") {
+      cylinder(group, bark, -1.12, 0.81, 0.6, 0.04, 1.4);
+      box(group, appearance.color, -0.91, 1.32, 0.6, 0.42, 0.28, 0.05);
+    }
     const highlight = ring(group, landmarkStyles[kind].color, 0, 0.16, 0, 1.70, 0.043);
     highlight.rotation.x = -Math.PI / 2;
     highlight.scale.y = 0.86;

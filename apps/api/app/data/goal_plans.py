@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from pymongo.errors import DuplicateKeyError
 
 from app.data.future_you import DEMO_PROFILE_ID
+from app.schemas.future_world import Appearance
 
 Slug = Annotated[str, StringConstraints(pattern=r"^(wedding|retirement|time-machine|dream-home|emergency|custom-[a-zA-Z0-9-]{1,80})$")]
 Amount = Annotated[float, Field(ge=0, le=1e12, multiple_of=0.01, allow_inf_nan=False)]
@@ -29,6 +30,10 @@ class GoalPlan(BaseModel):
     monthly: Amount
     months: int = Field(strict=True, ge=1, le=1200)
     revision: int = Field(default=0, ge=0, strict=True)
+
+
+class TownGoalPlan(GoalPlan):
+    appearance: Appearance | None = None
 
 
 def key(subject, slug):
@@ -61,8 +66,9 @@ async def seed_plans(collection, subject):
 async def list_plans(collection, subject):
     result = []
     async for row in collection.find({"user_id": subject, "slug": {"$exists": True}}):
-        result.append(GoalPlan(id=row["slug"], title=row["name"], saved=row["saved"], target=row["target"],
-                               monthly=row["monthly"], months=row.get("months", row["years"] * 12),
+        result.append(TownGoalPlan(appearance=row.get("appearance") if row.get("appearance_title") == row["name"] else None,
+                               id=row["slug"], title=row["name"], saved=row["saved"], target=row["target"],
+                               monthly=row["monthly"], months=row["months"] if "months" in row else row["years"] * 12,
                                revision=row.get("revision", 0)))
     order = {item[0]: n for n, item in enumerate(INITIAL)}
     return sorted(result, key=lambda plan: (order.get(plan.id, len(order)), plan.id))
@@ -79,3 +85,26 @@ async def save_plan(collection, subject, plan):
     if not result.matched_count and not result.upserted_id:
         return None
     return plan.model_copy(update={"revision": plan.revision + 1})
+
+
+async def resolve_appearance(collection, owner, slug, generate):
+    """Only the first result for the current title wins, independent of savings edits."""
+    query = {"_id": key(owner, slug), "user_id": owner, "slug": slug}
+    row = await collection.find_one(query, {"name": 1, "appearance": 1, "appearance_title": 1})
+    if not row:
+        raise KeyError(slug)
+    title = row["name"]
+    previous = row.get("appearance", {})
+    if previous and row.get("appearance_title") == title:
+        return Appearance.model_validate(previous)
+    art = await generate(title)
+    appearance = Appearance(**art.model_dump(), revision=previous.get("revision", 0) + 1)
+    updated = await collection.update_one(
+        {**query, "name": title, "appearance_title": {"$ne": title}, "appearance.revision": previous.get("revision")},
+        {"$set": {"appearance": appearance.model_dump(), "appearance_title": title}})
+    if updated.modified_count:
+        return appearance
+    winner = await collection.find_one({**query, "name": title, "appearance_title": title}, {"appearance": 1})
+    if winner:
+        return Appearance.model_validate(winner["appearance"])
+    raise ValueError("The goal was renamed. Reload its appearance.")

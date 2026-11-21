@@ -25,7 +25,7 @@ function WorldIcon() {
 export function FutureActions() {
   return (
     <div className={styles.futureActions}>
-      <Link href="/companion" className={styles.futureAction}>
+      <Link href="/future-you" className={styles.futureAction}>
         <TalkIcon /><span>Future Talk</span>
       </Link>
       <Link href="/future-world" className={styles.futureAction}>
