@@ -52,6 +52,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | OPS-GRAPH | Visualize agent activity and the parent-child trace of each run | Codex | Review | codex/agent-foundation | Private operator console |
 | DB-HANDOFF | Ship the opening MongoDB dataset and integration guide | Codex | Review | codex/agent-foundation | Seed, data export and README |
 | OPS-MAP | Diagram the connections between the API, agents, MCP tools and data sources | Codex | Review | codex/agent-foundation | Private operator dashboard |
+| HEALTH-UX | Integrate the investor health v2 experience with measured scores and Doraemon | Codex | Review | codex/investor-health-ux | Behavior report and human-agent interactions |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

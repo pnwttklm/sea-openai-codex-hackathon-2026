@@ -39,6 +39,7 @@ class Factor(BaseModel):
 class HealthDimension(Factor):
     question: str
     measurement: str
+    facts: dict[str, str] = Field(default_factory=dict)
     ai_assessment: str | None = None
 
 

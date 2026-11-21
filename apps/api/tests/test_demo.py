@@ -33,7 +33,13 @@ def test_demo_routes_share_consistent_fixture(monkeypatch):
         amd = client.get("/api/v1/demo/stocks/AMD").json()
         assert portfolio["score"] == behavior["score"]
         assert [f["name"] for f in behavior["factors"]] == ["Contribution", "DCA Consistency", "Diversification", "Goal & Risk Fit"]
+        evidence = {factor["name"]: factor["facts"] for factor in behavior["factors"]}
+        assert evidence["Contribution"]["Set aside"] == "THB 30,000"
+        assert evidence["DCA Consistency"] == {"Scheduled buys": "4", "Completed": "2", "Missed": "2"}
+        assert evidence["Diversification"]["US equities"] == "56.0%"
+        assert evidence["Goal & Risk Fit"]["Marry Shizuka"] == "0 / 3 checks fit"
         updated = client.post("/api/v1/demo/behavior/target", json={"monthly_target_thb": 60000}).json()
+        assert updated["factors"][0]["facts"]["Remaining"] == "THB 30,000"
         assert [f["score"] for f in updated["factors"][:2]] == [5, 5]
         assert updated["score"] < portfolio["score"]
         assert client.get("/api/v1/demo/portfolio").json()["score"] == updated["score"]

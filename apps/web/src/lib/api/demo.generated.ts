@@ -695,6 +695,10 @@ export interface components {
             question: string;
             /** Measurement */
             measurement: string;
+            /** Facts */
+            facts?: {
+                [key: string]: string;
+            };
             /** Ai Assessment */
             ai_assessment?: string | null;
         };
