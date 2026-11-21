@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FutureActions } from "./future-actions";
 import Image from "next/image";
-import Link from "next/link";
+import { DemoNav } from "../demo/shell";
 import { useRef, useState } from "react";
 import { duration, compactMoney, type GoalPlan } from "./demo-goals";
 import { GoalDetails } from "./goal-details";
@@ -83,33 +83,8 @@ function GoalCard({ goal, open }: { goal: GoalPlan; open: (trigger: HTMLButtonEl
   );
 }
 
-function FutureYouTabs() {
-  return (
-    <nav className={styles.tabs} aria-label="Main navigation">
-      <Link href="/">
-        <span className={styles.avatar}>
-          <Image className={styles.nobita} src={`${assets}/nobita.png`} alt="" width={580} height={1752} sizes="16px" />
-        </span>
-        Portfolio
-      </Link>
-      <button type="button" disabled aria-label="Invest, coming soon">
-        <Image src={`${assets}/doraemon-tab.svg`} alt="" width={31.605} height={28.105} />
-        Invest
-      </button>
-      <Link href="/goals" aria-current="page">
-        <span className={styles.avatar}>
-          <span className={styles.shizukaCrop}>
-            <Image className={styles.shizuka} src={`${assets}/shizuka.png`} alt="" width={49} height={49} sizes="49px" />
-          </span>
-        </span>
-        Future You
-      </Link>
-    </nav>
-  );
-}
-
 export function FutureYou() {
-  const { plans, savePlan } = useGoalPlans();
+  const { plans, savePlan, ready, error } = useGoalPlans();
   const goals = plans.filter(plan => plan.id !== "emergency");
   const reserve = plans.find(plan => plan.id === "emergency")!;
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -127,6 +102,8 @@ export function FutureYou() {
     trigger.current = button;
     setDetailId(id);
   }
+
+  if (!ready || error) return <main id="main" className={styles.screen}><p role="status">{error || "Loading saved goals…"}</p></main>;
 
   return (
     <main id="main" className={styles.screen} tabIndex={-1}>
@@ -157,9 +134,9 @@ export function FutureYou() {
         </article>
       </section>
 
-      <FutureYouTabs />
+      <DemoNav active="goals" />
 
-      {detail && <GoalDetails plan={detail} creating={draft !== null} onSave={plan => { savePlan(plan); setDraft(null); }} onClose={() => {
+      {detail && <GoalDetails plan={detail} creating={draft !== null} onSave={async plan => { await savePlan(plan); setDraft(null); }} onClose={() => {
         setDraft(null);
         setDetailId(null);
         trigger.current?.focus({ preventScroll: true });

@@ -13,9 +13,24 @@ docker compose up --build
 | API liveness | http://localhost:8000/api/v1/health |
 | MongoDB | `mongodb://mongo:27017` inside Compose only |
 
-No env file is required for this starter. Frontend and backend ports bind to localhost. MongoDB has no host port and no authentication in this local-only setup. Its data persists in the Compose-managed `mongo_data` volume. The backend receives the database URI, but the application does not connect to it yet. OpenAI and FastMCP are not configured.
+No env file is required for the starter. Frontend and backend ports bind to localhost. MongoDB has no host port or authentication in this local setup. Its data persists in the `mongo_data` volume.
+
+## Future You demo
+
+Set `FUTURE_YOU_DEMO=1` in the repository root `.env`. For live voice set `FUTURE_YOU_VOICE_ENABLED=1`. For selfie uploads set `FUTURE_YOU_MEDIA_ENABLED=1`. Both OpenAI features use the server-side `OPENAI_API_KEY`. `OPENAI_REALTIME_MODEL` and `OPENAI_IMAGE_MODEL` can override the defaults.
+
+```sh
+docker compose up -d --build --wait
+docker compose exec -T api python -m app.data.seed_future_you_demo
+```
+
+Open **Future Talk** on `/goals`, or visit `/future-you` directly. The Goals dashboard reads its browser-local plans. Future Talk reads its saved profile and goals from MongoDB. The demo uses a synthetic profile, goal, and portfolio snapshot from `future_you_demo`. Run the seed command again to add any missing demo data. Use **Start live conversation** to grant microphone access. **Use my photo** replaces the sample portrait for that visit and automatically suggests a voice style for the new portrait. Set `OPENAI_PORTRAIT_VISION_MODEL` to override the vision model. The local API tests mock OpenAI and run without a key. The [API contract](contracts/future-you.md) describes the portfolio fields, portrait upload, and WebRTC offer endpoints.
+
+To use existing data, set `FUTURE_YOU_USER_ID` to the saved profile's MongoDB ObjectId. This takes precedence over demo mode. Compose can also receive `MONGODB_URI` and `MONGODB_DATABASE` for an existing development database. The local API reads the saved profile and its goals without modifying them.
 
 For parallel work on one machine, see [Working in parallel](team/parallel-work.md). Use a distinct `-p` project name and `WEB_PORT`/`API_PORT` values for each checkout; Compose derives separate networks and database volumes per project.
+
+The portrait endpoint uses GPT Image. The earlier silent-video API also requires a model with GIF preview access and FFmpeg with H.264 support. Docker includes FFmpeg.
 
 ## Daily workflow
 

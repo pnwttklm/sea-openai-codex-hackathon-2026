@@ -1,3 +1,3 @@
 # MongoDB layer
 
-Add connection lifecycle, repositories, indexes, and synthetic seeds here. No database driver or connection is initialized yet. Coordinate dependencies and startup with Backend; read AGENTS.md before implementation.
+FastAPI manages the async PyMongo client. The shared demo seed initializes the synthetic profile and goals, market snapshot, and opening ledger. See the [integration and restore guide](../../../../database/README.md) for collection names, exports and commands.

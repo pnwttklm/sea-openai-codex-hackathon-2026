@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiGet, apiPost, ApiError } from "@/lib/api/client";
 import { initialPlans, validPlan, type GoalPlan } from "./demo-goals";
 
 const prefix = "future-you.demo.plan.v1.";
@@ -37,17 +38,30 @@ export function useGoalPlans() {
     setLoaded(true);
     window.addEventListener("storage", refresh);
     window.addEventListener("pageshow", refresh);
-    return () => {
-      window.removeEventListener("storage", refresh);
-      window.removeEventListener("pageshow", refresh);
-    };
-  }, []);
+    return () => { controller.abort(); window.removeEventListener("pageshow", refresh); };
+  }, [shared]);
 
-  function savePlan(plan: GoalPlan) {
-    if (!validPlan(plan)) throw new Error("Review the goal values.");
-    localStorage.setItem(prefix + plan.id, JSON.stringify(plan));
-    setPlans(readPlans());
+  async function savePlan(plan: GoalPlan) {
+    if (!validPlan(plan) || !ready) throw new Error("Review the goal values and reload your saved goals.");
+    if (shared) {
+      let saved: GoalPlan;
+      try {
+        saved = await apiPost<GoalPlan>("/api/v1/companion/goals", plan);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 409) {
+          setPlans(await apiGet<GoalPlan[]>("/api/v1/companion/goals"));
+        }
+        throw error;
+      }
+      setPlans(previous => [...previous.filter(p => p.id !== saved.id), saved]
+        .sort((a,b) => order(a.id) - order(b.id) || a.id.localeCompare(b.id)));
+    } else {
+      localStorage.setItem(prefix + plan.id, JSON.stringify(plan));
+      setPlans(readPlans());
+    }
   }
+  return { plans, savePlan, error, ready };
+}
 
   return { plans, loaded, savePlan };
 }

@@ -70,7 +70,8 @@ function TripTicket({ plan }: { plan: GoalPlan }) {
 }
 
 export function TimeMachine({ id }: { id: string }) {
-  const { plans } = useGoalPlans();
+  const { plans, error, ready } = useGoalPlans();
+  if (!ready || error) return <main id="main"><p role="status">{error || "Loading goal…"}</p></main>;
   const plan = plans.find(plan => plan.id === id)!;
   return (
     <main id="main" className={`${styles.screen} ${styles.voyage}`}>

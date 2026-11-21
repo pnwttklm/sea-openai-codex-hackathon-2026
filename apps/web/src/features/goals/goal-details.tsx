@@ -7,18 +7,19 @@ import { duration, money, validPlan, type GoalPlan } from "./demo-goals";
 import { GoalEditor } from "./goal-editor";
 import styles from "./future-you.module.css";
 
-const savedMessage = "Changes saved in this browser.";
+const savedMessage = process.env.NEXT_PUBLIC_SHARED_DEMO === "1" ? "Changes saved to your demo profile." : "Changes saved in this browser.";
 
 export function GoalDetails({ plan, creating, onSave, onClose }: {
   plan: GoalPlan;
   creating: boolean;
-  onSave: (plan: GoalPlan) => void;
+  onSave: (plan: GoalPlan) => Promise<void>;
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const previousHeight = useRef<number | null>(null);
   const resize = useRef<Animation | null>(null);
   const editButton = useRef<HTMLButtonElement>(null);
+  const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(creating);
   const [notice, setNotice] = useState("");
   const heading = useRef<HTMLHeadingElement>(null);
@@ -68,9 +69,9 @@ export function GoalDetails({ plan, creating, onSave, onClose }: {
     else endEdit();
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (dialog.current?.dataset.closing) return;
+    if (saving || dialog.current?.dataset.closing) return;
     const form = new FormData(event.currentTarget);
     const next = {
       ...plan, title: String(form.get("title")).trim(), saved: Number(form.get("saved")),
@@ -78,12 +79,13 @@ export function GoalDetails({ plan, creating, onSave, onClose }: {
     };
     if (!validPlan(next)) { setNotice("Enter a name and valid plan amounts."); return; }
     try {
-      onSave(next);
+      setSaving(true);
+      await onSave(next);
       setNotice(savedMessage);
       endEdit();
-    } catch {
-      setNotice("Your browser could not save these changes. Check storage access and try again.");
-    }
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Could not save. Please try again.");
+    } finally { setSaving(false); }
   }
 
   const ratio = Math.min(plan.saved / plan.target, 1);
@@ -95,9 +97,9 @@ export function GoalDetails({ plan, creating, onSave, onClose }: {
       <div className={styles.previewContent}>
         {editing ? (
           <div className={styles.editToolbar}>
-            <button type="button" onClick={cancelEdit}>Cancel</button>
+            <button type="button" disabled={saving} onClick={cancelEdit}>Cancel</button>
             <h2 ref={heading} tabIndex={-1} id="detail-title">{creating ? "New goal" : "Edit goal"}</h2>
-            <button type="submit" form="goal-form">{creating ? "Add" : "Save"}</button>
+            <button type="submit" form="goal-form" disabled={saving}>{creating ? "Add" : "Save"}</button>
           </div>
         ) : (
           <div className={styles.previewHeading}>

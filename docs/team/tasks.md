@@ -34,6 +34,37 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | API-01 | Scaffold FastAPI, configuration, health route, and Python package | Codex | Review | Current workspace | Starter implemented; review before feature work |
 | DATA-01 | Implement MongoDB client lifecycle and agreed repository interfaces | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
 | AI-01 | Implement configurable OpenAI service and FastMCP entry point | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
+| DEMO-01 | Implement two Portfolio states, Stock Detail, and Investor Health Score using a read-only demo API and MongoDB | Codex | Review | codex/prik-thai-design-stack | API tests, MongoDB fixture, frontend build/typecheck, and browser navigation verified |
+| DEMO-02 | Add an NVDA sell reflection with Webull news | Codex | Review | codex/prik-thai-design-stack | Paper fills verified in browser; live Webull and OpenAI require credentials |
+| DEMO-03 | Present the sell reflection as an extension-style chat panel | Codex | Review | codex/prik-thai-design-stack | Verified chat replies, review and dismiss in browser at mobile and desktop widths |
+| DEMO-04 | Add a conversational research agent with source-backed tool calls | Codex | Review | codex/prik-thai-design-stack | Tool routing mocked and browser fallback verified; live providers require credentials |
+| DEMO-05 | Persist Agent conversations and citations in MongoDB | Codex | Review | codex/prik-thai-agent-demo | Live Agent answer and sources reloaded from MongoDB; build and typecheck passed |
+| DEMO-06 | Add stateful bot avatars to the Agent panels | Codex | Review | codex/prik-thai-agent-demo | Both panels verified in browser; production build and typecheck passed |
+| DEMO-07 | Animate confirmed paper orders into their receipt | Codex | Review | codex/prik-thai-agent-demo | Buy, sell, and insufficient cash verified in browser; build and typecheck passed |
+| DEMO-08 | Add a broker-style paper order ticket with market and limit orders | Codex | Review | codex/prik-thai-agent-demo | Market fills, limit placement and cancellation verified in browser; API tests and frontend checks passed |
+| DEMO-09 | Settle paper trades in THB and add direct Portfolio chart interaction | Codex | Review | codex/prik-thai-agent-demo | Live FX, THB buy/sell, chart interactions, API tests and frontend checks verified |
+| DEMO-10 | Remove stock action bar caption | Codex | Review | codex/prik-thai-agent-demo | Frontend typecheck passed |
+| DEMO-11 | Show five INVX dimensions on stock pages | Codex | Review | codex/prik-thai-agent-demo | VOO browser check and typecheck passed |
+| DEMO-12 | Connect four Investor Health Score dimensions across the demo | Codex | Review | codex/prik-thai-agent-demo | Verified seven holdings, four dimensions, shared navigation and Future You |
+| TALK-01 | Integrate the profile-based Future Talk conversation into the Goals dashboard | Codex | Done | codex/main-future-talk | WEB-10 |
+| DEMO-13 | Add real holding logos | Codex | Review | main | Build, typecheck and five served SVGs verified |
+| AI-DESIGN-01 | Specify companion roles, FastMCP tools and the operator dashboard | Codex | Done | codex/agent-foundation | AGENT-01 |
+| AI-DESIGN-02 | Specify investor reflection and headline sentiment analysis | Codex | Done | codex/agent-foundation | AGENT-01 |
+| AGENT-01 | Implement four agents, MCP tools, shared investor data, character popup and private dashboard | Codex | Review | codex/agent-foundation | [Agent operations](../contracts/agent-operations.md) |
+| CHART-01 | Refresh the stock INVX radar, add selectable factors and a bar comparison | Codex | Review | codex/agent-foundation | AMD five-factor fixture |
+| POPUP-01 | Show the current stock in the investor’s portfolio in the stock companion popup | Codex | Review | codex/agent-foundation | AGENT-01 |
+| INVEST-01 | Open the searchable demo market from the Invest tab | Codex | Review | codex/agent-foundation | Demo stock catalog, stock detail and shared tab bar |
+| OPTIONS-01 | Add a read-only interactive option-chain mockup to stock detail | Codex | Review | codex/agent-foundation | Stock detail synthetic quote |
+| PORT-DEMO | Seed the shared paper portfolio from the seven-holding THB 500,000 example | Codex | Review | codex/agent-foundation | Shared portfolio, paper account and Mongo seed |
+| VOICE-LOCAL | Enable Future You voice in the running demo | Codex | Review | codex/agent-foundation | Local API configuration |
+| SCORE-01 | Open the reference behavior score from Portfolio and preserve the monthly health report | Codex | Review | codex/agent-foundation | Portfolio, behavior, shared health rubric and server-side AI assessment |
+| TUNNEL-01 | Read the demo portfolio and score through the frontend port | Codex | Review | codex/agent-foundation | Shared demo preview |
+| SCORE-ART | Show the Doraemon portrait on the assessment control | Codex | Review | codex/agent-foundation | Behavior screen |
+| ORDER-BAL | Lead stock order tickets with the current paper balance | Codex | Review | codex/agent-foundation | Stock order sheet |
+| ORDER-COPY | Simplify user-facing trading and balance labels | Codex | Review | codex/agent-foundation | Order sheet, portfolio and order errors |
+| OPS-GRAPH | Visualize agent activity and the parent-child trace of each run | Codex | Review | codex/agent-foundation | Private operator console |
+| DB-HANDOFF | Ship the opening MongoDB dataset and integration guide | Codex | Review | codex/agent-foundation | Seed, data export and README |
+| OPS-MAP | Diagram the connections between the API, agents, MCP tools and data sources | Codex | Review | codex/agent-foundation | Private operator dashboard |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

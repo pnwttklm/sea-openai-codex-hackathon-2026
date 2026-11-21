@@ -1,0 +1,19 @@
+.card { border: 1px solid #373647; border-radius: 20px; padding: 16px; background: linear-gradient(155deg, #232133, #18191f 60%); }
+.title,.controls,.sides { display: flex; align-items: center; }
+.title,.controls { justify-content: space-between; gap: 8px; }
+.title h2 { font-size: 19px; }
+.title span { font-size: 12px; color: #c3b9e7; }
+.controls { flex-wrap: wrap; margin: 18px 0 12px; }
+.sides { padding: 2px; border: 1px solid #454252; border-radius: 12px; }
+.sides button { min-height: 44px; padding: 0 12px; border-radius: 9px; font-size: 13px; }
+.sides button[aria-pressed=true] { background: #49415e; color: #fff; }
+.expiry { display: grid; gap: 2px; color: #c2bdce; font-size: 11px; }
+.expiry select { min-height: 44px; background: #20202a; color: #f6f4fc; border: 1px solid #454252; border-radius: 10px; padding: 0 8px; font: inherit; font-size: 13px; }
+.chain { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.chain th,.chain td { padding: 10px 8px; text-align: right; border-bottom: 1px solid #33313d; }
+.chain th:first-child { text-align: left; }
+.chain thead th { color: #c2bdce; font-size: 12px; font-weight: 500; }
+.chain tbody { font-size: 14px; }
+.nearest { background: #a494f017; }
+.chain small { display: block; color: #c5b9fa; font-weight: 400; }
+.card .note { color: #bcb8c9; font-size: 11px; margin-top: 12px; }

@@ -1,3 +1,3 @@
 # Decision journal
 
-Proposed feature area; no implementation yet. Place feature-specific components, hooks, types, and adapters here after scope and API contracts are agreed. The route at `src/app/journal/page.tsx` composes this module.
+In the shared local demo, `/journal` records an explicitly submitted reflection for the synthetic investor. The local API returns the latest 50 entries. Entries stay separate from agent traces.
