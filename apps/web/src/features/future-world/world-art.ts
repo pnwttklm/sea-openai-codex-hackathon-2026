@@ -112,16 +112,60 @@ export function createWorldArt() {
 
   function townGuide() {
     const g = new THREE.Group();
-    for (const side of [-1,1]) sphere(g, cream, side * 0.16, 0.15, 0.06, 0.16, 0.12, 0.19);
-    sphere(g, "#619bd6", 0, 0.47, 0, 0.35, 0.37, 0.29);
-    sphere(g, "#6ca8df", 0, 0.94, 0, 0.44, 0.40, 0.35);
-    sphere(g, cream, 0, 0.91, 0.18, 0.34, 0.28, 0.20);
-    for (const side of [-1,1]) sphere(g, dark, side * 0.11, 0.97, 0.362, 0.035, 0.055, 0.024);
-    sphere(g, "#eab264", 0, 0.85, 0.38, 0.064, 0.043, 0.04);
-    box(g, "#f5c581", 0, 0.59, 0.08, 0.53, 0.095, 0.43);
+    const body = new THREE.Group();
+    g.add(body);
+    const feet = [-1, 1].map(side => sphere(body, cream, side * 0.16, 0.15, 0.06, 0.16, 0.12, 0.19));
+    sphere(body, "#429ede", 0, 0.47, 0, 0.35, 0.37, 0.29);
+    sphere(body, cream, 0, 0.45, 0.20, 0.25, 0.25, 0.12);
+    const head = new THREE.Group();
+    head.position.y = 0.75;
+    body.add(head);
+    sphere(head, "#409edf", 0, 0.19, 0, 0.44, 0.40, 0.35);
+    sphere(head, cream, 0, 0.16, 0.18, 0.34, 0.28, 0.20);
+    for (const side of [-1, 1]) {
+      sphere(head, cream, side * 0.075, 0.31, 0.31, 0.079, 0.10, 0.05);
+      sphere(head, dark, side * 0.055, 0.30, 0.356, 0.027, 0.042, 0.017);
+      for (const row of [-1, 0, 1]) {
+        box(head, dark, side * 0.24, 0.14 + row * 0.047, 0.33, 0.16, 0.011, 0.012, 0.004).rotation.z = row * side * 0.19;
+      }
+    }
+    sphere(head, "#e64b50", 0, 0.21, 0.39, 0.061);
+    cylinder(body, "#cf4248", 0, 0.68, 0, 0.295, 0.065);
+    sphere(body, "#ffca47", 0, 0.64, 0.29, 0.062);
+    const paws = [-1, 1].map(side => sphere(body, cream, side * 0.32, 0.46, 0.12, 0.095));
+    const notebook = new THREE.Group();
+    notebook.position.set(0, 0.49, 0.41);
+    notebook.rotation.x = 0.28;
+    body.add(notebook);
+    box(notebook, "#31506e", 0, 0, 0, 0.49, 0.045, 0.34, 0.02);
+    box(notebook, "#fff4d9", 0, 0.03, 0, 0.45, 0.025, 0.30, 0.012);
+    const strokes = [-0.075, 0, 0.075].map(z =>
+      box(notebook, "#526477", 0, 0.046, z, 0.23, 0.005, 0.012, 0.002));
+    const pencil = cylinder(body, "#f59b37", 0, 0, 0, 0.024, 0.24, 8);
+    pencil.rotation.z = -0.44;
+    function pose(action: "idle" | "walk" | "look" | "write", t: number) {
+      const step = action === "walk" ? Math.sin(t * 9) : 0;
+      body.position.y = Math.abs(step) * 0.035;
+      feet.forEach((foot, i) => { foot.position.z = 0.06 + step * (i ? 0.09 : -0.09); });
+      head.rotation.x = action === "write" ? 0.30 : action === "look" ? -0.12 : 0;
+      const writing = action === "write";
+      notebook.visible = pencil.visible = writing;
+      paws[0].position.set(writing ? -0.23 : -0.32, writing ? 0.50 : 0.46, writing ? 0.40 : 0.12 + step * 0.07);
+      const stroke = (t * 0.95) % 3;
+      pencil.position.set(-0.06 + (stroke % 1) * 0.23, 0.65, 0.40 + (Math.floor(stroke) - 1) * 0.075);
+      if (writing) {
+        paws[1].position.copy(pencil.position);
+        strokes.forEach((line, i) => {
+          const ink = THREE.MathUtils.clamp(stroke - i, 0.01, 1);
+          line.scale.x = ink;
+          line.position.x = (ink - 1) * 0.115;
+        });
+      } else paws[1].position.set(0.32, 0.46, 0.12 - step * 0.07);
+    }
+    pose("idle", 0);
     g.position.set(-1.55, 0.07, 4.9);
     g.rotation.y = 0.28;
-    return g;
+    return { group: g, pose };
   }
 
   function room() {
@@ -334,25 +378,6 @@ export function createWorldArt() {
     return { group, highlight };
   }
 
-  function avatar() {
-    const group = new THREE.Group();
-    const body = new THREE.Group();
-    group.add(body);
-    const fur = "#f5b49d";
-    const feet = [-0.15, 0.15].map(x => sphere(body, fur, x, 0.12, 0.06, 0.14, 0.105, 0.16));
-    sphere(body, fur, 0, 0.40, 0, 0.34, 0.35, 0.27);
-    sphere(body, "#ffdac2", 0, 0.82, 0, 0.47, 0.39, 0.35);
-    for (const side of [-1,1]) {
-      const ear = cylinder(body, fur, side * 0.28, 1.15, -0.025, 0.018, 0.29, 12, 0.16);
-      ear.rotation.z = -side * 0.17;
-      sphere(body, "#443239", side * 0.14, 0.86, 0.324, 0.038, 0.053, 0.027);
-      sphere(body, "#efa897", side * 0.29, 0.76, 0.269, 0.094, 0.058, 0.041);
-      sphere(body, fur, side * 0.33, 0.46, 0.06, 0.095, 0.14, 0.11);
-    }
-    sphere(body, "#995e52", 0, 0.77, 0.35, 0.044, 0.029, 0.027);
-    return { group, body, feet };
-  }
-
   function dispose() {
     for (const geometry of geometries.values()) geometry.dispose();
     for (const material of materials.values()) material.dispose();
@@ -360,5 +385,5 @@ export function createWorldArt() {
     materials.clear();
   }
 
-  return { townGround, townGuide, room, landmark, avatar, dispose };
+  return { townGround, townGuide, room, landmark, dispose };
 }

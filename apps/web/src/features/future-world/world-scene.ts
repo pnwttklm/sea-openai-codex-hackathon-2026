@@ -2,6 +2,8 @@ import * as THREE from "three";
 import type { Landmark } from "./landmarks";
 import { createWorldArt } from "./world-art";
 
+import { createPlayer } from "./player";
+import { createGuideRoutine } from "./guide-routine";
 import { townPath } from "./town-path";
 
 export type WorldScene = ReturnType<typeof mountWorld>;
@@ -9,6 +11,7 @@ export type WorldScene = ReturnType<typeof mountWorld>;
 type Options = {
   canvas: HTMLCanvasElement;
   houseId?: string;
+  playerImage: HTMLImageElement;
   landmarks: Landmark[];
   onNearby: (id: string | null) => void;
   onInspect: (id: string) => void;
@@ -16,7 +19,7 @@ type Options = {
   onAvailability: (available: boolean) => void;
 };
 
-export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, onInterior, onAvailability }: Options) {
+export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, onInspect, onInterior, onAvailability }: Options) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.shadowMap.enabled = true;
@@ -37,7 +40,9 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
 
   const art = createWorldArt();
   const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 65);
-  const { group: avatar, body, feet } = art.avatar();
+  const player = createPlayer(playerImage);
+  const avatar = player.group;
+  let heading = 0;
   avatar.scale.setScalar(1.12);
   const returnedHouse = landmarks.find(plot => plot.kind === "house" && plot.plan.id === houseId);
   const spawnX = returnedHouse ? returnedHouse.x + 0.55 : 0;
@@ -49,7 +54,9 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
   scene.add(room.group);
   const outside = new THREE.Group();
   scene.add(outside);
-  const guide = art.townGuide();
+  const guideArt = art.townGuide();
+  const guide = guideArt.group;
+  const routine = createGuideRoutine(guideArt, avatar.position, canWalkTown);
   guide.name = "town-guide";
   let path: [number, number][] = [];
   let north = -6.3;
@@ -72,8 +79,11 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
       if (Math.abs(x) > 4 || z < -3.5 || z > 4.1) return false;
       return !room.obstacles.some(({ min, max }) => x > min.x - 0.20 && x < max.x + 0.20 && z > min.z - 0.20 && z < max.z + 0.20);
     }
+    return canWalkTown(x, z) && Math.hypot(x - guide.position.x, z - guide.position.z) >= 0.58;
+  }
+
+  function canWalkTown(x: number, z: number) {
     if (Math.abs(x) > 6.95 || z < north + 0.62 || z > 5.57) return false;
-    if (Math.hypot(x - guide.position.x, z - guide.position.z) < 0.58) return false;
     return landmarks.every(plot => Math.hypot(x - plot.x, z - plot.z) > plot.radius);
   }
 
@@ -114,7 +124,7 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
     stop();
     home = house;
     avatar.position.set(0, 0.10, 1.55);
-    body.rotation.y = 0;
+    heading = 0;
     placeInterior();
     updateNearby();
     resize();
@@ -126,7 +136,7 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
     stop();
     avatar.position.set(home.x + 0.55, 0.10, home.z + 2.04);
     home = undefined;
-    body.rotation.y = 0;
+    heading = 0;
     placeInterior();
     updateNearby();
     resize();
@@ -160,6 +170,7 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
       group.position.set(plot.x, 0, plot.z);
       plots.add(group);
     }
+    routine.reset();
     placeInterior();
     if (!canWalk(avatar.position.x, avatar.position.z)) avatar.position.set(0, 0.10, home ? 1.55 : 4.82);
     dirty = true;
@@ -185,7 +196,7 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
   function render(now: number) {
     const dt = Math.min((now - previous) / 1000, 0.05);
     previous = now;
-    if (!available) return;
+    if (!available || document.hidden) return;
     walk.copy(stick);
     if (keys.has("arrowleft") || keys.has("a")) walk.x -= 1;
     if (keys.has("arrowright") || keys.has("d")) walk.x += 1;
@@ -211,15 +222,17 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
       if (canWalk(x + walk.x, z)) avatar.position.x += walk.x;
       if (canWalk(avatar.position.x, z + walk.y)) avatar.position.z += walk.y;
       if (x === avatar.position.x && z === avatar.position.z) path = [];
-      body.rotation.y = Math.atan2(walk.x, walk.y);
+      heading = Math.atan2(walk.x, walk.y);
       phase += reduced.matches ? 0 : walk.length() * 4.6;
       updateNearby();
       dirty = true;
     } else if (phase) { phase = 0; dirty = true; }
+    if (!home && routine.tick(dt, landmarks, reduced.matches)) {
+      updateNearby();
+      dirty = true;
+    }
     if (!dirty) return;
-    body.position.y = Math.abs(Math.sin(phase)) * 0.045;
-    feet[0].position.z = 0.06 + Math.sin(phase) * 0.12;
-    feet[1].position.z = 0.06 - Math.sin(phase) * 0.12;
+    player.pose(heading, home ? 0 : Math.atan2(6, 15), phase);
     focus.set(avatar.position.x, 0.14, avatar.position.z - 1.48);
     if (!home) {
       focus.x *= canvas.clientWidth > canvas.clientHeight ? 0.38 : 0.87;
@@ -271,8 +284,13 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
   onAvailability(true);
   return {
     setLandmarks, inspect, stop, enterHouse, exitHouse,
+    startConversation() {
+      dirty = true;
+      return routine.startConversation();
+    },
+    endConversation() { routine.endConversation(); dirty = true; },
     setNight(night: boolean) {
-      scene.background = new THREE.Color(night ? "#373d64" : "#b8d2eb");
+      scene.background = new THREE.Color(night ? "#27234f" : "#b8d2eb");
       sky.color.set(night ? "#b0bbff" : "#fff7ea");
       sky.intensity = night ? 1.03 : 1.75;
       sun.color.set(night ? "#ced5ff" : "#fff0d8");
@@ -289,6 +307,7 @@ export function mountWorld({ canvas, houseId, landmarks, onNearby, onInspect, on
       canvas.removeEventListener("webglcontextrestored", restore);
       renderer.setAnimationLoop(null);
       sun.shadow.dispose();
+      player.dispose();
       art.dispose();
       renderer.dispose();
     },

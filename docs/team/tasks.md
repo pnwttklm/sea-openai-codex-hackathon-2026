@@ -23,6 +23,8 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | WEB-14 | Restore the island as a walkable full-screen town alongside the house in `apps/web` | Codex | Review | `poon-future-you` | WEB-12, WEB-13 |
 | WEB-15 | Connect town houses and interior doors with matching doorstep returns in `apps/web` | Codex | Review | `poon-future-you` | WEB-14 |
 | WEB-16 | Unify the town and its enterable interiors in a single Future World scene under `apps/web` | Codex | Review | `poon-future-you` | WEB-15 |
+| WEB-17 | Apply the supplied character turnaround and Prik Thai AI design guidelines to the Future World scene and controls in `apps/web` | Codex | Review | `poon-future-you` | WEB-16 |
+| WEB-18 | Animate Doraemon wandering, inspecting goals, and stopping to talk in Future World | Codex | Review | `poon-future-you` | WEB-17 |
 | API-01 | Scaffold FastAPI, configuration, health route, and Python package | Codex | Review | Current workspace | Starter implemented; review before feature work |
 | DATA-01 | Implement MongoDB client lifecycle and agreed repository interfaces | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
 | AI-01 | Implement configurable OpenAI service and FastMCP entry point | Unassigned | Ready | TBD | API-01; CONTRACT-01 |

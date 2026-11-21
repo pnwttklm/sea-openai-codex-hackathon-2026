@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { faArrowLeft, faHouse, faMoon, faSun, faTicket, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { duration, initialPlans, money } from "../goals/demo-goals";
@@ -12,12 +12,32 @@ import styles from "./future-world.module.css";
 
 const ticketGoals = new Set(initialPlans.filter(plan => plan.id !== "emergency").map(plan => plan.id));
 
+function WorldSheet({ label, onClose, children }: { label: string; onClose: () => void; children: ReactNode }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = dialog.current;
+    element?.showModal();
+    return () => element?.close();
+  }, []);
+  return (
+    <dialog ref={dialog} className={styles.sheet} aria-label={label}
+      onCancel={event => { event.preventDefault(); onClose(); }}
+      onClick={event => {
+        if (event.target !== event.currentTarget) return;
+        const bounds = event.currentTarget.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose();
+      }}>
+      {children}
+    </dialog>
+  );
+}
+
 function FundingDetails({ landmark, onEnter, onClose }: { landmark: Landmark; onEnter?: () => void; onClose: () => void }) {
   const { plan, kind } = landmark;
   const funded = Math.round(Math.min(1, plan.saved / plan.target) * 1000) / 10;
   const theme = landmarkStyles[kind];
   return (
-    <section className={styles.details} aria-label={`${plan.title} funding`}>
+    <WorldSheet label={`${plan.title} funding`} onClose={onClose}>
       <div className={styles.detailsHeading}>
         <span className={styles.landmarkIcon} style={{ backgroundColor: theme.color }}><FontAwesomeIcon icon={theme.icon} /></span>
         <div>
@@ -42,7 +62,7 @@ function FundingDetails({ landmark, onEnter, onClose }: { landmark: Landmark; on
           <Link href={`/future-you/${plan.id}`}><FontAwesomeIcon icon={faTicket} /> Trip ticket</Link>
         )}
       </div>
-    </section>
+    </WorldSheet>
   );
 }
 
@@ -50,7 +70,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const [interiorId, setInteriorId] = useState<string | null>(null);
   const town = interiorId === null;
   const [night, setNight] = useState(false);
-  const [guideReply, setGuideReply] = useState("Welcome! Walk up to a landmark to explore a goal, or tap a path to walk there.");
+  const [guideReply, setGuideReply] = useState("");
   const { plans, loaded } = useGoalPlans();
   const landmarks = useMemo(() => worldLandmarks(plans), [plans]);
   const [selectedId, setSelectedId] = useState(initialGoal ?? null);
@@ -69,10 +89,16 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const enterNearby = town && nearby?.kind === "house";
   const nearbyLabel = nearbyId === "house-exit" ? "Exit to town"
     : enterNearby ? "Enter house"
-    : nearbyId === "town-guide" ? "Talk to town guide"
+    : nearbyId === "town-guide" ? "Talk to Doraemon"
     : town && nearby ? "Explore " + nearby.plan.title : null;
   const discover = useCallback((id: string, trigger?: HTMLElement) => {
-    if (id === "town-guide") setGuideReply("Welcome! Walk up to a landmark to explore a goal, or tap a path to walk there.");
+    if (id === "town-guide") {
+      const subject = scene.current?.startConversation();
+      const plan = latestLandmarks.current.find(plot => plot.plan.id === subject)?.plan;
+      setGuideReply(plan
+        ? `I was making a note about “${plan.title}”. You've saved THB ${money.format(plan.saved)} toward it so far.`
+        : "Hi! I’m taking a walk around your town. Come look at the goals with me!");
+    }
     activeTrigger.current = trigger ?? null;
     setSelectedId(id);
     releaseStick();
@@ -88,10 +114,12 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
     if (!loaded || !canvas.current) return;
     const element = canvas.current;
     let cancelled = false;
-    import("./world-scene").then(({ mountWorld }) => {
+    const playerImage = new Image();
+    playerImage.src = "/future-world/player-turnaround.webp";
+    Promise.all([import("./world-scene"), playerImage.decode()]).then(([{ mountWorld }]) => {
       if (cancelled) return;
       scene.current = mountWorld({
-        canvas: element, houseId,
+        canvas: element, houseId, playerImage,
         landmarks: latestLandmarks.current,
         onNearby: setNearbyId,
         onInspect: discover,
@@ -113,9 +141,11 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   }, [town, availability, night]);
 
   const closeDetails = useCallback(() => {
+    scene.current?.endConversation();
     setSelectedId(null);
-    activeTrigger.current?.focus();
+    const trigger = activeTrigger.current;
     activeTrigger.current = null;
+    requestAnimationFrame(() => (trigger?.isConnected ? trigger : pad.current)?.focus({ preventScroll: true }));
   }, []);
 
   const interactNearby = useCallback((trigger?: HTMLElement) => {
@@ -212,8 +242,8 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
           {landmarks.map(({ plan }) => <button key={plan.id} onClick={event => discover(plan.id, event.currentTarget)}>{plan.title}</button>)}
         </section>
       )}
-      {guideOpen && <section className={styles.guide} aria-label="Town guide">
-        <div className={styles.guideHeading}><h2>Town guide</h2>
+      {guideOpen && <WorldSheet label="Doraemon" onClose={closeDetails}>
+        <div className={styles.guideHeading}><h2>Doraemon</h2>
           <button className={styles.iconButton} onClick={closeDetails} aria-label="Close conversation"><FontAwesomeIcon icon={faXmark} /></button>
         </div>
         <p aria-live="polite">{guideReply}</p>
@@ -221,7 +251,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
           <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>
           <button onClick={closeDetails}>Back to exploring</button>
         </div>
-      </section>}
+      </WorldSheet>}
       {selected && <FundingDetails landmark={selected} onEnter={town && selected.kind === "house" && availability === "ready" ? () => {
         setSelectedId(null);
         scene.current?.enterHouse(selected.plan.id);
