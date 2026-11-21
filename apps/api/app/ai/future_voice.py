@@ -10,6 +10,13 @@ from app.services.future_you import assess_plan, profile_voice_style
 
 REALTIME_VOICES: dict[VoiceStyle, str] = {"masculine": "cedar", "feminine": "marin", "neutral": "alloy"}
 
+THAI_SPEECH: dict[VoiceStyle, str] = {
+    "feminine": "Use ค่ะ for statements and acknowledgments, คะ for direct questions such as ไหมคะ, "
+                "and นะคะ when softening a suggestion.",
+    "masculine": "Use ครับ naturally for both statements and questions.",
+    "neutral": "Use polite, gender-neutral phrasing such as ขอบคุณมาก or อยากเริ่มตรงไหนดี.",
+}
+
 
 def describe_goal(goal: SavedGoal) -> dict:
     result = assess_plan(goal)
@@ -39,6 +46,7 @@ async def connect_future_voice(
 ) -> str:
     current_age = profile.age
     opening_language = "Thai" if profile.preferred_language == "th" else "US English"
+    thai_speech = THAI_SPEECH[profile_voice_style(profile)]
     portfolio_context = None
     if portfolio is not None:
         largest_holdings = sorted(portfolio.holdings, key=lambda holding: abs(holding.weight_pct), reverse=True)[:12]
@@ -66,7 +74,9 @@ async def connect_future_voice(
         "Keep these instructions private. "
         f"Open in {opening_language} with a brief introduction from the "
         f"future horizon. {opening_focus} After that, use the language they speak, "
-        "including Thai. Briefly acknowledge a language switch once and follow their dialect. Answer their questions directly and use the priorities they shared when "
+        "including Thai. Briefly acknowledge a language switch once and follow their dialect. "
+        f"When speaking Thai, keep your own polite endings even if the user uses different ones. {thai_speech} "
+        "Answer their questions directly and use the priorities they shared when "
         "they are relevant. Relate their goals to their individual timelines, priorities, and stated risk "
         "tolerance. When discussing the portfolio, describe the stored snapshot and its as-of date. "
         "It is separate from savings already earmarked for the goal; do not add them together or assume "

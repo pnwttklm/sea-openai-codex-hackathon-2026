@@ -221,6 +221,7 @@ def test_voice_client_secret_exchange(
         assert '"age_in_scenario": 36' in session["instructions"]
         saved_profile.get_goal.assert_awaited_once_with(USER_ID, GOAL_ID)
     assert "Open in Thai" in session["instructions"]
+    assert "ค่ะ for statements and acknowledgments, คะ for direct questions" in session["instructions"]
     if override:
         assert '"portfolio_today": null' in session["instructions"]
     else:
