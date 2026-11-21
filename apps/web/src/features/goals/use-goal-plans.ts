@@ -30,22 +30,13 @@ function readPlans() {
 }
 
 export function useGoalPlans() {
-  const [plans, setPlans] = useState<GoalPlan[]>(initialPlans);
-  const [error, setError] = useState("");
-  const [ready, setReady] = useState(false);
-  const shared = process.env.NEXT_PUBLIC_SHARED_DEMO === "1";
+  const [plans, setPlans] = useState(initialPlans);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    const controller = new AbortController();
-    async function refresh() {
-      try {
-        const next = shared ? await apiGet<GoalPlan[]>("/api/v1/companion/goals", controller.signal) : readPlans();
-        if (!next.some(p => p.id === "emergency")) throw new Error("Demo goals need to be seeded.");
-        if (!controller.signal.aborted) { setPlans(next); setError(""); setReady(true); }
-      } catch {
-        if (!controller.signal.aborted) setError("Could not load saved goals. Reload to try again.");
-      }
-    }
-    void refresh();
+    function refresh() { setPlans(readPlans()); }
+    refresh();
+    setLoaded(true);
+    window.addEventListener("storage", refresh);
     window.addEventListener("pageshow", refresh);
     return () => { controller.abort(); window.removeEventListener("pageshow", refresh); };
   }, [shared]);
@@ -72,7 +63,5 @@ export function useGoalPlans() {
   return { plans, savePlan, error, ready };
 }
 
-function order(id: string) {
-  const index = initialPlans.findIndex(plan => plan.id === id);
-  return index < 0 ? initialPlans.length : index;
+  return { plans, loaded, savePlan };
 }

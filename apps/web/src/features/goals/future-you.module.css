@@ -108,21 +108,6 @@
   .futureAction { transition: transform 140ms var(--ease-press), background-color 140ms ease; }
   .futureAction:active { transform: scale(.97); }
 }
-.worldList { margin: 0; padding: 0; list-style: none; }
-.worldList li + li { border-top: 1px solid #ffffff16; }
-.worldList a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 4px;
-  color: white;
-  text-decoration: none;
-  overflow-wrap: anywhere;
-}
-.worldList small { display: block; font-size: 13px; color: var(--future-secondary); }
-.worldList svg { width: 10px; color: var(--future-secondary); }
-
 .goals {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -570,6 +555,12 @@
   position: absolute; top: max(16px,env(safe-area-inset-top)); left: 16px;
   display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
   padding: 6px 16px; border-radius: 24px; color: white; background: #18173670; text-decoration: none;
+}
+.enterWorld {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; margin-top: 16px; padding: 6px 20px;
+  border: 1px solid #ffffff33; border-radius: 24px;
+  background: #262347; color: #f4eeff; font-weight: 600; text-decoration: none;
 }
 .stage { position: relative; width: 100%; max-width: 375px; aspect-ratio: 375 / 348; }
 .stage img { position: absolute; height: auto; }
