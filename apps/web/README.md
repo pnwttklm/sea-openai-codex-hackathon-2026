@@ -18,4 +18,4 @@ npm start
 
 `npm start` requires a successful build. `src/app/` owns routes and layouts; `src/components/layout/` owns navigation and the shared shell; `src/components/ui/` owns reusable UI; `src/features/` owns feature modules; `src/lib/api/` owns the API client. Use `@/` imports for `src/`.
 
-Routes: `/`, `/goals`, `/journal`, `/companion`. Feature pages are nonfunctional placeholders. Loading, error, and not-found boundaries are included. No database or OpenAI connection exists in this frontend.
+Open `/future-you`, choose the saved goal, and select **Meet future me**. The [local development guide](../../docs/development.md) covers the demo fixture, selfie upload, and Realtime voice. The `/goals`, `/journal`, and `/companion` routes are placeholders.

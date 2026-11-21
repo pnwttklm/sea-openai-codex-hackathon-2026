@@ -4,7 +4,7 @@ An intent-based AI financial companion for Thai investors, focused on goals, inv
 
 ## Current status
 
-Local development scaffolds are available: Next.js routes and a FastAPI health endpoint. Product screens are placeholders; MongoDB, OpenAI, FastMCP, authentication, and deployment are not connected.
+Future You reads a saved MongoDB profile and goal, creates an older portrait from an optional selfie, and supports local conversations through OpenAI Realtime. The Goals, Journal, and Companion pages are placeholders. FastMCP, authentication, and deployment remain follow-up work.
 
 ## Run locally
 

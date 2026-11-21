@@ -1,3 +1,3 @@
 # MongoDB layer
 
-Add connection lifecycle, repositories, indexes, and synthetic seeds here. No database driver or connection is initialized yet. Coordinate dependencies and startup with Backend; read AGENTS.md before implementation.
+Future You uses the async PyMongo client owned by the API lifespan. The repository reads the configured profile and its goals. The opt-in seed writes only to `future_you_demo`. See the [collection contract](../../../../docs/contracts/future-you.md) and [local setup](../../../../docs/development.md).

@@ -11,8 +11,8 @@ uvicorn app.main:app --reload --port 8000
 
 REST liveness: `GET http://localhost:8000/api/v1/health`. API docs: http://localhost:8000/docs.
 
-Run `pytest` after installing dev dependencies. `CORS_ORIGINS` is a comma-separated process environment variable; `.env` files are not automatically loaded. Allowed browser methods currently cover only the health route.
+Run `pytest` after installing dev dependencies. Set `CORS_ORIGINS` as a comma-separated process environment variable. The API does not automatically load `.env` files.
 
 `app/api/routes/`: REST handlers. `app/schemas/`: Pydantic contracts. `app/services/`: business logic shared by REST and MCP. `app/core/`: settings and shared infrastructure. `app/data/`: MongoDB. `app/ai/`: OpenAI and FastMCP.
 
-Only the health route is implemented. Database, AI, authentication, product routes, and a Python lockfile remain follow-up tasks. The service is for local development; it is not deployment-ready.
+The local API includes health, saved Future You context, GPT Image portrait upload, and opt-in Realtime voice. See the [Future You contract](../../docs/contracts/future-you.md) and [local demo setup](../../docs/development.md). FastMCP, authentication, and a Python lockfile remain follow-up work.
