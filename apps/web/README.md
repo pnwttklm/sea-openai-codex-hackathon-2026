@@ -25,3 +25,5 @@ Stock pages support confirmed paper buys and sells at synthetic prices. Open NVD
 Ask Agent saves completed questions, answers, and citations to MongoDB. Reopen the panel in the same browser and stock page to pick up the conversation. The browser stores the random conversation identifier locally.
 
 `/goals` shows the Future You dashboard with editable demo goals, an emergency reserve, and Future World at `/future-you/[goal]`. Goal edits persist in the current browser origin. The `/journal` and `/companion` routes remain starters.
+
+Open **Future Talk** from `/goals` to start the conversation at `/future-you`. The [local development guide](../../docs/development.md) covers the demo fixture, selfie upload, and Realtime voice. The Future Talk landing design remains available at `/welcome`.

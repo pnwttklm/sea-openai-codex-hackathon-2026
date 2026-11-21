@@ -22,6 +22,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | DEMO-03 | Present the sell reflection as an extension-style chat panel | Codex | Review | codex/prik-thai-design-stack | Verified chat replies, review and dismiss in browser at mobile and desktop widths |
 | DEMO-04 | Add a conversational research agent with source-backed tool calls | Codex | Review | codex/prik-thai-design-stack | Tool routing mocked and browser fallback verified; live providers require credentials |
 | DEMO-05 | Persist Agent conversations and citations in MongoDB | Codex | Review | codex/prik-thai-agent-demo | Live Agent answer and sources reloaded from MongoDB; build and typecheck passed |
+| FUTURE-01 | Talk live about saved goals, personalization, and the latest portfolio | Codex | Review | feat/future-you-realtime | Future Talk owns its page layout and can share the API lifespan with the Agent demo. See the branch handoff in `parallel-work.md`. |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

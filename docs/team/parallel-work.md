@@ -57,3 +57,18 @@ Use the same project name for subsequent commands, for example `docker compose -
 ## Handoff and integration
 
 Claim a task with exact paths, implement it on your branch, run relevant checks, and report contract changes and blockers. Avoid committing unrelated formatting. The integration owner brings reviewed changes into the shared branch in dependency order, runs the complete checks, and verifies one end-to-end flow. Use task-board changes in small commits; resolve overlapping board entries by preserving everyone's status.
+
+### Future You branch handoff
+
+| Branch reviewed | Local entry point | Source of demo data |
+| --- | --- | --- |
+| `origin/main` (`c1699f9`) | `docker compose up --build` starts the starter and health API. | No feature data. |
+| `origin/poon-future-you` (`593b23b`) | `npm ci` and `npm run dev` in `apps/web`; open `/goals`. | The goals editor saves plans in this browser's local storage. Future World opens `/future-you/[goal]`. |
+| `origin/codex/prik-thai-agent-demo` (`d06a725`) | `docker compose up --build`; open `/` for Portfolio, then the Invest tab for research chat. The first portfolio read seeds the fixture. | MongoDB `demo_snapshots` holds the portfolio. `paper_accounts` holds simulated fills and balances. Research uses `OPENAI_API_KEY`, optional `OPENAI_REFLECTION_MODEL`, and optional `WEBULL_MCP_ACCESS_TOKEN`. |
+| `feat/future-you-realtime` | Run the [Future You demo setup](../development.md#future-you-demo), then open `/future-you`. | MongoDB holds the profile, goals, and latest portfolio snapshot. OpenAI streams Realtime audio. |
+
+Use a separate Compose project and port pair for each checkout. The goals dashboard can link **Future Talk** from `/goals` to `/future-you`, and keep `/future-you/[goal]` for Future World. The conversation page owns its `<main>` so it can sit outside the dashboard's route group. The Agent demo routes and `/api/v1/future-you` have separate prefixes and can share one `AsyncMongoClient` in the application lifespan. Keep the configured CORS origins and the `X-Future-Voice-Style` exposed header when combining API startup.
+
+The two demo portfolios use different balances and profiles. Choose the canonical demo profile before sharing a portfolio between Portfolio and Future Talk. Map the Agent demo's `value_thb` and `holdings[].weight` into the [Future You snapshot contract](../contracts/future-you.md), add the actual snapshot date, and verify both screens agree. Keep the simulated USD paper account separate. The Goals branch stores slug IDs and a `months` horizon, while the conversation reads MongoDB ObjectIds and currently accepts whole years. Agree on the shared ID and month-based contract before routing confirmed edits to MongoDB. Keep the emergency reserve separate from life goal balances.
+
+The two upstream branches both change the root frontend layout and dependency manifests. During integration, keep one root layout, include both API routers, reconcile both manifests, regenerate `package-lock.json`, and rerun the build and API checks. Verify that an edited goal and a current portfolio value appear consistently in the dashboard and the next Future Talk session.

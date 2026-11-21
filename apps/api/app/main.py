@@ -9,6 +9,7 @@ from pymongo.errors import PyMongoError
 
 from app.api.router import router
 from app.data.demo import DemoRepository
+from app.data.future_you import DEMO_PROFILE_ID, FutureYouRepository
 from app.data.research import ResearchRepository
 from app.services.demo import DemoService
 from app.services.paper import PaperService
@@ -21,28 +22,33 @@ async def lifespan(application: FastAPI):
     application.state.demo = None
     application.state.paper = None
     application.state.research = None
+    user_id = os.getenv("FUTURE_YOU_USER_ID")
+    future_demo = not user_id and os.getenv("FUTURE_YOU_DEMO") == "1"
+    application.state.future_you_user_id = DEMO_PROFILE_ID if future_demo else user_id
+    application.state.future_you_is_demo = future_demo
+    application.state.future_you_repository = None
     if not uri:
         yield
         return
 
     database = os.getenv("MONGODB_DATABASE", "prik_thai_dev")
-    async with AsyncMongoClient(uri, timeoutMS=3000) as client:
+    async with AsyncMongoClient(uri, serverSelectionTimeoutMS=3000, timeoutMS=5000) as client:
         repository = DemoRepository(client, database)
         application.state.demo = DemoService(repository)
         application.state.paper = PaperService(repository)
         application.state.research = ResearchService(ResearchRepository(client, database))
+        application.state.future_you_repository = FutureYouRepository(client[database], demo=future_demo)
         yield
 
 
 def create_app() -> FastAPI:
     application = FastAPI(title="Prik Thai API", version="0.1.0", lifespan=lifespan)
-    origins = [
-        origin.strip()
-        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
-        if origin.strip()
-    ]
+    default_origins = "http://localhost:3000,http://127.0.0.1:3000"
+    origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", default_origins).split(",") if origin.strip()]
+    application.state.allowed_origins = origins
     application.add_middleware(
-        CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["Content-Type"],
+        CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"], expose_headers=["X-Future-Voice-Style"],
     )
 
     @application.exception_handler(PyMongoError)

@@ -4,7 +4,7 @@ An intent-based AI financial companion for Thai investors, focused on goals, inv
 
 ## Current status
 
-The local demo includes Portfolio (line and allocation views), Investing Behavior Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. FastMCP server tools, authentication, and deployment remain future work.
+The local demo includes Portfolio, Investing Behavior Score, Stock Detail, paper orders, and a research agent. Portfolio and quotes come from a synthetic MongoDB fixture. The Goals dashboard offers a local editor and Future World. Future Talk loads a MongoDB profile, goals, and portfolio snapshot, creates an older portrait from an optional selfie, and opens a conversation through OpenAI Realtime.
 
 ## Run locally
 

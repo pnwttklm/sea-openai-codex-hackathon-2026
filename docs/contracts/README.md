@@ -1,6 +1,6 @@
 # Shared contracts
 
-The API implements [process liveness](health.md) and the read-only [demo data contract](demo.md). There are no finalized contracts for personal data or MCP tools.
+The API implements [process liveness](health.md), the [Portfolio and Agent demo](demo.md), and [Future Talk](future-you.md).
 
 Before two work areas depend on each other, add a short contract document here and have the affected owners review it in the task or PR. Backend coordinates the canonical Pydantic schemas and eventual generated OpenAPI output; Frontend must not maintain a competing schema definition.
 
