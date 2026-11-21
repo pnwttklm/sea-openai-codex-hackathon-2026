@@ -1,6 +1,6 @@
 # Shared contracts
 
-The starter implements only the [health contract](health.md). No product API endpoints, database schemas, repository interfaces, or MCP tools have been finalized yet.
+The API implements [process liveness](health.md) and the read-only [demo data contract](demo.md). There are no finalized contracts for personal data or MCP tools.
 
 Before two work areas depend on each other, add a short contract document here and have the affected owners review it in the task or PR. Backend coordinates the canonical Pydantic schemas and eventual generated OpenAPI output; Frontend must not maintain a competing schema definition.
 

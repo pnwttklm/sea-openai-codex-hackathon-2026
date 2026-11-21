@@ -29,6 +29,9 @@ services:
       CORS_ORIGINS: http://localhost:${WEB_PORT:-3000}
       MONGODB_URI: mongodb://mongo:27017
       MONGODB_DATABASE: prik_thai_dev
+      WEBULL_MCP_ACCESS_TOKEN: ${WEBULL_MCP_ACCESS_TOKEN:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_REFLECTION_MODEL: ${OPENAI_REFLECTION_MODEL:-}
     volumes:
       - ./apps/api/app:/app/app
       - ./apps/api/tests:/app/tests

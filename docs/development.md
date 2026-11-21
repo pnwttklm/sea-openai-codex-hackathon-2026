@@ -13,7 +13,7 @@ docker compose up --build
 | API liveness | http://localhost:8000/api/v1/health |
 | MongoDB | `mongodb://mongo:27017` inside Compose only |
 
-No env file is required for this starter. Frontend and backend ports bind to localhost. MongoDB has no host port and no authentication in this local-only setup. Its data persists in the Compose-managed `mongo_data` volume. The backend receives the database URI, but the application does not connect to it yet. OpenAI and FastMCP are not configured.
+No env file is required for this starter. Frontend and backend ports bind to localhost. MongoDB has no host port and no authentication in this local-only setup. Its data persists in the Compose-managed `mongo_data` volume. The backend uses that URI for the read-only demo API and automatically inserts its versioned synthetic snapshot on the first demo request. OpenAI and FastMCP are not configured.
 
 For parallel work on one machine, see [Working in parallel](team/parallel-work.md). Use a distinct `-p` project name and `WEB_PORT`/`API_PORT` values for each checkout; Compose derives separate networks and database volumes per project.
 

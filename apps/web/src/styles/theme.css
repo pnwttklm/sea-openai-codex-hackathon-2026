@@ -1,6 +1,6 @@
 /* Confirmed user preference. Remaining visual tokens await Figma inspection. */
 :root {
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 body {

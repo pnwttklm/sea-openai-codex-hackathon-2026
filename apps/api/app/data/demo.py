@@ -1,0 +1,55 @@
+from pymongo import AsyncMongoClient
+from pymongo.errors import DuplicateKeyError
+
+from app.data.demo_seed import seed_document
+
+FIXTURE_ID = "prik-thai-demo-v1"
+
+
+class DemoRepository:
+    def __init__(self, client: AsyncMongoClient, database: str) -> None:
+        self.collection = client[database]["demo_snapshots"]
+        self.paper = client[database]["paper_accounts"]
+
+    async def get(self) -> dict:
+        query = {"_id": FIXTURE_ID}
+        document = await self.collection.find_one(query)
+        if document is None:
+            fixture = seed_document()
+            try:
+                await self.collection.update_one(query, {"$setOnInsert": fixture}, upsert=True)
+            except DuplicateKeyError:
+                # A concurrent request inserted this version first.
+                pass
+            document = await self.collection.find_one(query)
+        if document is None:
+            raise RuntimeError("Demo snapshot was unavailable after initialization")
+        return document
+
+    async def get_paper_account(self) -> dict:
+        query = {"_id": "nobita-paper-v1"}
+        document = await self.paper.find_one(query)
+        if document is None:
+            snapshot = await self.get()
+            positions = dict.fromkeys(snapshot["stocks"], 10)
+            try:
+                await self.paper.update_one(
+                    query,
+                    {"$setOnInsert": {"revision": 0, "cash_cents": 1_000_000, "positions": positions, "fills": {}}},
+                    upsert=True,
+                )
+            except DuplicateKeyError:
+                pass
+            document = await self.paper.find_one(query)
+        if document is None:
+            raise RuntimeError("Paper account was unavailable after initialization")
+        return document
+
+    async def save_paper_fill(
+        self, revision: int, order_id: str, account: dict, fill: dict,
+    ) -> bool:
+        result = await self.paper.update_one(
+            {"_id": "nobita-paper-v1", "revision": revision},
+            {"$set": {**account, f"fills.{order_id}": fill}},
+        )
+        return result.modified_count == 1

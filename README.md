@@ -4,7 +4,7 @@ An intent-based AI financial companion for Thai investors, focused on goals, inv
 
 ## Current status
 
-Local development scaffolds are available: Next.js routes and a FastAPI health endpoint. Product screens are placeholders; MongoDB, OpenAI, FastMCP, authentication, and deployment are not connected.
+The local demo includes Portfolio (line and allocation views), Investing Behavior Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. FastMCP server tools, authentication, and deployment remain future work.
 
 ## Run locally
 

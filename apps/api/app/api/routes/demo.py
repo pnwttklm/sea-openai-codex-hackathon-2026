@@ -1,0 +1,110 @@
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
+from pydantic import UUID4
+
+from app.ai.research import research_chat
+from app.schemas.demo import AgentChat, AgentQuestion, AgentReply, AgentTurn, Behavior, PaperAccount, PaperFill, PaperOrder, Portfolio, SellReflection, Stock
+from app.services.demo import DemoService
+from app.services.paper import PaperConflict, PaperService
+from app.services.research import ResearchService
+
+router = APIRouter(prefix="/demo", tags=["demo"])
+
+
+def demo_service(request: Request) -> DemoService:
+    service = request.app.state.demo
+    if service is None:
+        raise HTTPException(status_code=503, detail="Demo database is not configured")
+    return service
+
+
+Demo = Annotated[DemoService, Depends(demo_service)]
+
+
+@router.get("/portfolio")
+async def portfolio(service: Demo) -> Portfolio:
+    return await service.portfolio()
+
+
+@router.get("/behavior")
+async def behavior(service: Demo) -> Behavior:
+    return await service.behavior()
+
+
+@router.get("/stocks/{symbol}")
+async def stock(symbol: Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")], service: Demo) -> Stock:
+    result = await service.stock(symbol)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Symbol is not in the demo")
+    return result
+
+
+@router.get("/stocks/{symbol}/sell-reflection")
+async def sell_reflection(
+    symbol: Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")], service: Demo,
+) -> SellReflection:
+    result = await service.sell_reflection(symbol)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Symbol is not in the demo")
+    return result
+
+
+def paper_service(request: Request) -> PaperService:
+    service = request.app.state.paper
+    if service is None:
+        raise HTTPException(status_code=503, detail="Paper accounts are not configured")
+    return service
+
+
+Paper = Annotated[PaperService, Depends(paper_service)]
+
+
+@router.get("/paper-account")
+async def paper_account(service: Paper) -> PaperAccount:
+    return await service.account()
+
+
+@router.post("/paper-orders")
+async def paper_order(order: PaperOrder, service: Paper) -> PaperFill:
+    try:
+        result = await service.fill(order)
+    except PaperConflict as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if result is None:
+        raise HTTPException(status_code=404, detail="Symbol is not in the demo")
+    return result
+
+
+@router.post("/agent/chat")
+async def agent_chat(chat: AgentChat) -> AgentReply:
+    reply = await research_chat(chat)
+    if reply is None:
+        raise HTTPException(status_code=503, detail="Research is unavailable right now. Try again once the agent is configured and online.")
+    return reply
+
+
+def research_service(request: Request) -> ResearchService:
+    service = request.app.state.research
+    if service is None:
+        raise HTTPException(status_code=503, detail="Chat storage is not configured")
+    return service
+
+
+Research = Annotated[ResearchService, Depends(research_service)]
+StockSymbol = Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")]
+
+
+@router.get("/agent/chat/{conversation_id}/{symbol}")
+async def agent_history(conversation_id: UUID4, symbol: StockSymbol, service: Research) -> list[AgentTurn]:
+    return await service.history(conversation_id, symbol)
+
+
+@router.post("/agent/chat/{conversation_id}/{symbol}")
+async def agent_turn(
+    conversation_id: UUID4, symbol: StockSymbol, body: AgentQuestion, service: Research,
+) -> AgentTurn:
+    turn = await service.ask(conversation_id, symbol, body.question)
+    if turn is None:
+        raise HTTPException(status_code=503, detail="Research is unavailable right now. Try again once the agent is configured and online.")
+    return turn
