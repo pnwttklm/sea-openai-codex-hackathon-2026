@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 // The three equal atlas cells contain the original front, back, and left profile drawings.
-export function createPlayer(image: HTMLImageElement) {
+export function createDogCompanion(image: HTMLImageElement) {
   const group = new THREE.Group();
   const texture = new THREE.Texture(image);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -21,8 +21,11 @@ export function createPlayer(image: HTMLImageElement) {
   group.add(shadow);
   drawing.renderOrder = 1;
 
-  function pose(heading: number, cameraAngle: number, step: number) {
-    const angle = heading - cameraAngle;
+  group.position.set(1.65, 0.10, 4.85);
+  group.scale.setScalar(0.81);
+  function pose(action: "idle" | "walk" | "look" | "write", elapsed: number) {
+    const step = action === "walk" ? elapsed * 8 : 0;
+    const angle = group.rotation.y - Math.atan2(6, 15);
     const right = Math.sin(angle), forward = Math.cos(angle);
     const profile = Math.abs(right) > Math.abs(forward);
     const cell = profile ? 2 : forward < 0 ? 1 : 0;
@@ -30,9 +33,10 @@ export function createPlayer(image: HTMLImageElement) {
     texture.repeat.x = (mirror ? -1 : 1) / 3;
     texture.offset.x = (cell + Number(mirror)) / 3;
     drawing.position.y = 0.025 + Math.abs(Math.sin(step)) * 0.065;
-    material.rotation = Math.sin(step) * 0.034;
+    material.rotation = action === "look" ? 0.11 : Math.sin(step) * 0.034;
   }
 
+  pose("idle", 0);
   return {
     group, pose,
     dispose() {

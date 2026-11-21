@@ -26,6 +26,8 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | WEB-17 | Apply the supplied character turnaround and Prik Thai AI design guidelines to the Future World scene and controls in `apps/web` | Codex | Review | `poon-future-you` | WEB-16 |
 | WEB-18 | Animate Doraemon wandering, inspecting goals, and stopping to talk in Future World | Codex | Review | `poon-future-you` | WEB-17 |
 | DOC-02 | [Future World conversation, chart, and 3D goal integration handoff](future-world-integration.md) | Codex | Review | `poon-future-you` | WEB-18 |
+| WEB-19 | Make Nobita playable and move the Shopee dog into a separate town companion role | Codex | Review | `poon-future-you` | WEB-18 |
+| DOC-03 | Update the [backend handoff](future-world-integration.md) for Nobita and both town companions | Codex | Review | `poon-future-you` | WEB-19, DOC-02 |
 | API-01 | Scaffold FastAPI, configuration, health route, and Python package | Codex | Review | Current workspace | Starter implemented; review before feature work |
 | DATA-01 | Implement MongoDB client lifecycle and agreed repository interfaces | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
 | AI-01 | Implement configurable OpenAI service and FastMCP entry point | Unassigned | Ready | TBD | API-01; CONTRACT-01 |

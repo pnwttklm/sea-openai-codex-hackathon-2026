@@ -2,7 +2,7 @@ import * as THREE from "three";
 import type { Landmark } from "./landmarks";
 import { createWorldArt } from "./world-art";
 
-import { createPlayer } from "./player";
+import { createDogCompanion } from "./dog-companion";
 import { createGuideRoutine } from "./guide-routine";
 import { townPath } from "./town-path";
 
@@ -11,7 +11,7 @@ export type WorldScene = ReturnType<typeof mountWorld>;
 type Options = {
   canvas: HTMLCanvasElement;
   houseId?: string;
-  playerImage: HTMLImageElement;
+  dogImage: HTMLImageElement;
   landmarks: Landmark[];
   onNearby: (id: string | null) => void;
   onInspect: (id: string) => void;
@@ -19,7 +19,7 @@ type Options = {
   onAvailability: (available: boolean) => void;
 };
 
-export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, onInspect, onInterior, onAvailability }: Options) {
+export function mountWorld({ canvas, houseId, dogImage, landmarks, onNearby, onInspect, onInterior, onAvailability }: Options) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.shadowMap.enabled = true;
@@ -40,7 +40,7 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
 
   const art = createWorldArt();
   const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 65);
-  const player = createPlayer(playerImage);
+  const player = art.nobita();
   const avatar = player.group;
   let heading = 0;
   avatar.scale.setScalar(1.12);
@@ -56,7 +56,11 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
   scene.add(outside);
   const guideArt = art.townGuide();
   const guide = guideArt.group;
-  const routine = createGuideRoutine(guideArt, avatar.position, canWalkTown);
+  const dog = createDogCompanion(dogImage);
+  dog.group.name = "shopee-dog";
+  const companions = [guide, dog.group];
+  const routine = createGuideRoutine(guideArt, avatar.position, canWalkTown, dog.group.position, true);
+  const dogRoutine = createGuideRoutine(dog, avatar.position, canWalkTown, guide.position, false);
   guide.name = "town-guide";
   let path: [number, number][] = [];
   let north = -6.3;
@@ -79,7 +83,7 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
       if (Math.abs(x) > 4 || z < -3.5 || z > 4.1) return false;
       return !room.obstacles.some(({ min, max }) => x > min.x - 0.20 && x < max.x + 0.20 && z > min.z - 0.20 && z < max.z + 0.20);
     }
-    return canWalkTown(x, z) && Math.hypot(x - guide.position.x, z - guide.position.z) >= 0.58;
+    return canWalkTown(x, z) && companions.every(({ position }) => Math.hypot(x - position.x, z - position.z) >= 0.58);
   }
 
   function canWalkTown(x: number, z: number) {
@@ -100,7 +104,10 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
         const gap = Math.hypot(x - plot.x, z - plot.z);
         if (gap < distance) { id = plot.plan.id; distance = gap; }
       }
-      if (Math.hypot(x - guide.position.x, z - guide.position.z) < Math.min(distance, 2.0)) id = guide.name;
+      for (const companion of companions) {
+        const gap = Math.hypot(x - companion.position.x, z - companion.position.z);
+        if (gap < Math.min(distance, 2)) { id = companion.name; distance = gap; }
+      }
     }
     if (id !== nearby) {
       if (nearby && highlights.has(nearby)) highlights.get(nearby)!.visible = false;
@@ -157,7 +164,7 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
     plots.clear();
     path = [];
     highlights.clear();
-    plots.add(guide);
+    plots.add(...companions);
     if (lawn) outside.remove(lawn);
     north = -6.3 - Math.ceil(Math.max(0, next.length - 6) / 3) * 5.45;
     lawn = art.townGround(north);
@@ -171,6 +178,7 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
       plots.add(group);
     }
     routine.reset();
+    dogRoutine.reset();
     placeInterior();
     if (!canWalk(avatar.position.x, avatar.position.z)) avatar.position.set(0, 0.10, home ? 1.55 : 4.82);
     dirty = true;
@@ -227,12 +235,13 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
       updateNearby();
       dirty = true;
     } else if (phase) { phase = 0; dirty = true; }
-    if (!home && routine.tick(dt, landmarks, reduced.matches)) {
-      updateNearby();
-      dirty = true;
+    if (!home) {
+      const guideMoved = routine.tick(dt, landmarks, reduced.matches);
+      const dogMoved = dogRoutine.tick(dt, landmarks, reduced.matches);
+      if (guideMoved || dogMoved) { updateNearby(); dirty = true; }
     }
     if (!dirty) return;
-    player.pose(heading, home ? 0 : Math.atan2(6, 15), phase);
+    player.pose(heading, phase);
     focus.set(avatar.position.x, 0.14, avatar.position.z - 1.48);
     if (!home) {
       focus.x *= canvas.clientWidth > canvas.clientHeight ? 0.38 : 0.87;
@@ -284,11 +293,11 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
   onAvailability(true);
   return {
     setLandmarks, inspect, stop, enterHouse, exitHouse,
-    startConversation() {
+    startConversation(id: string) {
       dirty = true;
-      return routine.startConversation();
+      return (id === dog.group.name ? dogRoutine : routine).startConversation();
     },
-    endConversation() { routine.endConversation(); dirty = true; },
+    endConversation() { routine.endConversation(); dogRoutine.endConversation(); dirty = true; },
     setNight(night: boolean) {
       scene.background = new THREE.Color(night ? "#27234f" : "#b8d2eb");
       sky.color.set(night ? "#b0bbff" : "#fff7ea");
@@ -307,7 +316,7 @@ export function mountWorld({ canvas, houseId, playerImage, landmarks, onNearby, 
       canvas.removeEventListener("webglcontextrestored", restore);
       renderer.setAnimationLoop(null);
       sun.shadow.dispose();
-      player.dispose();
+      dog.dispose();
       art.dispose();
       renderer.dispose();
     },

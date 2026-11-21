@@ -2,6 +2,19 @@
 
 These are proposed integration points for the teammate building the backend, MongoDB, and AI services. The current frontend uses local demo goals, scripted Doraemon replies, and predefined Three.js landmarks. Backend and Frontend should agree on payloads and failure states in the [shared contracts](../contracts/README.md) before wiring them together.
 
+## Who the player is talking to
+
+Nobita is the playable avatar in town and inside houses. The authenticated account owns the goals and conversations. All players appear as Nobita, so use the account identity from the session for MongoDB reads and writes.
+
+| Character | Current interaction | Backend integration |
+| --- | --- | --- |
+| Doraemon (`town-guide`) | **Talk to Doraemon** opens his sheet. When he is inspecting a landmark or writing in his notebook, the scene returns that goal’s ID. | Connect this interaction to the proposed LLM conversation and chart flow below. Treat the goal ID as optional and verify ownership before loading its data. |
+| Shopee dog (`shopee-dog`) | **Say hi to Shopee dog** and **Pet the dog** give local responses. The dog pauses during the interaction and resumes wandering afterward. | Keep greeting and petting client-side. They require zero model calls or conversation writes. |
+
+The two companions share the same sheet component. Wire the model request inside the Doraemon branch of `discover`, where both the companion and optional goal are known. A sheet opening on its own is ambiguous. The current identifiers are scene object names; agree on any API fields in the shared contract. [Frontend interaction handler](../../apps/web/src/features/future-world/future-world.tsx) · [Scene interaction dispatch](../../apps/web/src/features/future-world/world-scene.ts)
+
+To check the integration, open a Doraemon conversation at a goal, close it, then greet and pet the dog. Doraemon’s conversation history should still contain only his exchange. Start another conversation while Doraemon is wandering and verify that the previous landmark is not silently attached to the new exchange.
+
 ## 1. Let Doraemon answer and ask back
 
 When the player taps **Talk to Doraemon**, open a conversation where they can type a question or choose a suggested reply. If Doraemon was looking at a landmark, the scene already supplies its goal ID. Use that context for the opening exchange. When he is wandering, let him ask which goal the player wants to discuss.

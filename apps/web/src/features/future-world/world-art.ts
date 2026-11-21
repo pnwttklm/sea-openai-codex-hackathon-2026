@@ -110,6 +110,60 @@ export function createWorldArt() {
     return group;
   }
 
+  function nobita() {
+    const group = new THREE.Group();
+    const body = new THREE.Group();
+    group.add(body);
+    const skin = "#ffc48b", hair = "#332525", yellow = "#ffbc25", shorts = "#20508b";
+    const shirt = box(body, yellow, 0, 0.83, 0, 0.43, 0.42, 0.34);
+    shirt.rotation.x = -0.03;
+    box(body, shorts, 0, 0.60, 0, 0.43, 0.16, 0.33);
+    const legs: Group[] = [], arms: Group[] = [];
+    for (const side of [-1, 1]) {
+      const leg = new THREE.Group();
+      leg.position.set(side * 0.114, 0.6, 0);
+      body.add(leg);
+      cylinder(leg, skin, 0, -0.28, 0, 0.071, 0.31);
+      box(leg, shorts, 0, -0.08, 0, 0.21, 0.20, 0.32, 0.03);
+      cylinder(leg, cream, 0, -0.43, 0, 0.076, 0.15);
+      sphere(leg, "#72b4d2", 0, -0.51, 0.045, 0.105, 0.078, 0.16);
+      legs.push(leg);
+      const arm = new THREE.Group();
+      arm.position.set(side * 0.235, 0.97, 0);
+      body.add(arm);
+      sphere(arm, yellow, side * 0.017, -0.12, 0, 0.081, 0.19, 0.085);
+      sphere(arm, skin, side * 0.02, -0.32, 0.008, 0.068, 0.085, 0.069);
+      arms.push(arm);
+      box(body, cream, side * 0.071, 1.006, 0.14, 0.12, 0.072, 0.064, 0.012).rotation.z = side * 0.43;
+    }
+    const head = new THREE.Group();
+    head.position.y = 1.29;
+    head.rotation.x = -0.16;
+    body.add(head);
+    sphere(head, skin, 0, 0, 0, 0.32, 0.34, 0.285);
+    const cap = mesh(head, "nobita-hair", () => new THREE.SphereGeometry(1, 24, 12, 0, 2 * Math.PI, 0, 1.23), hair, 0, 0.012, 0);
+    cap.scale.set(0.328, 0.35, 0.294);
+    sphere(head, hair, 0, 0.07, -0.10, 0.312, 0.25, 0.213);
+    for (const side of [-1, 1]) {
+      sphere(head, skin, side * 0.312, -0.01, 0, 0.055, 0.083, 0.049);
+      box(head, hair, side * 0.26, 0.041, 0.11, 0.025, 0.025, 0.235, 0.008).rotation.y = side * 0.41;
+      sphere(head, "#fffaf0", side * 0.126, 0.045, 0.247, 0.12, 0.124, 0.041);
+      ring(head, hair, side * 0.126, 0.045, 0.27, 0.12, 0.014);
+      sphere(head, hair, side * 0.104, 0.033, 0.29, 0.024, 0.033, 0.014);
+    }
+    sphere(head, skin, 0, -0.061, 0.28, 0.046, 0.046, 0.045);
+    const smile = mesh(head, "nobita-smile", () => new THREE.TorusGeometry(0.083, 0.009, 6, 16, Math.PI * 0.72), hair, 0, -0.072, 0.254);
+    smile.rotation.z = Math.PI * 1.14;
+    function pose(heading: number, phase: number) {
+      group.rotation.y = heading;
+      const stride = Math.sin(phase);
+      body.position.y = Math.abs(stride) * 0.027;
+      legs[0].rotation.x = arms[1].rotation.x = stride * 0.48;
+      legs[1].rotation.x = arms[0].rotation.x = -stride * 0.48;
+    }
+    return { group, pose };
+  }
+
   function townGuide() {
     const g = new THREE.Group();
     const body = new THREE.Group();
@@ -385,5 +439,5 @@ export function createWorldArt() {
     materials.clear();
   }
 
-  return { townGround, townGuide, room, landmark, dispose };
+  return { townGround, townGuide, nobita, room, landmark, dispose };
 }

@@ -6,8 +6,10 @@ import type { createWorldArt } from "./world-art";
 type Guide = ReturnType<ReturnType<typeof createWorldArt>["townGuide"]>;
 type Point = [number, number];
 
-export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: number, z: number) => boolean) {
+export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: number, z: number) => boolean, other: Vector3, takesNotes: boolean) {
   const { position, rotation } = guide.group;
+  const spawn = position.clone();
+  const clearOfCompanion = (x: number, z: number) => Math.hypot(x - other.x, z - other.z) >= 0.75;
   let route: Point[] = [];
   let activity: "idle" | "walk" | "look" | "write" = "idle";
   let elapsed = 0;
@@ -28,7 +30,7 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
   function reset() {
     route = [];
     goalId = undefined;
-    if (!walkable(position.x, position.z)) position.set(-1.55, 0.07, 4.9);
+    if (!walkable(position.x, position.z)) position.copy(spawn);
     begin("idle", 2.5);
   }
 
@@ -50,7 +52,7 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
       const side = Math.random() < 0.5 ? -1 : 1;
       destinations = [[player.x + side * 1.35, player.z + 0.45], [side * 2.32, 0], [-side * 2.32, 4.82]];
     }
-    const clear = (x: number, z: number) => walkable(x, z) && Math.hypot(x - player.x, z - player.z) > 0.75;
+    const clear = (x: number, z: number) => walkable(x, z) && clearOfCompanion(x, z) && Math.hypot(x - player.x, z - player.z) > 0.75;
     for (const [x, z] of destinations) {
       if (!clear(x, z)) continue;
       route = townPath(position.x, position.z, x, z, clear);
@@ -82,7 +84,7 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
       const gap = Math.hypot(dx, dz);
       const fraction = gap ? Math.min(1, dt * 1.35 / gap) : 1;
       const nx = position.x + dx * fraction, nz = position.z + dz * fraction;
-      if (!walkable(nx, nz) || Math.hypot(nx - player.x, nz - player.z) < 0.68) {
+      if (!walkable(nx, nz) || !clearOfCompanion(nx, nz) || Math.hypot(nx - player.x, nz - player.z) < 0.68) {
         reset();
         return true;
       }
@@ -104,8 +106,8 @@ export function createGuideRoutine(guide: Guide, player: Vector3, walkable: (x: 
       return true;
     }
     if (elapsed >= duration) {
-      if (activity === "look") begin("write", 4.8);
-      else if (activity === "write") { goalId = undefined; begin("idle", 1.2); }
+      if (activity === "look" && takesNotes) begin("write", 4.8);
+      else if (activity === "write" || activity === "look") { goalId = undefined; begin("idle", 1.2); }
       else chooseRoute(plots);
       return true;
     }

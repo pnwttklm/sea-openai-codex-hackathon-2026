@@ -83,17 +83,23 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const latestLandmarks = useRef(landmarks);
   const activeTrigger = useRef<HTMLElement | null>(null);
   const selected = landmarks.find(plot => plot.plan.id === selectedId);
-  const guideOpen = selectedId === "town-guide";
+  const dogOpen = selectedId === "shopee-dog";
+  const companionName = dogOpen ? "Shopee dog" : "Doraemon";
+  const guideOpen = dogOpen || selectedId === "town-guide";
   const panelOpen = Boolean(selected || guideOpen);
   const nearby = landmarks.find(plot => plot.plan.id === nearbyId);
   const enterNearby = town && nearby?.kind === "house";
   const nearbyLabel = nearbyId === "house-exit" ? "Exit to town"
     : enterNearby ? "Enter house"
+    : nearbyId === "shopee-dog" ? "Say hi to Shopee dog"
     : nearbyId === "town-guide" ? "Talk to Doraemon"
     : town && nearby ? "Explore " + nearby.plan.title : null;
   const discover = useCallback((id: string, trigger?: HTMLElement) => {
-    if (id === "town-guide") {
-      const subject = scene.current?.startConversation();
+    if (id === "shopee-dog") {
+      scene.current?.startConversation(id);
+      setGuideReply("Woof! The little dog perks up and wags his tail at Nobita.");
+    } else if (id === "town-guide") {
+      const subject = scene.current?.startConversation(id);
       const plan = latestLandmarks.current.find(plot => plot.plan.id === subject)?.plan;
       setGuideReply(plan
         ? `I was making a note about “${plan.title}”. You've saved THB ${money.format(plan.saved)} toward it so far.`
@@ -114,12 +120,12 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
     if (!loaded || !canvas.current) return;
     const element = canvas.current;
     let cancelled = false;
-    const playerImage = new Image();
-    playerImage.src = "/future-world/player-turnaround.webp";
-    Promise.all([import("./world-scene"), playerImage.decode()]).then(([{ mountWorld }]) => {
+    const dogImage = new Image();
+    dogImage.src = "/future-world/player-turnaround.webp";
+    Promise.all([import("./world-scene"), dogImage.decode()]).then(([{ mountWorld }]) => {
       if (cancelled) return;
       scene.current = mountWorld({
-        canvas: element, houseId, playerImage,
+        canvas: element, houseId, dogImage,
         landmarks: latestLandmarks.current,
         onNearby: setNearbyId,
         onInspect: discover,
@@ -222,7 +228,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
       )}
       {availability === "ready" && !panelOpen && (
         <div ref={pad} className={styles.stick} tabIndex={0} role="group"
-          aria-label="Movement joystick. Drag to walk, or use the arrow keys. Press E to inspect a nearby goal."
+          aria-label="Move Nobita with the joystick or arrow keys. Press E to interact."
           onPointerDown={event => {
             if (event.button !== 0 || pointer.current !== null) return;
             pointer.current = event.pointerId;
@@ -242,13 +248,14 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
           {landmarks.map(({ plan }) => <button key={plan.id} onClick={event => discover(plan.id, event.currentTarget)}>{plan.title}</button>)}
         </section>
       )}
-      {guideOpen && <WorldSheet label="Doraemon" onClose={closeDetails}>
-        <div className={styles.guideHeading}><h2>Doraemon</h2>
+      {guideOpen && <WorldSheet label={companionName} onClose={closeDetails}>
+        <div className={styles.guideHeading}><h2>{companionName}</h2>
           <button className={styles.iconButton} onClick={closeDetails} aria-label="Close conversation"><FontAwesomeIcon icon={faXmark} /></button>
         </div>
         <p aria-live="polite">{guideReply}</p>
         <div className={styles.answers}>
-          <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>
+          {dogOpen ? <button onClick={() => setGuideReply("The little dog leans into your hand. Woof!")}>Pet the dog</button> :
+          <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>}
           <button onClick={closeDetails}>Back to exploring</button>
         </div>
       </WorldSheet>}
