@@ -1131,7 +1131,9 @@ export interface operations {
     };
     behavior_api_v1_demo_behavior_get: {
         parameters: {
-            query?: never;
+            query?: {
+                include_assessment?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1145,6 +1147,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Behavior"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

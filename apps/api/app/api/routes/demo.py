@@ -31,8 +31,13 @@ async def portfolio(service: Demo) -> Portfolio:
 
 
 @router.get("/behavior")
-async def behavior(service: Demo) -> Behavior:
-    return await service.behavior()
+async def behavior(service: Demo, request: Request, include_assessment: bool = False) -> Behavior:
+    report = await service.behavior()
+    if include_assessment and request.app.state.future_you_is_demo:
+        cached = getattr(request.app.state, "behavior_preview", None)
+        if cached and cached[0] == report:
+            return cached[1]
+    return report
 
 
 @router.post("/behavior/assessment")
@@ -43,7 +48,13 @@ async def behavior_assessment(service: Demo, request: Request) -> Behavior:
     if not state.companion_model.client or state.agent_traces is None:
         raise HTTPException(503, "AI assessment is unavailable in this session.")
     try:
-        return await assess_behavior(service, state.companion_model, Trace(state.agent_traces))
+        review = await assess_behavior(service, state.companion_model, Trace(state.agent_traces))
+        evidence = review.model_copy(deep=True)
+        evidence.ai_assessment = None
+        for factor in evidence.factors:
+            factor.ai_assessment = None
+        state.behavior_preview = (evidence, review)
+        return review
     except AssessmentUnavailable:
         raise HTTPException(503, "Doraemon could not complete the assessment. Try again.") from None
 

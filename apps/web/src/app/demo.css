@@ -354,7 +354,8 @@ body:has(.order-sheet[open]) { overflow: hidden; }
 .open-order-list { display: grid; gap: 8px; margin-top: 8px; font-size: 13px; }
 .open-order-list button { min-height: 44px; border: 1px solid var(--edge); font-size: 12px; }
 .open-order-list button:disabled { opacity: .55; cursor: default; }
-.order-account-context { border-bottom: 1px solid var(--edge); padding-bottom: 10px; font-size: 13px; }
+.order-account-context { padding: 12px 14px; background: #211f2c; border: 1px solid #383442; border-radius: 14px; font-size: 14px; }
+.order-account-context dd { font-size: 16px; }
 .order-fx { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .demo-shell .order-fx .source-label { margin: 0; }
 .order-fx button { flex: none; min-height: 44px; padding: 0 8px; font-size: 12px; }

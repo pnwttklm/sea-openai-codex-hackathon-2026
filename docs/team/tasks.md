@@ -45,6 +45,9 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | PORT-DEMO | Seed the shared paper portfolio from the seven-holding THB 500,000 example | Codex | Review | codex/agent-foundation | Shared portfolio, paper account and Mongo seed |
 | VOICE-LOCAL | Enable Future You voice in the running demo | Codex | Review | codex/agent-foundation | Local API configuration |
 | SCORE-01 | Open the reference behavior score from Portfolio and preserve the monthly health report | Codex | Review | codex/agent-foundation | Portfolio, behavior, shared health rubric and server-side AI assessment |
+| TUNNEL-01 | Read the demo portfolio and score through the frontend port | Codex | Review | codex/agent-foundation | Shared demo preview |
+| SCORE-ART | Show the Doraemon portrait on the assessment control | Codex | Review | codex/agent-foundation | Behavior screen |
+| ORDER-BAL | Lead stock order tickets with the current paper balance | Codex | Review | codex/agent-foundation | Stock order sheet |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

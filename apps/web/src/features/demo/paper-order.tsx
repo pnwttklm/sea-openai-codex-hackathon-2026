@@ -357,10 +357,9 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
               </dl>
             ) : (
               <>
-                <p className="source-label">Paper order · Demo quote USD {usd.format(stock.price_cents / 100)}</p>
                 <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="paper account">
                   {(account) => <dl className="order-details order-account-context">
-                    <div><dt>{side === "buy" ? "Cash balance" : "Shares held"}</dt><dd>{side === "buy"
+                    <div><dt>{side === "buy" ? "Paper cash balance" : "Paper share balance"}</dt><dd>{side === "buy"
                       ? account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"
                       : `${account.positions[stock.symbol]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? 0} ${stock.symbol}`}</dd></div>
                   </dl>}
@@ -384,6 +383,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
                     <input inputMode="decimal" required value={limitInput} onChange={(event) => setLimitInput(event.target.value)} />
                   </label>}
                 </div>
+                <p className="source-label">Demo price per share · USD {usd.format(stock.price_cents / 100)}</p>
                 <p>{orderType === "market" ? "Estimated total" : "Value at limit"} · <strong>{valid && fx ? thbCash.format(toSatang(estimatedPrice * shares, fx.rate_micros) / 100) : "—"}</strong></p>
               </>
             )}

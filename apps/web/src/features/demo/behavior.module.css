@@ -41,3 +41,13 @@
 .detail a { text-decoration: underline; }
 .detail label, .detail input { display: block; width: 100%; }
 .detail input { min-height: 44px; padding: 8px; margin-top: 4px; color: inherit; background: #14131b; border: 1px solid #625d70; border-radius: 9px; }
+
+.overview .assess {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 18px 3px 6px;
+  border: 1px solid #8a71ba;
+}
+.overview .assess:disabled { opacity: .72; }
+.overview .assess + small { display: block; margin-top: 6px; }

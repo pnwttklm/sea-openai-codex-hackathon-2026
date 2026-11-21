@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { apiPost } from "@/lib/api/client";
+import { apiPost, isRemoteDemoPreview } from "@/lib/api/client";
 import { DemoData, type BehaviorData } from "./data";
 import { Gauge, Ring, factorColor } from "./charts";
+import { Mascot } from "../companion/mascots";
 import { BackLink } from "./shell";
 import styles from "./behavior.module.css";
 
@@ -33,11 +34,15 @@ function BehaviorRadar({ factors }: { factors: BehaviorData["factors"] }) {
 }
 
 function HealthReport({ initial }: { initial: BehaviorData }) {
+  const preview = isRemoteDemoPreview();
+  const [showPreview, setShowPreview] = useState(false);
   const [report, setReport] = useState(initial);
   const [target, setTarget] = useState(String(initial.monthly_target_thb));
   const [busy, setBusy] = useState<"assessment" | "target" | null>(null);
   const [notice, setNotice] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  const showReview = !preview || showPreview;
 
   async function assess() {
     setBusy("assessment");
@@ -74,10 +79,15 @@ function HealthReport({ initial }: { initial: BehaviorData }) {
       <div className="card-heading"><h2>Investing Behavior Score</h2><span>Demo plan</span></div>
       <div className="score-summary"><div><strong className="assessment">{report.label}</strong><small>{report.score} / 100 points</small></div><Ring score={report.score} /></div>
       <BehaviorRadar factors={report.factors} />
-      <p className={styles.explanation}>{report.ai_assessment || report.explanation}</p>
-      <button type="button" className={styles.assess} disabled={busy !== null} onClick={assess}>
-        {busy === "assessment" ? "Doraemon is assessing…" : report.ai_assessment ? "Refresh AI assessment" : "Assess with Doraemon"}
+      <p className={styles.explanation}>{(showReview && report.ai_assessment) || report.explanation}</p>
+      <button type="button" className={styles.assess} disabled={busy !== null || (preview && !report.ai_assessment)}
+        onClick={preview ? () => setShowPreview(value => !value) : assess}
+        aria-expanded={preview && report.ai_assessment ? showPreview : undefined}>
+        <Mascot agent="companion" size={44} />
+        <span>{preview ? (showPreview ? "Hide AI assessment" : "View AI assessment") :
+          busy === "assessment" ? "Doraemon is assessing…" : report.ai_assessment ? "Refresh AI assessment" : "Assess with Doraemon"}</span>
       </button>
+      {preview && !report.ai_assessment && <small>Awaiting a local AI assessment for this portfolio.</small>}
     </section>
     <p role="status" className={styles.notice}>{notice}</p>
     <section className={styles.grid} aria-label="Four behavior dimensions">
@@ -90,9 +100,9 @@ function HealthReport({ initial }: { initial: BehaviorData }) {
         </button>
         <div id={`metric-${index}`} className={styles.detail} hidden={expanded !== factor.name}>
           <strong>{factor.question}</strong><p>{factor.measurement}</p>
-          {factor.ai_assessment && <p><b>Doraemon’s assessment</b><br />{factor.ai_assessment}</p>}
+          {showReview && factor.ai_assessment && <p><b>Doraemon’s assessment</b><br />{factor.ai_assessment}</p>}
           {factor.name === "Goal & Risk Fit" && <Link href="/goals">View life goals →</Link>}
-          {factor.name === "Contribution" && <form onSubmit={save}>
+          {factor.name === "Contribution" && !preview && <form onSubmit={save}>
             <label>Monthly target (THB)<input type="number" min="1" max="100000000" step="1" required value={target} disabled={busy !== null} onChange={e => setTarget(e.target.value)} /></label>
             <button type="submit" disabled={busy !== null || Number(target) === report.monthly_target_thb}>{busy === "target" ? "Saving…" : "Save target"}</button>
           </form>}
