@@ -23,3 +23,5 @@ The demo starts at `/` with both Portfolio chart views. The score card opens `/b
 Stock pages support confirmed paper buys and sells at synthetic prices. Open NVDA and select Sell to see the optional Agent reflection before review. Portfolio shows the paper account cash and share counts separately from the synthetic THB reference chart.
 
 Ask Agent saves completed questions, answers, and citations to MongoDB. Reopen the panel in the same browser and stock page to pick up the conversation. The browser stores the random conversation identifier locally.
+
+The paper order ticket offers Market and Limit orders for whole shares, with a separate review before confirmation. The static quote fills market orders and limits that already qualify. Other limits go to Open orders and reserve cash or shares until cancelled. The demo does not match against a live market feed.

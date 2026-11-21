@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartLine, faChartPie, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { DemoData, signed, thb, usd, type PortfolioData, type Range } from "./data";
+import { DemoData, signed, thb, thbCash, type PortfolioData, type Range } from "./data";
 import { Ring, Sparkline } from "./charts";
 import { Character, DemoNav } from "./shell";
 import type { PaperAccount } from "./paper-order";
@@ -14,7 +14,7 @@ const periodLabels: Record<Range, string> = { "1Y": "past 1 year", "3Y": "past 3
 const shades = ["#a45cff", "#676780", "#494950", "#696971", "#888893", "#38383b"];
 const logos: Record<string, string> = { NVDA: "nvda.jpg", AAPL: "aapl.svg", MSTR: "mstr.jpg", MSFT: "msft.svg" };
 
-function Allocation({ items }: { items: PortfolioData["allocation"] }) {
+function Allocation({ items, value }: { items: PortfolioData["allocation"]; value: number }) {
   const [active, setActive] = useState(0);
   let offset = 0;
   if (!items.length) return <p className="demo-state">No allocation data</p>;
@@ -28,11 +28,12 @@ function Allocation({ items }: { items: PortfolioData["allocation"] }) {
             const start = offset;
             offset += percent;
             return <circle key={name} cx="105" cy="105" r="79" pathLength="100" fill="none"
-              stroke={index === 0 ? "url(#allocation-violet)" : shades[index % shades.length]} strokeWidth={active === index ? 27 : 20}
+              onClick={() => setActive(index)} className="allocation-segment"
+              stroke={active === index ? "url(#allocation-violet)" : shades[index % shades.length]} strokeWidth={active === index ? 27 : 20}
               strokeDasharray={`${Math.max(0, percent - 0.75)} 100`} strokeDashoffset={-start} transform="rotate(-90 105 105)" />;
           })}
         </svg>
-        <p aria-live="polite"><strong>{selected.name}</strong><span>{selected.percent}%</span></p>
+        <p aria-live="polite"><strong>{selected.name}</strong><span>{selected.percent}%</span><small>{thb.format(value * selected.percent / 100)}</small></p>
       </div>
       <div className="allocation-key" aria-label="Allocation groups">
         {items.map(({ name, percent }, index) => <button key={name} type="button" aria-pressed={active === index} onClick={() => setActive(index)}>{name} {percent}%</button>)}
@@ -41,10 +42,25 @@ function Allocation({ items }: { items: PortfolioData["allocation"] }) {
   );
 }
 
+function HistoryExplorer({ values, label }: { values: number[]; label: string }) {
+  const [selected, setSelected] = useState(values.length - 1);
+  return (
+    <>
+      <div className="trend gain"><Sparkline values={values} label={label} point={selected} onPoint={setSelected} /></div>
+      <label className="chart-slider">
+        <span>Browse history <output>{thb.format(values[selected])}</output></span>
+        <input aria-label="Portfolio history point" aria-valuetext={`${thb.format(values[selected])}, point ${selected + 1} of ${values.length}`}
+          type="range" min={0} max={values.length - 1} value={selected} onChange={(event) => setSelected(Number(event.target.value))} />
+      </label>
+    </>
+  );
+}
+
 export function Portfolio() {
   const [view, setView] = useState<"line" | "allocation">("line");
   const [period, setPeriod] = useState<Range>("1Y");
   const [sort, setSort] = useState("weight");
+  const chart = useRef<HTMLElement>(null);
   return (
     <div className={`demo-screen portfolio ${view === "line" ? "portfolio-line" : "portfolio-allocation"}`}>
       <DemoData<PortfolioData> path="/api/v1/demo/portfolio" title="portfolio">
@@ -60,7 +76,7 @@ export function Portfolio() {
                 <div className="investor-avatar"><Character name="nobita" /><img className="companion-badge" src="/demo/doraemon-badge.svg" alt="" /></div>
                 <span className="muted">Investor</span><h1>{data.investor}</h1>
               </header>
-              <section aria-label="Portfolio value">
+              <section ref={chart} aria-label="Portfolio value">
                 <div className="portfolio-value">
                   <div>
                     <strong>{thb.format(data.value_thb)}</strong>
@@ -75,36 +91,23 @@ export function Portfolio() {
                 </div>
                 {view === "line" ? (
                   <>
-                    <div className="trend gain"><Sparkline values={history.values} label={`Portfolio history, ${periodLabels[period]}`} /></div>
+                    <HistoryExplorer key={period} values={history.values} label={`Portfolio history, ${periodLabels[period]}`} />
                     <div className="segments" role="group" aria-label="Time range">
                       {ranges.map((range) => <button type="button" key={range} aria-pressed={period === range} onClick={() => setPeriod(range)}>{range}</button>)}
                     </div>
                   </>
-                ) : <Allocation items={data.allocation} />}
+                ) : <Allocation items={data.allocation} value={data.value_thb} />}
               </section>
               <Link href="/behavior" className="health-card">
-                <div className="card-heading"><h2>Investor Health Score</h2><span>Today <FontAwesomeIcon icon={faChevronRight} /></span></div>
-                <div className="score-summary"><div>{data.score_label}<small>{data.score} points</small></div><Ring score={data.score} /></div>
+                <div className="card-heading"><h2>Investor Health Score</h2><span>This month <FontAwesomeIcon icon={faChevronRight} /></span></div>
+                <div className="score-summary"><div>{data.score_label}<small>{data.score} / 100 · 4 dimensions</small></div><Ring score={data.score} /></div>
               </Link>
               <section className="insights">
                 <h2>Portfolio Insights Analytics</h2>
                 <div className="insight-grid">
-                  <button type="button" onClick={() => setView("allocation")}>Largest allocation <strong>{data.allocation[0]?.name ?? "—"} {data.allocation[0]?.percent ?? 0}%</strong></button>
-                  <Link href="/stocks/AMD">Explore AMD <strong>Stock detail <FontAwesomeIcon icon={faChevronRight} /></strong></Link>
+                  <button type="button" onClick={() => { setView("allocation"); chart.current?.scrollIntoView({ block: "start" }); }}>Largest allocation <strong>{data.allocation[0]?.name ?? "—"} {data.allocation[0]?.percent ?? 0}%</strong></button>
+                  <Link href="/stocks/VT">Explore VT <strong>Stock detail <FontAwesomeIcon icon={faChevronRight} /></strong></Link>
                 </div>
-              </section>
-              <section className="paper-account" aria-label="Paper account">
-                <h2>Paper account</h2>
-                <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="paper account">
-                  {(account) => (
-                    <>
-                      <p>Available cash · <strong>USD {usd.format(account.cash_cents / 100)}</strong></p>
-                      <ul>{holdings.map(({ symbol }) => (
-                        <li key={symbol}><Link href={`/stocks/${symbol}`}>{symbol} <strong>{account.positions[symbol] ?? 0}</strong> shares</Link></li>
-                      ))}</ul>
-                    </>
-                  )}
-                </DemoData>
               </section>
               <section aria-labelledby="holdings-title">
                 <div className="card-heading holdings-heading">
@@ -119,14 +122,27 @@ export function Portfolio() {
                         <span className={`ticker-logo ticker-${holding.symbol.toLowerCase()}`}>
                           {logos[holding.symbol] ? <img src={`/demo/${logos[holding.symbol]}`} alt="" /> : ({ VOO: "500", QQQ: "100" }[holding.symbol] ?? holding.symbol.slice(0, 2))}
                         </span>
-                        <span className="holding-name"><strong>{holding.symbol}</strong><small>{holding.weight.toFixed(2)}%</small></span>
+                        <span className="holding-name"><strong>{holding.symbol}</strong><small>{holding.name}</small></span>
                         <span className={`holding-trend ${holding.change_percent >= 0 ? "gain" : "loss"}`}><Sparkline values={holding.trend} /></span>
-                        <span className="quote"><strong>{usd.format(holding.price_cents / 100)}</strong><small className={holding.change_percent >= 0 ? "badge-gain" : "badge-loss"}>{signed(holding.change_percent)}%</small></span>
+                        <span className="quote"><strong>{thb.format(data.value_thb * holding.weight / 100)}</strong><small>{holding.weight}%</small></span>
                       </Link>
                     </li>
                   ))}
                 </ul>
-                <p className="source-label">Demo portfolio · Synthetic balances and quotes</p>
+                <p className="source-label">VT includes US stocks also held in VOO. Total invested · {thb.format(data.value_thb)}</p>
+              </section>
+              <section className="paper-account" aria-label="Paper account">
+                <h2>Paper account</h2>
+                <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="paper account">
+                  {(account) => (
+                    <>
+                      <p>Cash balance · <strong>{account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"}</strong></p>
+                      <ul>{Object.keys(account.positions).sort().map((symbol) => (
+                        <li key={symbol}><Link href={`/stocks/${symbol}`}>{symbol} <strong>{account.positions[symbol] ?? 0}</strong> shares</Link></li>
+                      ))}</ul>
+                    </>
+                  )}
+                </DemoData>
               </section>
             </>
           );

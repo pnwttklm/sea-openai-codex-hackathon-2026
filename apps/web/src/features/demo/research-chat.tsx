@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { apiGet, apiPost } from "@/lib/api/client";
 import type { components } from "@/lib/api/demo.generated";
+import { AgentAvatar } from "./agent-avatar";
 
 type Schemas = components["schemas"];
 
@@ -12,28 +13,32 @@ type Turn = Schemas["AgentTurn"];
 
 export function ResearchPanel({ symbol, onDismiss }: { symbol: string; onDismiss: () => void }) {
   const closeButton = useRef<HTMLButtonElement>(null);
+  const [pending, setPending] = useState("");
   useEffect(() => { closeButton.current?.focus(); }, []);
 
   return (
     <section className="agent-panel" role="dialog" aria-labelledby="research-title"
       onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onDismiss(); } }}>
       <div className="agent-toolbar">
-        <span className="agent-mark" aria-hidden="true"><FontAwesomeIcon icon={faCommentDots} /></span>
+        <AgentAvatar busy={!!pending} />
         <div><h2 id="research-title">Investing Agent</h2><p>{symbol} · Stock research</p></div>
         <button ref={closeButton} type="button" aria-label="Close research agent" onClick={onDismiss}><FontAwesomeIcon icon={faXmark} /></button>
       </div>
-      <ResearchChat key={symbol} symbol={symbol} />
+      <ResearchChat key={symbol} symbol={symbol} pending={pending} setPending={setPending} />
     </section>
   );
 }
 
-export function ResearchChat({ symbol }: { symbol: string }) {
+function ResearchChat({ symbol, pending, setPending }: {
+  symbol: string;
+  pending: string;
+  setPending: (question: string) => void;
+}) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [chatPath, setChatPath] = useState<`/${string}`>();
   const [historyError, setHistoryError] = useState(false);
   const [reload, setReload] = useState(0);
   const [draft, setDraft] = useState("");
-  const [pending, setPending] = useState("");
   const [error, setError] = useState("");
   const request = useRef<AbortController>(null);
   const latest = useRef<HTMLDivElement>(null);

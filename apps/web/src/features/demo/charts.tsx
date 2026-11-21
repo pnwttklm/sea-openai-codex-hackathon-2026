@@ -4,16 +4,30 @@ const size = 240;
 const center = 120;
 const radius = 94;
 
-export function Sparkline({ values, label }: { values: number[]; label?: string }) {
+export function Sparkline({ values, label, point, onPoint }: {
+  values: number[];
+  label?: string;
+  point?: number;
+  onPoint?: (point: number) => void;
+}) {
   if (values.length < 2) return null;
   const low = Math.min(...values);
   const span = Math.max(1, Math.max(...values) - low);
   const points = values.map((value, index) =>
     `${4 + (index * 292) / (values.length - 1)},${108 - ((value - low) * 100) / span}`
   );
-  const [endX, endY] = points.at(-1)!.split(",");
+  const selected = points[point ?? values.length - 1] ?? points[values.length - 1];
+  const [endX, endY] = selected.split(",");
   return (
-    <svg viewBox="0 0 300 114" role={label ? "img" : undefined} aria-label={label} aria-hidden={!label || undefined}>
+    <svg viewBox="0 0 300 114" role={label ? "img" : undefined} aria-label={label} aria-hidden={!label || undefined}
+      className={onPoint ? "chart-interactive" : undefined}
+      onClick={onPoint ? (event) => {
+        const matrix = event.currentTarget.getScreenCTM();
+        if (!matrix) return;
+        const { x } = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+        onPoint(Math.max(0, Math.min(values.length - 1, Math.round(((x - 4) / 292) * (values.length - 1)))));
+      } : undefined}>
+      {point != null && <line x1={endX} x2={endX} y1={4} y2={112} stroke="currentColor" opacity=".45" strokeDasharray="3 3" />}
       {label && <polygon points={`4,114 ${points.join(" ")} 296,114`} fill="currentColor" opacity=".12" />}
       <polyline points={points.join(" ")} fill="none" stroke="currentColor" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
       {label && <circle cx={endX} cy={endY} r="3" fill="currentColor" />}
@@ -41,12 +55,13 @@ export function factorColor(score: number) {
   return "var(--loss)";
 }
 
-export function Radar({ factors }: { factors: Factor[] }) {
+export function Radar({ factors }: { factors: { name: Factor["name"]; score: number | null }[] }) {
   const point = (index: number, ratio: number) => {
-    const angle = -Math.PI / 2 - index * 2 * Math.PI / factors.length;
+    const axis = [0, 1, 4, 2, 3][index] ?? index;
+    const angle = -Math.PI / 2 - axis * 2 * Math.PI / factors.length;
     return [center + Math.cos(angle) * radius * ratio, center + Math.sin(angle) * radius * ratio];
   };
-  const polygon = (ratios: number[]) => ratios.map((ratio, index) => point(index, ratio).join(",")).join(" ");
+  const polygon = (ratios: number[]) => [0, 1, 3, 4, 2].map((index) => point(index, ratios[index]).join(",")).join(" ");
   return (
     <div className="radar">
       <svg viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
@@ -55,8 +70,11 @@ export function Radar({ factors }: { factors: Factor[] }) {
           const [x, y] = point(index, 1);
           return <line key={name} className="radar-grid" x1={center} y1={center} x2={x} y2={y} />;
         })}
-        <polygon className="radar-values" points={polygon(factors.map(({ score }) => score / 10))} />
+        {factors.every(({ score }) => score !== null) && (
+          <polygon className="radar-values" points={polygon(factors.map(({ score }) => Number(score) / 10))} />
+        )}
         {factors.map(({name, score}, index) => {
+          if (score === null) return null;
           const [x, y] = point(index, score / 10);
           return <circle key={name} cx={x} cy={y} r="4" fill={factorColor(score)} />;
         })}
@@ -64,7 +82,7 @@ export function Radar({ factors }: { factors: Factor[] }) {
       <ul aria-label="Radar chart values">
         {factors.map(({name, score}, index) => (
           <li key={name} className={`radar-label radar-label-${index}`}>
-            {name}<span style={{ color: factorColor(score) }}>{score.toFixed(1)}</span>
+            {name}<span style={{ color: score === null ? undefined : factorColor(score) }}>{score?.toFixed(1) ?? "—"}</span>
           </li>
         ))}
       </ul>

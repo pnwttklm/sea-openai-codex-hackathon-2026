@@ -65,7 +65,7 @@ def _citations(response) -> list[NewsHeadline]:
     return parse_headlines(items)
 
 
-async def research_chat(chat: AgentChat) -> AgentReply | None:
+async def research_chat(chat: AgentChat, health=None) -> AgentReply | None:
     key = os.getenv("OPENAI_API_KEY")
     model = os.getenv("OPENAI_REFLECTION_MODEL")
     if not key or not model:
@@ -74,15 +74,17 @@ async def research_chat(chat: AgentChat) -> AgentReply | None:
     try:
         async with asyncio.timeout(35):
             async with AsyncOpenAI(api_key=key, timeout=30, max_retries=0) as client:
-                return await run_research(client, chat, model, webull_enabled=bool(os.getenv("WEBULL_MCP_ACCESS_TOKEN")))
+                return await run_research(client, chat, model, health=health, webull_enabled=bool(os.getenv("WEBULL_MCP_ACCESS_TOKEN")))
     except (TimeoutError, OpenAIError):
         return None
 
 
-async def run_research(client, chat: AgentChat, model: str, *, webull_enabled: bool, reader: NewsReader = fetch_news) -> AgentReply | None:
+async def run_research(client, chat: AgentChat, model: str, *, webull_enabled: bool, reader: NewsReader = fetch_news, health=None) -> AgentReply | None:
     inputs = [{"role": message.role, "content": message.text} for message in chat.messages]
     sources: list[NewsHeadline] = []
     instructions = f"{INSTRUCTIONS}\nCurrent stock context: {chat.symbol}."
+    if health is not None:
+        instructions += "\nUse this synthetic Investor Health Score when relevant. Keep the plan out of market-data queries: " + health.model_dump_json()
     for round_number in range(3):
         allow_webull = webull_enabled and round_number < 2
         tools = [NEWS_FUNCTION, {"type": "web_search"}] if allow_webull else [{"type": "web_search"}]

@@ -45,3 +45,9 @@ export const thb = new Intl.NumberFormat("en-US", { style: "currency", currency:
 export function signed(value: number, digits = 2) {
   return new Intl.NumberFormat("en-US", { signDisplay: "exceptZero", maximumFractionDigits: digits }).format(value);
 }
+
+export const thbCash = new Intl.NumberFormat("en-US", { style: "currency", currency: "THB", currencyDisplay: "code", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+export function toSatang(usdCents: number, fxRateMicros: number) {
+  return Number((BigInt(usdCents) * BigInt(fxRateMicros) + BigInt(500_000)) / BigInt(1_000_000));
+}

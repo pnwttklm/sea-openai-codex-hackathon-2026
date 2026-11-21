@@ -54,12 +54,15 @@ function Chart({ symbol }: { symbol: string }) {
 }
 
 const modes = ["Overview", "INVX", "Options", "News"] as const;
+const dimensions = ["Quality", "Profitability", "Growth", "Dividend", "Valuation"];
 type Mode = (typeof modes)[number];
 
 function Details({ stock }: { stock: StockData }) {
-  const [selected, setSelected] = useState<Mode>(stock.factors?.length ? "INVX" : "Overview");
+  const [selected, setSelected] = useState<Mode>("INVX");
   const up = stock.change_percent >= 0;
-  const factors = stock.factors ?? [];
+  const factors = dimensions.map((name) => ({
+    name, score: stock.factors?.find((factor) => factor.name === name)?.score ?? null,
+  }));
   return (
     <>
       <header className="stock-title">
@@ -74,11 +77,12 @@ function Details({ stock }: { stock: StockData }) {
       <div className="stock-modes" role="group" aria-label="Stock detail view">
         {modes.map((mode) => <button type="button" key={mode} aria-pressed={selected === mode} onClick={() => setSelected(mode)}>{mode}</button>)}
       </div>
-      {selected === "Overview" && <Chart symbol={`${stock.exchange}:${stock.symbol}`} />}
+      {selected === "Overview" && <Chart symbol={stock.symbol === "BTC" ? "COINBASE:BTCUSD" : `${stock.exchange}:${stock.symbol}`} />}
       {selected === "INVX" && (
         <section className="fundamentals">
-          <h2>INVX Fundamental</h2><p className="source-label">Illustrative demo ratings</p>
-          {factors.length ? <Radar factors={factors} /> : <p>No fundamental ratings for this symbol in the demo.</p>}
+          <h2>INVX Fundamental</h2>
+          <p className="source-label">5 dimensions · {stock.factors?.length ? "Illustrative demo ratings" : "Ratings unavailable for " + stock.symbol}</p>
+          <Radar factors={factors} />
         </section>
       )}
       {selected === "Options" && <p className="demo-state">Options data is unavailable in this demo.</p>}

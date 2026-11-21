@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from pydantic import UUID4
 
 from app.ai.research import research_chat
-from app.schemas.demo import AgentChat, AgentQuestion, AgentReply, AgentTurn, Behavior, PaperAccount, PaperFill, PaperOrder, Portfolio, SellReflection, Stock
+from app.schemas.demo import AgentChat, AgentQuestion, AgentReply, AgentTurn, Behavior, MonthlyTarget, PaperAccount, PaperFill, PaperFX, PaperOrder, Portfolio, SellReflection, Stock
 from app.services.demo import DemoService
 from app.services.paper import PaperConflict, PaperService
 from app.services.research import ResearchService
@@ -30,6 +30,11 @@ async def portfolio(service: Demo) -> Portfolio:
 @router.get("/behavior")
 async def behavior(service: Demo) -> Behavior:
     return await service.behavior()
+
+
+@router.post("/behavior/target")
+async def update_target(body: MonthlyTarget, service: Demo) -> Behavior:
+    return await service.update_target(body.monthly_target_thb)
 
 
 @router.get("/stocks/{symbol}")
@@ -62,7 +67,10 @@ Paper = Annotated[PaperService, Depends(paper_service)]
 
 @router.get("/paper-account")
 async def paper_account(service: Paper) -> PaperAccount:
-    return await service.account()
+    try:
+        return await service.account()
+    except PaperConflict as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
 
 
 @router.post("/paper-orders")
@@ -77,8 +85,8 @@ async def paper_order(order: PaperOrder, service: Paper) -> PaperFill:
 
 
 @router.post("/agent/chat")
-async def agent_chat(chat: AgentChat) -> AgentReply:
-    reply = await research_chat(chat)
+async def agent_chat(chat: AgentChat, service: Demo) -> AgentReply:
+    reply = await research_chat(chat, await service.behavior())
     if reply is None:
         raise HTTPException(status_code=503, detail="Research is unavailable right now. Try again once the agent is configured and online.")
     return reply
@@ -108,3 +116,24 @@ async def agent_turn(
     if turn is None:
         raise HTTPException(status_code=503, detail="Research is unavailable right now. Try again once the agent is configured and online.")
     return turn
+
+
+@router.get("/paper-orders/open")
+async def open_paper_orders(service: Paper) -> list[PaperFill]:
+    return await service.open_orders()
+
+
+@router.post("/paper-orders/{order_id}/cancel")
+async def cancel_paper_order(order_id: UUID4, service: Paper) -> PaperFill:
+    try:
+        result = await service.cancel(order_id)
+    except PaperConflict as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    if result is None:
+        raise HTTPException(status_code=404, detail="Paper order not found")
+    return result
+
+
+@router.get("/paper-fx")
+async def paper_fx(service: Paper) -> PaperFX:
+    return await service.fx()

@@ -6,9 +6,13 @@ from app.data.research import ResearchRepository
 from app.schemas.demo import AgentChat, AgentMessage, AgentTurn
 
 
+from app.services.demo import DemoService
+
+
 class ResearchService:
-    def __init__(self, repository: ResearchRepository) -> None:
+    def __init__(self, repository: ResearchRepository, demo: DemoService) -> None:
         self.repository = repository
+        self.demo = demo
 
     async def history(self, conversation_id: UUID, symbol: str) -> list[AgentTurn]:
         return await self.repository.history(conversation_id, symbol)
@@ -22,7 +26,7 @@ class ResearchService:
                 AgentMessage(role="assistant", text=turn.reply.answer[:2400]),
             ])
         messages.append(AgentMessage(role="user", text=question))
-        reply = await research_chat(AgentChat(symbol=symbol, messages=messages))
+        reply = await research_chat(AgentChat(symbol=symbol, messages=messages), await self.demo.behavior())
         if reply is None:
             return None
         turn = AgentTurn(question=question, reply=reply, created_at=datetime.now(UTC))

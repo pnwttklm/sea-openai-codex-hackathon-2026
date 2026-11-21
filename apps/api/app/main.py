@@ -12,6 +12,7 @@ from app.data.demo import DemoRepository
 from app.data.research import ResearchRepository
 from app.services.demo import DemoService
 from app.services.paper import PaperService
+from app.services.fx import FXUnavailable
 from app.services.research import ResearchService
 
 
@@ -30,7 +31,7 @@ async def lifespan(application: FastAPI):
         repository = DemoRepository(client, database)
         application.state.demo = DemoService(repository)
         application.state.paper = PaperService(repository)
-        application.state.research = ResearchService(ResearchRepository(client, database))
+        application.state.research = ResearchService(ResearchRepository(client, database), application.state.demo)
         yield
 
 
@@ -48,6 +49,10 @@ def create_app() -> FastAPI:
     @application.exception_handler(PyMongoError)
     async def database_error(request: Request, error: PyMongoError) -> JSONResponse:
         return JSONResponse({"detail": "Demo database is temporarily unavailable"}, status_code=503)
+
+    @application.exception_handler(FXUnavailable)
+    async def fx_error(request: Request, error: FXUnavailable) -> JSONResponse:
+        return JSONResponse({"detail": str(error)}, status_code=503)
 
     application.include_router(router, prefix="/api/v1")
     return application

@@ -3,7 +3,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.data.demo_seed import seed_document
 
-FIXTURE_ID = "prik-thai-demo-v1"
+FIXTURE_ID = "prik-thai-demo-v3"
 
 
 class DemoRepository:
@@ -25,6 +25,10 @@ class DemoRepository:
         if document is None:
             raise RuntimeError("Demo snapshot was unavailable after initialization")
         return document
+
+    async def set_monthly_target(self, target: int) -> None:
+        await self.get()
+        await self.collection.update_one({"_id": FIXTURE_ID}, {"$set": {"health_plan.monthly_target_thb": target}})
 
     async def get_paper_account(self) -> dict:
         query = {"_id": "nobita-paper-v1"}
@@ -53,3 +57,12 @@ class DemoRepository:
             {"$set": {**account, f"fills.{order_id}": fill}},
         )
         return result.modified_count == 1
+
+    async def initialize_thb(self, revision: int, cash_satang: int, rate_micros: int) -> None:
+        await self.paper.update_one(
+            {"_id": "nobita-paper-v1", "revision": revision, "cash_thb_satang": None},
+            {
+                "$set": {"cash_thb_satang": cash_satang, "opening_fx_micros": rate_micros},
+                "$inc": {"revision": 1},
+            },
+        )

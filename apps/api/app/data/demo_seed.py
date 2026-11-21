@@ -1,31 +1,44 @@
 """Synthetic, versioned data for the local prototype."""
 
-from app.schemas.demo import Behavior, Factor, Portfolio, Stock
+from app.schemas.demo import Factor, Stock
 
-BEHAVIOR = Behavior(
-    score=30,
-    label="Low",
-    explanation="Your recent low investing behavior score has been driven by sub-optimal decision making in investments.",
-    factors=[
-        Factor(name=name, score=score, label=label)
-        for name, score, label in [
-            ("Discipline", 10, "Perfect"),
-            ("Performance", 8, "Excellent"),
-            ("Decision", 2, "Low"),
-            ("Pressure", 6, "Okay"),
-            ("Psychology", 4, "Okay"),
-        ]
+# Illustrative fund look-through and risk assumptions for the demo, not market data.
+HEALTH_PLAN = {
+    "monthly_target_thb": 30000,
+    "contributions_thb": [20000, 10000],
+    "scheduled_purchases": [True, True, False, False],
+    "exposures": {
+        "VOO": {"US equities": 1}, "VT": {"US equities": .6, "Other global equities": .4},
+        "NVDA": {"US equities": 1}, "SE": {"Other global equities": 1},
+        "SGOV": {"Treasury bills": 1}, "GLD": {"Gold": 1}, "BTC": {"Bitcoin": 1},
+    },
+    "risk_profiles": {
+        "VOO": {"minimum_years": 5, "stress_loss_pct": 30, "risk_level": 2},
+        "NVDA": {"minimum_years": 7, "stress_loss_pct": 50, "risk_level": 3},
+    },
+    "goals": [
+        {"name": "Wedding", "years": 5, "loss_capacity_pct": 15, "risk_comfort": 2, "symbols": ["NVDA"]},
+        {"name": "Retirement", "years": 25, "loss_capacity_pct": 40, "risk_comfort": 3, "symbols": ["VOO"]},
     ],
-)
+}
 
+# Synthetic quote values; holding allocations follow the supplied THB 500,000 portfolio.
 QUOTES = [
-    ("VOO", "Vanguard S&P 500 ETF", "AMEX", 70256, 0.85, 27.31),
-    ("QQQ", "Invesco QQQ Trust", "NASDAQ", 71488, 0.87, 21.83),
-    ("NVDA", "NVIDIA Corporation", "NASDAQ", 21229, -0.03, 9.81),
-    ("AAPL", "Apple Inc.", "NASDAQ", 33227, 1.75, 5.32),
-    ("MSTR", "Strategy Inc.", "NASDAQ", 17526, -0.22, 5.00),
-    ("MSFT", "Microsoft Corporation", "NASDAQ", 49563, 0.63, 4.92),
-    ("AMD", "Advanced Micro Devices, Inc.", "NASDAQ", 17523, 1.36, 4.32),
+    ("VOO", "Vanguard S&P 500 ETF", "AMEX", 70256, 0.85, 35),
+    ("NVDA", "NVIDIA", "NASDAQ", 21229, -0.03, 15),
+    ("SGOV", "iShares 0–3 Month Treasury Bond ETF", "AMEX", 10045, 0.01, 15),
+    ("VT", "Vanguard Total World Stock ETF", "AMEX", 13500, 0.45, 10),
+    ("SE", "Sea Limited", "NYSE", 12000, -0.35, 10),
+    ("GLD", "SPDR Gold Shares", "AMEX", 37000, 0.25, 10),
+    ("BTC", "Bitcoin", "COINBASE", 9000000, -0.80, 5),
+]
+# Keep instrument pages available for existing demo positions and order history.
+OTHER_QUOTES = [
+    ("AMD", "Advanced Micro Devices, Inc.", "NASDAQ", 17523, 1.36),
+    ("QQQ", "Invesco QQQ Trust", "NASDAQ", 71488, 0.87),
+    ("AAPL", "Apple Inc.", "NASDAQ", 33227, 1.75),
+    ("MSTR", "Strategy Inc.", "NASDAQ", 17526, -0.22),
+    ("MSFT", "Microsoft Corporation", "NASDAQ", 49563, 0.63),
 ]
 
 TRAIL = [
@@ -53,13 +66,13 @@ def seed_document() -> dict:
         noise = [round(start + (point / 84) * span) for point in TRAIL]
         points = noise if index == 0 else [round((value + start + span * i / 40) / 2) for i, value in enumerate(noise)]
         history[period] = dict(values=points, change_thb=span, change_percent=change_percent)
-    portfolio = Portfolio(
+    portfolio = dict(
         investor="Nobita", value_thb=500000, history=history,
         allocation=[
             dict(name=name, percent=percent)
-            for name, percent in [("Growth", 30), ("Core", 22), ("Income", 20), ("Broad market", 18), ("Cash", 5), ("Other", 5)]
+            for name, percent in [("Equities", 70), ("Treasury bills", 15), ("Gold", 10), ("Bitcoin", 5)]
         ],
-        holdings=holdings, score=BEHAVIOR.score, score_label=BEHAVIOR.label,
+        holdings=holdings,
     )
     factors = [
         Factor(name=name, score=score, label=label)
@@ -72,4 +85,7 @@ def seed_document() -> dict:
         holding["symbol"]: Stock(**holding, factors=factors if holding["symbol"] == "AMD" else []).model_dump()
         for holding in holdings
     }
-    return dict(portfolio=portfolio.model_dump(), behavior=BEHAVIOR.model_dump(), stocks=stocks)
+    for symbol, name, exchange, price, change in OTHER_QUOTES:
+        stocks[symbol] = Stock(symbol=symbol, name=name, exchange=exchange, price_cents=price,
+                               change_percent=change, factors=factors if symbol == "AMD" else []).model_dump()
+    return dict(portfolio=portfolio, health_plan=HEALTH_PLAN, stocks=stocks)

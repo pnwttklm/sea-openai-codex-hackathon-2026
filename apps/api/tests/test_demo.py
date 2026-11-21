@@ -7,8 +7,15 @@ from app.services.demo import DemoService
 
 
 class FixtureRepository:
+    def __init__(self):
+        from copy import deepcopy
+        self.snapshot = deepcopy(seed_document())
+
     async def get(self):
-        return seed_document()
+        return self.snapshot
+
+    async def set_monthly_target(self, target):
+        self.snapshot["health_plan"]["monthly_target_thb"] = target
 
 
 class UnavailableRepository:
@@ -24,9 +31,17 @@ def test_demo_routes_share_consistent_fixture(monkeypatch):
         portfolio = client.get("/api/v1/demo/portfolio").json()
         behavior = client.get("/api/v1/demo/behavior").json()
         amd = client.get("/api/v1/demo/stocks/AMD").json()
-        assert portfolio["score"] == behavior["score"] == 30
+        assert portfolio["score"] == behavior["score"]
+        assert [f["name"] for f in behavior["factors"]] == ["Contribution", "DCA Consistency", "Diversification", "Goal & Risk Fit"]
+        updated = client.post("/api/v1/demo/behavior/target", json={"monthly_target_thb": 60000}).json()
+        assert [f["score"] for f in updated["factors"][:2]] == [5, 5]
+        assert updated["score"] < portfolio["score"]
+        assert client.get("/api/v1/demo/portfolio").json()["score"] == updated["score"]
+        assert client.post("/api/v1/demo/behavior/target", json={"monthly_target_thb": 0}).status_code == 422
         assert portfolio["value_thb"] == portfolio["history"]["1Y"]["values"][-1]
         assert sum(group["percent"] for group in portfolio["allocation"]) == 100
+        assert [(h["symbol"], h["weight"]) for h in portfolio["holdings"]] == [
+            ("VOO", 35), ("NVDA", 15), ("SGOV", 15), ("VT", 10), ("SE", 10), ("GLD", 10), ("BTC", 5)]
         assert amd["source"] == "demo"
         assert amd["price_cents"] == 17523
         assert len(amd["factors"]) == 5
@@ -64,7 +79,7 @@ def test_sell_reflection_uses_webull_only_for_nvda(monkeypatch):
         assert client.get("/api/v1/demo/stocks/AMD/sell-reflection").json() == {"prompt": None}
         prompt = client.get("/api/v1/demo/stocks/NVDA/sell-reflection").json()["prompt"]
         assert prompt["demo_change_percent"] == -6
-        assert prompt["decision_score"] == 2
+        assert prompt["goal_risk_fit_score"] == 5
         assert prompt["news_status"] == "available"
         assert prompt["headlines"][0]["title"] == "Example NVIDIA news"
         assert calls == ["NVDA"]

@@ -1,23 +1,36 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { DistortionWave } from "distortion-waves";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faCommentDots, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { apiGet, apiPost } from "@/lib/api/client";
 import type { components } from "@/lib/api/demo.generated";
-import { signed, usd, type StockData } from "./data";
+import { DemoData, signed, thbCash, toSatang, usd, type StockData } from "./data";
+import { AgentAvatar } from "./agent-avatar";
 import { ResearchPanel } from "./research-chat";
 
 type Schemas = components["schemas"];
 type Side = Schemas["PaperOrder"]["side"];
 type Reflection = Schemas["SellReflection"];
 type PaperFill = Schemas["PaperFill"];
+type PaperFX = Schemas["PaperFX"];
+const rateFormat = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+type OrderType = NonNullable<Schemas["PaperOrder"]["order_type"]>;
 export type PaperAccount = Schemas["PaperAccount"];
 
 export function PaperTrade({ stock }: { stock: StockData }) {
   const [side, setSide] = useState<Side>();
   const [research, setResearch] = useState(false);
   const [fill, setFill] = useState<PaperFill>();
+  const [orderRevision, setOrderRevision] = useState(0);
+  const [ordersOpen, setOrdersOpen] = useState(false);
+
+  function recordFill(result: PaperFill) {
+    setFill(result);
+    setOrderRevision((revision) => revision + 1);
+    if (result.status === "open") setOrdersOpen(true);
+  }
   const trigger = useRef<HTMLButtonElement>(null);
 
   function start(side: Side, button: HTMLButtonElement) {
@@ -37,7 +50,6 @@ export function PaperTrade({ stock }: { stock: StockData }) {
       <div className="trade-preview" aria-label="Paper trading">
         <button type="button" onClick={(event) => start("buy", event.currentTarget)}>Buy</button>
         <button type="button" onClick={(event) => start("sell", event.currentTarget)}>Sell</button>
-        <small>Paper trading</small>
       </div>
       <button className="stock-research" type="button" aria-expanded={research} onClick={(event) => {
         trigger.current = event.currentTarget;
@@ -50,13 +62,58 @@ export function PaperTrade({ stock }: { stock: StockData }) {
       }} />}
       {fill && (
         <p className="paper-receipt" role="status">
-          Paper order filled · {fill.side === "buy" ? "Bought" : "Sold"} {fill.quantity} {fill.symbol} at USD {usd.format(fill.price_cents / 100)}.
-          {" "}Cash after this fill: USD {usd.format(fill.account.cash_cents / 100)}.
+          {fill.status === "open" ? `Limit order placed · ${fill.quantity} ${fill.symbol} · Open`
+            : `Paper order filled · ${fill.side === "buy" ? "Bought" : "Sold"} ${fill.quantity} ${fill.symbol} at USD ${usd.format((fill.price_cents ?? 0) / 100)}.`}
         </p>
       )}
-      {side && <OrderSheet key={side} stock={stock} side={side} onDismiss={dismiss} onFill={setFill} obscured={research} onResearch={() => setResearch(true)} />}
+      <button type="button" className="stock-research" aria-expanded={ordersOpen} onClick={() => setOrdersOpen(!ordersOpen)}>Open orders</button>
+      {ordersOpen && <OpenOrders key={orderRevision} symbol={stock.symbol} onCancelled={(id) => {
+        if (fill?.order_id === id) setFill(undefined);
+      }} />}
+      {side && <OrderSheet key={side} stock={stock} side={side} onDismiss={dismiss} onFill={recordFill} obscured={research} onResearch={() => setResearch(true)} />}
     </>
   );
+}
+
+function OpenOrders({ symbol, onCancelled }: { symbol: string; onCancelled: (id: string) => void }) {
+  const [cancelled, setCancelled] = useState<string[]>([]);
+  const [cancelling, setCancelling] = useState<string>();
+  const [error, setError] = useState("");
+
+  async function cancel(id: string) {
+    setCancelling(id);
+    setError("");
+    try {
+      await apiPost<PaperFill>(`/api/v1/demo/paper-orders/${id}/cancel`, {});
+      setCancelled((previous) => [...previous, id]);
+      onCancelled(id);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not cancel the order.");
+    } finally {
+      setCancelling(undefined);
+    }
+  }
+
+  return <section className="paper-account" aria-label="Open paper orders">
+    <h2>Open orders · {symbol}</h2>
+    <DemoData<PaperFill[]> path="/api/v1/demo/paper-orders/open" title="open orders">
+      {(orders) => {
+        const active = orders.filter((order) => order.symbol === symbol && !cancelled.includes(order.order_id));
+        return active.length ? (
+          <div className="open-order-list">
+            {active.map((order) => (
+              <div key={order.order_id}>
+                <span>{order.side === "buy" ? "Buy" : "Sell"} {order.quantity} · Limit USD {usd.format((order.limit_price_cents ?? 0) / 100)}</span>
+                <button type="button" disabled={!!cancelling} onClick={() => void cancel(order.order_id)}>{cancelling === order.order_id ? "Cancelling…" : "Cancel order"}</button>
+              </div>
+            ))}
+          </div>
+        ) : <p>No open orders for {symbol}.</p>;
+      }}
+    </DemoData>
+    {error && <p className="order-error" role="alert">{error}</p>}
+    {cancelled.length > 0 && <p role="status">Order cancelled.</p>}
+  </section>;
 }
 
 function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
@@ -68,17 +125,31 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
   obscured: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const confirmButton = useRef<HTMLButtonElement>(null);
+  const formId = useId();
+  const [receipt, setReceipt] = useState<PaperFill>();
   const [review, setReview] = useState(side === "buy" || stock.symbol !== "NVDA");
   const [reflection, setReflection] = useState<Reflection | null>();
   const [reply, setReply] = useState<"plan" | "news">();
   const [quantity, setQuantity] = useState("1");
+  const [orderType, setOrderType] = useState<OrderType>("market");
+  const [limitInput, setLimitInput] = useState((stock.price_cents / 100).toFixed(2));
+  const [reviewingOrder, setReviewingOrder] = useState(false);
+  const [fx, setFX] = useState<PaperFX>();
+  const [fxError, setFXError] = useState(false);
+  const [fxAttempt, setFXAttempt] = useState(0);
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
-  const attempt = useRef<{ id: string; quantity: number } | null>(null);
+  const attempt = useRef<{ id: string; signature: string } | null>(null);
   const [error, setError] = useState("");
   const closePanel = useRef<HTMLButtonElement>(null);
   const shares = Number(quantity);
-  const valid = Number.isInteger(shares) && shares >= 1 && shares <= 10000;
+  const limit = /^\d+(?:\.\d{1,2})?$/.test(limitInput) ? Math.round(Number(limitInput) * 100) : 0;
+  const valid = Number.isInteger(shares) && shares >= 1 && shares <= 10000
+    && (orderType === "market" || (limit >= 1 && limit <= 100_000_000));
+  const isMarketable = orderType === "market" || (side === "buy" ? stock.price_cents <= limit : stock.price_cents >= limit);
+  const estimatedPrice = orderType === "market" ? stock.price_cents : limit;
+  const statusTitle = receipt?.status === "open" ? "Paper limit order placed" : "Paper order filled";
 
   useEffect(() => {
     const node = dialog.current;
@@ -111,22 +182,51 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
     return () => controller.abort();
   }, [review, stock.symbol]);
 
+  useEffect(() => {
+    if (!review) return;
+    const controller = new AbortController();
+    apiGet<PaperFX>("/api/v1/demo/paper-fx", controller.signal).then(
+      (rate) => { if (!controller.signal.aborted) setFX(rate); },
+      () => { if (!controller.signal.aborted) setFXError(true); },
+    );
+    return () => controller.abort();
+  }, [review, fxAttempt]);
+
+  function refreshFX() {
+    setFX(undefined);
+    setFXError(false);
+    setError("");
+    setReviewingOrder(false);
+    setFXAttempt((value) => value + 1);
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!valid || inFlight.current) return;
+    if (!valid || !fx || inFlight.current || receipt) return;
+    if (!reviewingOrder) {
+      setReviewingOrder(true);
+      setError("");
+      requestAnimationFrame(() => confirmButton.current?.focus());
+      return;
+    }
     inFlight.current = true;
     setBusy(true);
     setError("");
-    if (attempt.current?.quantity !== shares) {
-      attempt.current = { id: crypto.randomUUID(), quantity: shares };
+    const signature = `${orderType}:${shares}:${orderType === "limit" ? limit : ""}:${fx.rate_micros}`;
+    if (attempt.current?.signature !== signature) {
+      attempt.current = { id: crypto.randomUUID(), signature };
     }
     try {
       const result = await apiPost<PaperFill>("/api/v1/demo/paper-orders", {
         order_id: attempt.current.id,
-        symbol: stock.symbol, side, quantity: shares,
+        symbol: stock.symbol, side, quantity: shares, order_type: orderType,
+        limit_price_cents: orderType === "limit" ? limit : null,
+        fx_rate_micros: fx.rate_micros,
       } satisfies Schemas["PaperOrder"]);
+      setReceipt(result);
       onFill(result);
-      onDismiss();
+      setBusy(false);
+      inFlight.current = false;
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Could not complete the paper order.");
       setBusy(false);
@@ -140,14 +240,14 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
       <section className="agent-panel" hidden={obscured} role="dialog" aria-labelledby="agent-title"
         onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onDismiss(); } }}>
         <div className="agent-toolbar">
-          <span className="agent-mark" aria-hidden="true"><FontAwesomeIcon icon={faCommentDots} /></span>
+          <AgentAvatar busy={reflection === undefined} />
           <div><h2 id="agent-title">Investing Agent</h2><p>{stock.symbol} · Before you sell</p></div>
           <button ref={closePanel} type="button" aria-label="Close agent" onClick={onDismiss}><FontAwesomeIcon icon={faXmark} /></button>
         </div>
         <div className="agent-thread">
           {prompt && <p className="agent-context">
-            {stock.symbol} {signed(prompt.demo_change_percent)}% (simulation) · Behavior {prompt.behavior_score}/100
-            {prompt.decision_score != null && ` · Decision ${prompt.decision_score}/10`}
+            {stock.symbol} {signed(prompt.demo_change_percent)}% (simulation) · Investor Health {prompt.behavior_score}/100
+             · Goal &amp; Risk Fit {prompt.goal_risk_fit_score}/10
           </p>}
           <div className="agent-message" aria-live="polite">
             {reflection === undefined ? <p>Checking Webull headlines for {stock.symbol}…</p>
@@ -192,26 +292,115 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
     <dialog
       ref={dialog}
       className="order-sheet"
-      aria-labelledby="sheet-title"
+      aria-label={receipt ? statusTitle : reviewingOrder ? `Review paper ${side}` : `Paper ${side} order`}
       onCancel={(event) => { event.preventDefault(); if (!inFlight.current) onDismiss(); }}
       onClick={(event) => { if (event.target === event.currentTarget && !inFlight.current) onDismiss(); }}
     >
-      <div className="order-sheet-content">
-        <div className="card-heading">
-          <h2 id="sheet-title">Review paper {side}</h2>
-          <button type="button" disabled={busy} onClick={onDismiss}>Close</button>
+      <DistortionWave
+        className="order-wave"
+        type="vertical"
+        palette="colorful"
+        revealed={!!receipt}
+        source={confirmButton}
+        reducedMotion="system"
+        onFinish={(revealed) => { if (revealed) confirmButton.current?.focus(); }}
+        overlay={
+          <div className="order-wave-actions">
+            <button
+              ref={confirmButton}
+              className="order-primary"
+              type={receipt ? "button" : "submit"}
+              form={receipt ? undefined : formId}
+              disabled={!receipt && (!valid || !fx || busy)}
+              onClick={receipt ? onDismiss : undefined}
+            >
+              {receipt ? "Done" : busy ? "Submitting…" : reviewingOrder ? `Confirm paper ${side}` : "Review order"}
+            </button>
+          </div>
+        }
+        revealedContent={
+          <div className="order-sheet-content order-wave-view order-filled" aria-hidden={!receipt}>
+            {receipt && (
+              <>
+                <span className="order-filled-icon" aria-hidden="true"><FontAwesomeIcon icon={faCheck} /></span>
+                <h2>{statusTitle}</h2>
+                {receipt.status === "open" ? (
+                  <p>Open · {receipt.side === "buy" ? "Buy" : "Sell"} {receipt.quantity} {receipt.symbol} at a limit of USD {usd.format((receipt.limit_price_cents ?? 0) / 100)}. Manage it under Open orders.</p>
+                ) : (
+                  <p>{receipt.side === "buy" ? "Bought" : "Sold"} {receipt.quantity} {receipt.symbol} at USD {usd.format((receipt.price_cents ?? 0) / 100)} per share.</p>
+                )}
+                <dl>
+                  <div><dt>{receipt.status === "open" ? "Limit order value" : "Order total"}</dt><dd>{receipt.total_thb_satang != null ? thbCash.format(receipt.total_thb_satang / 100) : "—"}</dd></div>
+                  <div><dt>Cash balance</dt><dd>{receipt.account.cash_thb_satang != null ? thbCash.format(receipt.account.cash_thb_satang / 100) : "—"}</dd></div>
+                </dl>
+                {receipt.fx && <p className="source-label">USD 1 = THB {rateFormat.format(receipt.fx.rate_micros / 1_000_000)} · {receipt.fx.as_of}</p>}
+              </>
+            )}
+          </div>
+        }
+      >
+        <div className="order-sheet-content order-wave-view" inert={!!receipt}>
+          <div className="card-heading">
+            <h2>{reviewingOrder ? "Review order" : `${side === "buy" ? "Buy" : "Sell"} ${stock.symbol}`}</h2>
+            {reviewingOrder
+              ? <button type="button" disabled={busy} onClick={() => { setReviewingOrder(false); setError(""); }}>Edit</button>
+              : <button type="button" onClick={onDismiss}>Close</button>}
+          </div>
+          <form id={formId} onSubmit={submit}>
+            {reviewingOrder ? (
+              <dl className="order-details">
+                <div><dt>Action</dt><dd>{side === "buy" ? "Buy" : "Sell"} {stock.symbol}</dd></div>
+                <div><dt>Order type</dt><dd>{orderType === "market" ? "Market" : "Limit"}</dd></div>
+                <div><dt>Quantity</dt><dd>{shares} {shares === 1 ? "share" : "shares"}</dd></div>
+                <div><dt>{orderType === "market" ? "Demo price" : "Limit price"}</dt><dd>USD {usd.format(estimatedPrice / 100)}</dd></div>
+                <div><dt>{orderType === "market" ? "Estimated total" : "Value at limit"}</dt><dd>{fx ? thbCash.format(toSatang(estimatedPrice * shares, fx.rate_micros) / 100) : "—"}</dd></div>
+              </dl>
+            ) : (
+              <>
+                <p className="source-label">Paper order · Demo quote USD {usd.format(stock.price_cents / 100)}</p>
+                <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="paper account">
+                  {(account) => <dl className="order-details order-account-context">
+                    <div><dt>{side === "buy" ? "Cash balance" : "Shares held"}</dt><dd>{side === "buy"
+                      ? account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"
+                      : `${account.positions[stock.symbol] ?? 0} ${stock.symbol}`}</dd></div>
+                  </dl>}
+                </DemoData>
+                <fieldset className="order-types">
+                  <legend>Order type</legend>
+                  <div className="segments">
+                    {(["market", "limit"] as const).map((type) => (
+                      <button key={type} type="button" aria-pressed={orderType === type} onClick={() => setOrderType(type)}>
+                        {type === "market" ? "Market" : "Limit"}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="order-inputs">
+                  <label>Shares
+                    <input type="number" min={1} max={10000} step={1} required value={quantity}
+                      onChange={(event) => setQuantity(event.target.value)} />
+                  </label>
+                  {orderType === "limit" && <label>Limit price (USD)
+                    <input inputMode="decimal" required value={limitInput} onChange={(event) => setLimitInput(event.target.value)} />
+                  </label>}
+                </div>
+                <p>{orderType === "market" ? "Estimated total" : "Value at limit"} · <strong>{valid && fx ? thbCash.format(toSatang(estimatedPrice * shares, fx.rate_micros) / 100) : "—"}</strong></p>
+              </>
+            )}
+            <div className="order-fx">
+              <p className="source-label" role={fxError ? "alert" : "status"}>
+                {fx ? `USD 1 = THB ${rateFormat.format(fx.rate_micros / 1_000_000)} · ${fx.source} reference rate · ${fx.as_of}`
+                  : fxError ? "USD/THB rate unavailable." : "Loading USD/THB rate…"}
+              </p>
+              {(fx || fxError) && <button type="button" disabled={busy} onClick={refreshFX}>Refresh rate</button>}
+            </div>
+            {orderType === "limit" && valid && <p className="source-label">
+              {isMarketable ? "The demo quote meets your limit." : "The demo quote falls outside your limit. This order stays open until cancelled in the demo."}
+            </p>}
+            {error && <p role="alert" className="order-error">{error}</p>}
+          </form>
         </div>
-        <form onSubmit={submit}>
-          <p>{stock.symbol} · USD {usd.format(stock.price_cents / 100)} per share</p>
-          <label>Shares
-            <input type="number" min={1} max={10000} step={1} required value={quantity} disabled={busy}
-              onChange={(event) => { setQuantity(event.target.value); setError(""); }} />
-          </label>
-          <p>Estimated total · <strong>{valid ? `USD ${usd.format(stock.price_cents * shares / 100)}` : "—"}</strong></p>
-          {error && <p role="alert" className="order-error">{error}</p>}
-          <button className="order-primary" type="submit" disabled={!valid || busy}>{busy ? "Submitting…" : `Confirm paper ${side}`}</button>
-        </form>
-      </div>
+      </DistortionWave>
     </dialog>
   );
 }

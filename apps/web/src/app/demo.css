@@ -173,7 +173,6 @@ body:has(.demo-shell) { background: #09090c; }
 .trade-preview button { flex: 1; min-height: 44px; font-size: 13px; padding: 0; border-radius: 999px; cursor: default; }
 .trade-preview button:first-child { background: #075c4e; }
 .trade-preview button:nth-child(2) { background: #8b2341; }
-.trade-preview small { margin: 0 6px; }
 .chart-panel { min-width: 0; }
 .chart-panel .tradingview-widget-container { width: 100%; height: 345px; }
 .chart-panel .tradingview-widget-container__widget { width: 100%; height: 100%; }
@@ -244,21 +243,14 @@ body:has(.order-sheet[open]) { overflow: hidden; }
 }
 .agent-toolbar {
   display: grid;
-  grid-template-columns: 32px 1fr 44px;
+  grid-template-columns: 40px 1fr 44px;
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
   border-bottom: 1px solid var(--edge);
 }
 .agent-toolbar p { font-size: 12px; color: var(--subtle); }
-.agent-mark {
-  display: grid;
-  place-items: center;
-  height: 32px;
-  border-radius: 9px;
-  color: #d4ceff;
-  background: #383063;
-}
+.agent-mark { display: grid; place-items: center; width: 40px; height: 40px; }
 .agent-toolbar button { min-height: 44px; padding: 0; }
 .agent-toolbar button:hover { background: #ffffff12; }
 .agent-thread { overflow-y: auto; overscroll-behavior: contain; padding: 12px; }
@@ -323,3 +315,63 @@ body:has(.order-sheet[open]) { overflow: hidden; }
 .research-compose button { min-height: 44px; background: #5146dc; }
 .research-compose button:disabled { opacity: .55; cursor: default; }
 .agent-panel[hidden] { display: none; }
+
+.order-wave { width: 100%; overflow: hidden; border-radius: 23px 23px 0 0; }
+.order-wave-view {
+  min-height: 100%;
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  background: var(--raised);
+}
+.order-wave-actions {
+  position: absolute;
+  inset: auto 16px calc(16px + env(safe-area-inset-bottom));
+}
+.order-wave-actions .order-primary { width: 100%; }
+.order-filled { display: grid; align-content: start; gap: 9px; }
+.order-filled-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--mint);
+  background: #104539;
+  border-radius: 50%;
+}
+.order-filled dl { display: grid; gap: 6px; margin: 0; }
+.order-filled dl div { display: flex; justify-content: space-between; gap: 8px; }
+.order-filled dt { color: var(--subtle); }
+.order-filled dd { margin: 0; font-weight: 600; }
+
+.order-types { border: 0; min-width: 0; margin: 0; padding: 0; }
+.order-types legend { font-size: 13px; margin-bottom: 6px; }
+.order-types button[aria-pressed="true"] { background: #5146dc; font-weight: 600; }
+.order-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+.order-inputs input { width: 100%; }
+.order-details { display: grid; gap: 10px; margin: 0; }
+.order-details div, .open-order-list > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.order-details dt { color: var(--subtle); }
+.order-details dd { margin: 0; font-weight: 600; }
+.open-order-list { display: grid; gap: 8px; margin-top: 8px; font-size: 13px; }
+.open-order-list button { min-height: 44px; border: 1px solid var(--edge); font-size: 12px; }
+.open-order-list button:disabled { opacity: .55; cursor: default; }
+.order-account-context { border-bottom: 1px solid var(--edge); padding-bottom: 10px; font-size: 13px; }
+.order-fx { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.demo-shell .order-fx .source-label { margin: 0; }
+.order-fx button { flex: none; min-height: 44px; padding: 0 8px; font-size: 12px; }
+.chart-interactive, .allocation-segment { cursor: pointer; }
+.donut > p { pointer-events: none; }
+.donut > p small { font-size: 10px; }
+.chart-slider { display: grid; gap: 4px; margin: 0 0 10px; font-size: 12px; color: var(--subtle); }
+.chart-slider span { display: flex; justify-content: space-between; gap: 6px; }
+.chart-slider output { color: var(--text); font-weight: 600; }
+.chart-slider input { width: 100%; min-height: 32px; margin: 0; accent-color: var(--mint); cursor: pointer; }
+
+.health-dimensions { display: grid; gap: 12px; margin-top: 16px; }
+.health-dimensions .factor-card { background: #191c23; }
+.health-dimensions progress { width: 100%; height: 6px; accent-color: #7ed8ef; }
+.health-dimensions p, .behavior-card > p { color: #d1d1d2; line-height: 1.5; font-size: 14px; }
+.health-dimensions form { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; }
+.health-dimensions label { display: grid; gap: 4px; font-size: 12px; flex: 1; }
+.health-dimensions input { width: 100%; min-height: 44px; color: inherit; background: #111214; border: 1px solid var(--edge); border-radius: 10px; padding: 8px; }
+.health-dimensions button { min-height: 44px; padding-inline: 12px; }
+.health-dimensions [role="status"] { flex-basis: 100%; font-size: 13px; }
