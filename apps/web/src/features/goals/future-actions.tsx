@@ -31,7 +31,7 @@ export function FutureActions({ goals }: { goals: GoalPlan[] }) {
   return (
     <>
       <div className={styles.futureActions}>
-        <Link href="/companion" className={styles.futureAction}>
+        <Link href="/future-you" className={styles.futureAction}>
           <TalkIcon /><span>Future Talk</span>
         </Link>
         <button type="button" className={styles.futureAction} aria-haspopup="dialog" onClick={() => chooser.current?.showModal()}>

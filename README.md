@@ -4,7 +4,7 @@ An intent-based AI financial companion for Thai investors, focused on goals, inv
 
 ## Current status
 
-Local development scaffolds are available: Next.js routes and a FastAPI health endpoint. Product screens are placeholders; MongoDB, OpenAI, FastMCP, authentication, and deployment are not connected.
+Open Future Talk from the Goals dashboard to talk with an imagined older self using a saved profile, goals, and portfolio. See the [local demo setup](docs/development.md#future-you-demo) for MongoDB, Realtime voice, and portrait uploads.
 
 ## Run locally
 
