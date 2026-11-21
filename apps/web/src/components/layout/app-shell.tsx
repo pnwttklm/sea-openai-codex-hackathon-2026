@@ -7,6 +7,7 @@ import { Navigation } from "./navigation";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const path = usePathname();
+  if (path === "/ops/agents") return <>{children}</>;
   if (path === "/" || path === "/invest" || path === "/behavior" || path.startsWith("/stocks/")) {
     return <main id="main" className="demo-shell">{children}</main>;
   }
