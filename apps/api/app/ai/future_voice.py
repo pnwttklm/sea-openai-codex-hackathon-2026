@@ -5,7 +5,7 @@ from openai import AsyncOpenAI, OpenAIError
 from openai.types.realtime.realtime_audio_formats_param import AudioPCM
 from openai.types.realtime.realtime_session_create_request_param import RealtimeSessionCreateRequestParam
 
-from app.schemas.future_you import FutureProfile, PortfolioSnapshot, SavedGoal, VoiceStyle
+from app.schemas.future_you import FutureProfile, PortfolioSnapshot, SavedGoal, VoiceScenario, VoiceStyle
 from app.services.future_you import assess_plan, profile_voice_style
 
 REALTIME_VOICES: dict[VoiceStyle, str] = {"masculine": "cedar", "feminine": "marin", "neutral": "alloy"}
@@ -34,6 +34,25 @@ def describe_goal(goal: SavedGoal) -> dict:
     }
 
 
+def voice_scenario(profile: FutureProfile, goals: list[SavedGoal], years_from_now: int,
+                   portfolio: PortfolioSnapshot | None) -> VoiceScenario:
+    portfolio_context = None
+    if portfolio is not None:
+        largest_holdings = sorted(portfolio.holdings, key=lambda holding: abs(holding.weight_pct), reverse=True)[:12]
+        portfolio_context = {
+            **portfolio.model_dump(mode="json", exclude={"holdings"}, exclude_none=True),
+            "holdings_count": len(portfolio.holdings),
+            "largest_holdings": [holding.model_dump(mode="json") for holding in largest_holdings],
+        }
+    return {
+        "years_from_now": years_from_now,
+        "profile_today": profile.model_dump(exclude={"gender", "voice_style"}, exclude_none=True),
+        "portfolio_today": portfolio_context,
+        "age_in_scenario": profile.age + years_from_now if profile.age is not None else None,
+        "goals": [describe_goal(goal) for goal in goals],
+    }
+
+
 async def connect_future_voice(
     profile: FutureProfile,
     goals: list[SavedGoal],
@@ -45,24 +64,9 @@ async def connect_future_voice(
     portfolio: PortfolioSnapshot | None = None,
     voice_style: VoiceStyle | None = None,
 ) -> str:
-    current_age = profile.age
     opening_language = "Thai" if profile.preferred_language == "th" else "US English"
     thai_speech = THAI_SPEECH[profile_voice_style(profile)]
-    portfolio_context = None
-    if portfolio is not None:
-        largest_holdings = sorted(portfolio.holdings, key=lambda holding: abs(holding.weight_pct), reverse=True)[:12]
-        portfolio_context = {
-            **portfolio.model_dump(mode="json", exclude={"holdings"}, exclude_none=True),
-            "holdings_count": len(portfolio.holdings),
-            "largest_holdings": [holding.model_dump(mode="json") for holding in largest_holdings],
-        }
-    scenario = {
-        "years_from_now": years_from_now,
-        "profile_today": profile.model_dump(exclude={"gender", "voice_style"}, exclude_none=True),
-        "portfolio_today": portfolio_context,
-        "age_in_scenario": current_age + years_from_now if current_age is not None else None,
-        "goals": [describe_goal(goal) for goal in goals],
-    }
+    scenario = voice_scenario(profile, goals, years_from_now, portfolio)
     opening_focus = (
         "Mention the selected goal in the opening." if focused_goal else
         "Start with the big picture, tie it to a personal priority, and let the person choose what to discuss. "

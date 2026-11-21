@@ -39,6 +39,7 @@ class Factor(BaseModel):
 class HealthDimension(Factor):
     question: str
     measurement: str
+    facts: dict[str, str] = Field(default_factory=dict)
     ai_assessment: str | None = None
 
 
@@ -90,6 +91,44 @@ class SellPrompt(BaseModel):
 
 class SellReflection(BaseModel):
     prompt: SellPrompt | None
+
+
+class FitCheck(BaseModel):
+    goal: str
+    label: str
+    fits: bool
+    evidence: str
+
+
+class InstrumentRating(BaseModel):
+    checks: list[FitCheck]
+    weight_pct: float
+    exposure: list[str]
+    summary: str
+    source: Literal["ai", "demo"]
+
+
+class TradeDraft(BaseModel):
+    symbol: str = Field(pattern=r"^[A-Z]{1,5}$")
+    side: Literal["buy", "sell"]
+    quantity: int = Field(strict=True, ge=1, le=10000)
+    order_type: Literal["market", "limit"]
+    estimated_satang: int = Field(strict=True, ge=0, le=10**15)
+
+
+class TradeGoal(BaseModel):
+    slug: str | None = None
+    saved: float | None = None
+    target: float | None = None
+    name: str
+    years: float
+
+
+class TradeReview(BaseModel):
+    goals: list[TradeGoal]
+    monthly_target_thb: int
+    question: str
+    source: Literal["ai", "demo"]
 
 
 class PaperFX(BaseModel):

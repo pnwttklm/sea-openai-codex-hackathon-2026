@@ -26,7 +26,8 @@ class DemoService:
                 plans = await self.goals()
                 for goal, slug in zip(data["health_plan"]["goals"], ("wedding", "retirement", "time-machine", "dream-home")):
                     if slug in plans:
-                        goal.update(name=plans[slug].title, years=plans[slug].months / 12)
+                        plan = plans[slug]
+                        goal.update(slug=slug, name=plan.title, years=plan.months / 12, saved=plan.saved, target=plan.target)
         return data
 
     async def portfolio(self) -> Portfolio:

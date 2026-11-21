@@ -31,7 +31,7 @@ For the wedding fixture, the estimated five-year balance is THB 525,142.68. The 
 
 | Route under `/api/v1` | Contract |
 | --- | --- |
-| `POST /companion/turns` | Accepts `question` and optional `goal_id`. Returns `answer`, `presenters`, `evidence`, `status` and `mode`. The investor sees specialist mascots and source notes. |
+| `POST /companion/turns` | Accepts `question` and optional `goal_id` and `symbol`. For headline questions without a named ticker, the stock page supplies its symbol. Returns `answer`, `presenters`, `evidence`, `status` and `mode`. The investor sees specialist mascots and source notes. |
 | `GET /companion/goals`, `POST /companion/goals` | Read or explicitly confirm a plan with slug, title, saved/target/monthly THB, months and revision. Concurrent edits with a stale revision return 409. |
 | `GET /companion/journal`, `POST /companion/journal` | Read the latest 50 owned entries or submit a UUID and reflection text. |
 | `POST /ops/session`, `DELETE /ops/session` | Local operator login/logout. Login requires a server-only secret of at least 24 characters, issues an HttpOnly, SameSite=Strict signed one-hour cookie and rate-limits failed attempts. |
@@ -53,3 +53,7 @@ docker compose -p prik-agent-foundation exec -T -e AGENT_TEST_MONGODB_URI=mongod
 docker compose -p prik-agent-foundation exec -T web npm run typecheck
 docker compose -p prik-agent-foundation run --rm --no-deps web npm run build
 ```
+
+Authenticated `GET /api/v1/ops/future-context` returns the current synthetic overview scenario used to start Future You voice sessions. It includes the scenario horizon, allowed profile fields, goal projections, and optional dated portfolio with up to twelve largest holdings. Missing demo profiles return 404. Reads use the operator session and are never cached.
+
+Local demo `POST /api/v1/companion/news/{symbol}` reads the configured headline sample and returns its source, timestamp, dated articles, and analysis when available. Empty coverage returns an empty articles list. A feed error returns 503. Provider analysis failures preserve the headlines.

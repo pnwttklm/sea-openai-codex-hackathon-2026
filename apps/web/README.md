@@ -22,7 +22,7 @@ The demo starts at `/` with both Portfolio chart views. The score card opens `/b
 
 Stock pages support confirmed paper buys and sells at synthetic prices. Open NVDA and select Sell to see the optional Agent reflection before review. Shared demo mode values the same paper account for the Portfolio, Future Talk and Companion views.
 
-Ask Agent saves completed questions, answers, and citations to MongoDB. Reopen the panel in the same browser and stock page to pick up the conversation. The browser stores the random conversation identifier locally.
+In shared demo mode, the Doraemon button on each stock page opens Investor Companion with the selected ticker. The News tab shows headlines and analysis directly.
 
 The paper order ticket offers Market and Limit orders for whole shares, with a separate review before confirmation. The static quote fills market orders and limits that already qualify. Other limits go to Open orders and reserve cash or shares until cancelled. The demo does not match against a live market feed.
 `/goals` shows the Future You dashboard with editable demo goals, an emergency reserve, and a time-machine entry at `/future-you/[goal]`. In shared demo mode confirmed edits persist in MongoDB. Standalone mode uses the current browser origin. Future Talk opens the full-screen conversation at `/future-you` using the configured API profile. Loading, error, and not-found boundaries are included.

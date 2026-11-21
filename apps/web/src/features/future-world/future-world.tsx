@@ -276,7 +276,8 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
           <span />
         </div>
       )}
-      {availability === "loading" && <p className={styles.message} role="status">{error || "Opening your world…"}</p>}
+      {error && <p className={styles.message} role="alert">{error}</p>}
+      {!error && availability === "loading" && <p className={styles.message} role="status">Opening your world…</p>}
       {availability === "fallback" && !panelOpen && (
         <section className={styles.message}><h2>3D view unavailable</h2><p>Explore your saved goals here.</p>
           <button onClick={event => discover("town-guide", event.currentTarget)}>Talk to Doraemon</button>

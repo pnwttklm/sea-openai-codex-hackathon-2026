@@ -10,6 +10,10 @@ from bson import ObjectId
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 
 from app.ai.companion_runtime import TurnRunner
+from app.ai.stock_news import stock_news
+from app.schemas.companion import StockNews, Symbol
+from app.ai.future_voice import voice_scenario
+from app.schemas.future_you import OVERVIEW_YEARS, VoiceScenario
 from app.api.routes.future_you import local_origin_allowed
 from app.data.decision_journal import JournalEntry, JournalNote
 from app.data.agent_traces import Trace
@@ -29,16 +33,28 @@ def demo_only(request: Request, response: Response):
         raise HTTPException(403, "Enable the local synthetic demo.")
 
 
-@router.post("/companion/turns", response_model=Reply, dependencies=[Depends(demo_only)])
-async def companion_turn(body: Turn, request: Request):
+def companion_services(request: Request, question: str) -> CompanionServices:
     if not local_origin_allowed(request):
         raise HTTPException(403, "Use the local demo app.")
     state = request.app.state
     if state.agent_traces is None:
         raise HTTPException(503, "Demo database is unavailable.")
-    services = CompanionServices(state.future_you_repository, ObjectId(DEMO_PROFILE_ID), body.question,
+    return CompanionServices(state.future_you_repository, ObjectId(DEMO_PROFILE_ID), question,
                                  Trace(state.agent_traces), state.companion_model,
                                  os.getenv("COMPANION_NEWS_SOURCE", "demo") == "demo")
+
+@router.post("/companion/news/{symbol}", dependencies=[Depends(demo_only)])
+async def news(symbol: Symbol, request: Request) -> StockNews:
+    services = companion_services(request, "")
+    try:
+        return await stock_news(services, symbol)
+    except (RuntimeError, TimeoutError, ValueError):
+        raise HTTPException(503, "The headline feed is unavailable. Try again.") from None
+
+
+@router.post("/companion/turns", response_model=Reply, dependencies=[Depends(demo_only)])
+async def companion_turn(body: Turn, request: Request):
+    services = companion_services(request, body.question)
     try:
         return await TurnRunner(services, body).run()
     except TimeoutError:
@@ -104,6 +120,18 @@ async def logout(request: Request, response: Response):
 
 
 Traces = Annotated[object, Depends(require_operator)]
+
+
+@router.get("/ops/future-context", dependencies=[Depends(require_operator)])
+async def future_context(request: Request) -> VoiceScenario:
+    repo = request.app.state.future_you_repository
+    subject = ObjectId(DEMO_PROFILE_ID)
+    profile = await repo.get_profile(subject)
+    if profile is None:
+        raise HTTPException(404, "The demo profile has not been seeded.")
+    goals = await repo.list_goals(subject)
+    portfolio = await repo.latest_portfolio(subject)
+    return voice_scenario(profile, goals, OVERVIEW_YEARS, portfolio)
 
 
 @router.get("/ops/agent-runs", response_model=list[Run])

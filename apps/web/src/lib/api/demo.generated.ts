@@ -126,6 +126,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/demo/stocks/{symbol}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stock History */
+        get: operations["stock_history_api_v1_demo_stocks__symbol__history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/demo/stocks/{symbol}/sell-reflection": {
         parameters: {
             query?: never;
@@ -154,6 +171,40 @@ export interface paths {
         get: operations["paper_account_api_v1_demo_paper_account_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/stocks/{symbol}/agent-rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Agent Rating */
+        post: operations["agent_rating_api_v1_demo_stocks__symbol__agent_rating_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/demo/order-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Order Review */
+        post: operations["order_review_api_v1_demo_order_review_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -382,6 +433,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/companion/news/{symbol}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** News */
+        post: operations["news_api_v1_companion_news__symbol__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/companion/turns": {
         parameters: {
             query?: never;
@@ -412,6 +480,23 @@ export interface paths {
         post: operations["login_api_v1_ops_session_post"];
         /** Logout */
         delete: operations["logout_api_v1_ops_session_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/future-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Future Context */
+        get: operations["future_context_api_v1_ops_future_context_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -645,6 +730,17 @@ export interface components {
             /** Label */
             label: string;
         };
+        /** FitCheck */
+        FitCheck: {
+            /** Goal */
+            goal: string;
+            /** Label */
+            label: string;
+            /** Fits */
+            fits: boolean;
+            /** Evidence */
+            evidence: string;
+        };
         /** FutureAssessmentResponse */
         FutureAssessmentResponse: {
             /** Projected */
@@ -789,6 +885,10 @@ export interface components {
             question: string;
             /** Measurement */
             measurement: string;
+            /** Facts */
+            facts?: {
+                [key: string]: string;
+            };
             /** Ai Assessment */
             ai_assessment?: string | null;
         };
@@ -826,6 +926,22 @@ export interface components {
             /** Trend */
             trend: number[];
         };
+        /** InstrumentRating */
+        InstrumentRating: {
+            /** Checks */
+            checks: components["schemas"]["FitCheck"][];
+            /** Weight Pct */
+            weight_pct: number;
+            /** Exposure */
+            exposure: string[];
+            /** Summary */
+            summary: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "ai" | "demo";
+        };
         /** JournalEntry */
         JournalEntry: {
             /**
@@ -855,6 +971,19 @@ export interface components {
         MonthlyTarget: {
             /** Monthly Target Thb */
             monthly_target_thb: number;
+        };
+        /** NewsArticle */
+        NewsArticle: {
+            /** Title */
+            title: string;
+            /** Publisher */
+            publisher: string | null;
+            /** Url */
+            url: string | null;
+            /** Published */
+            published: string;
+            /** Tone */
+            tone?: ("positive" | "negative" | "neutral" | "unclear") | null;
         };
         /** NewsHeadline */
         NewsHeadline: {
@@ -1003,6 +1132,23 @@ export interface components {
             /** Score Label */
             score_label: string;
         };
+        /** PriceSeries */
+        PriceSeries: {
+            /**
+             * Source
+             * @constant
+             */
+            source: "Yahoo Finance";
+            /** Prices */
+            prices: number[];
+            /** Timestamps */
+            timestamps: number[];
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+        };
         /** Progress */
         Progress: {
             /**
@@ -1112,6 +1258,26 @@ export interface components {
             /** Points */
             points: components["schemas"]["Point"][];
         };
+        /** ScenarioHolding */
+        ScenarioHolding: {
+            /** Symbol */
+            symbol: string;
+            /** Weight Pct */
+            weight_pct: string;
+        };
+        /** ScenarioPortfolio */
+        ScenarioPortfolio: {
+            /** As Of */
+            as_of: string;
+            /** Total Value Thb */
+            total_value_thb: string;
+            /** Cash Thb */
+            cash_thb?: string;
+            /** Holdings Count */
+            holdings_count: number;
+            /** Largest Holdings */
+            largest_holdings: components["schemas"]["ScenarioHolding"][];
+        };
         /** SellPrompt */
         SellPrompt: {
             /** Demo Change Percent */
@@ -1183,6 +1349,22 @@ export interface components {
             /** Factors */
             factors?: components["schemas"]["Factor"][];
         };
+        /** StockNews */
+        StockNews: {
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "demo" | "Webull";
+            /** As Of */
+            as_of: string;
+            /** Items */
+            items: components["schemas"]["NewsArticle"][];
+            /** Summary */
+            summary?: string | null;
+            /** Analysis Source */
+            analysis_source?: ("ai" | "demo") | null;
+        };
         /** TownGoalPlan */
         TownGoalPlan: {
             /** Id */
@@ -1204,12 +1386,60 @@ export interface components {
             revision: number;
             appearance?: components["schemas"]["Appearance"] | null;
         };
+        /** TradeDraft */
+        TradeDraft: {
+            /** Symbol */
+            symbol: string;
+            /**
+             * Side
+             * @enum {string}
+             */
+            side: "buy" | "sell";
+            /** Quantity */
+            quantity: number;
+            /**
+             * Order Type
+             * @enum {string}
+             */
+            order_type: "market" | "limit";
+            /** Estimated Satang */
+            estimated_satang: number;
+        };
+        /** TradeGoal */
+        TradeGoal: {
+            /** Slug */
+            slug?: string | null;
+            /** Saved */
+            saved?: number | null;
+            /** Target */
+            target?: number | null;
+            /** Name */
+            name: string;
+            /** Years */
+            years: number;
+        };
+        /** TradeReview */
+        TradeReview: {
+            /** Goals */
+            goals: components["schemas"]["TradeGoal"][];
+            /** Monthly Target Thb */
+            monthly_target_thb: number;
+            /** Question */
+            question: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "ai" | "demo";
+        };
         /** Turn */
         Turn: {
             /** Question */
             question: string;
             /** Goal Id */
             goal_id?: string | null;
+            /** Symbol */
+            symbol?: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1232,6 +1462,22 @@ export interface components {
             sdp: string;
             /** Voice Style */
             voice_style?: ("masculine" | "feminine" | "neutral") | null;
+        };
+        /** VoiceScenario */
+        VoiceScenario: {
+            /** Years From Now */
+            years_from_now: number;
+            /** Age In Scenario */
+            age_in_scenario: number | null;
+            /** Profile Today */
+            profile_today: {
+                [key: string]: string | number;
+            };
+            portfolio_today: components["schemas"]["ScenarioPortfolio"] | null;
+            /** Goals */
+            goals: {
+                [key: string]: string | number;
+            }[];
         };
         /** WorldReply */
         WorldReply: {
@@ -1454,6 +1700,39 @@ export interface operations {
             };
         };
     };
+    stock_history_api_v1_demo_stocks__symbol__history_get: {
+        parameters: {
+            query: {
+                period: "1D" | "1W" | "1M" | "1Y";
+            };
+            header?: never;
+            path: {
+                symbol: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriceSeries"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     sell_reflection_api_v1_demo_stocks__symbol__sell_reflection_get: {
         parameters: {
             query?: never;
@@ -1501,6 +1780,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaperAccount"];
+                };
+            };
+        };
+    };
+    agent_rating_api_v1_demo_stocks__symbol__agent_rating_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                symbol: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstrumentRating"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    order_review_api_v1_demo_order_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TradeDraft"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradeReview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1904,6 +2247,37 @@ export interface operations {
             };
         };
     };
+    news_api_v1_companion_news__symbol__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                symbol: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockNews"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     companion_turn_api_v1_companion_turns_post: {
         parameters: {
             query?: never;
@@ -1983,6 +2357,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    future_context_api_v1_ops_future_context_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceScenario"];
+                };
             };
         };
     };

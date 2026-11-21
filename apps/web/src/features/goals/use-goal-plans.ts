@@ -62,6 +62,7 @@ export function useGoalPlans(customizeLandmarks = false) {
       try {
         const next = shared ? await apiGet<GoalPlan[]>("/api/v1/companion/goals", controller.signal) : readPlans();
         if (controller.signal.aborted) return;
+        if (!next.some(plan => plan.id === "emergency")) throw new Error("Demo goals need to be seeded.");
         setPlans(next);
         setError("");
         setReady(true);
@@ -96,7 +97,16 @@ export function useGoalPlans(customizeLandmarks = false) {
       setPlans(previous => [...previous.filter(p => p.id !== saved.id), saved]
         .sort((a,b) => order(a.id) - order(b.id) || a.id.localeCompare(b.id)));
     } else {
-      localStorage.setItem(prefix + plan.id, JSON.stringify(plan));
+      const write = () => {
+        const current = readPlan(plan.id);
+        if ((current?.revision ?? 0) !== (plan.revision ?? 0)) {
+          setPlans(readPlans());
+          throw new Error("This goal changed. Review the latest balance.");
+        }
+        localStorage.setItem(prefix + plan.id, JSON.stringify({ ...plan, revision: (plan.revision ?? 0) + 1 }));
+      };
+      if (navigator.locks) await navigator.locks.request(prefix + plan.id, write);
+      else write();
       setPlans(readPlans());
     }
   }

@@ -124,6 +124,8 @@ class TurnRunner:
                     self.thai = profile.get("preferred_language") == "th"
                 async with trace.span(root, "provider" if self.s.model.client else "fixture", "route_turn"):
                     intent = await self.s.model.route(self.turn.question, bool(self.turn.goal_id))
+                if intent.news and intent.symbol is None:
+                    intent.symbol = self.turn.symbol
                 goal_id, parts, jobs = self.turn.goal_id, [], []
                 if intent.goal and goal_id is None:
                     choices = (await self.tool("companion", "list_my_goals", {}, root))["goals"]

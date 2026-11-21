@@ -19,6 +19,7 @@ class StrictModel(BaseModel):
 class Turn(StrictModel):
     question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=1500)]
     goal_id: MongoId | None = None
+    symbol: Symbol | None = None
 
 
 class Reply(StrictModel):
@@ -74,3 +75,23 @@ class Run(BaseModel):
 
 class RunDetail(Run):
     spans: list[Span]
+
+class NewsReading(StrictModel):
+    summary: str = Field(min_length=1, max_length=480)
+    tones: list[Tone] = Field(max_length=3)
+
+
+class NewsArticle(BaseModel):
+    title: str
+    publisher: str | None
+    url: str | None
+    published: str
+    tone: Tone | None = None
+
+
+class StockNews(BaseModel):
+    source: Literal["demo", "Webull"]
+    as_of: str
+    items: list[NewsArticle]
+    summary: str | None = None
+    analysis_source: Literal["ai", "demo"] | None = None

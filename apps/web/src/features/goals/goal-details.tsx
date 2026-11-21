@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "re
 import { faCircleCheck, faPen, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { duration, money, validPlan, type GoalPlan } from "./demo-goals";
+import { EmergencyVault } from "./emergency-vault";
 import { GoalEditor } from "./goal-editor";
 import styles from "./future-you.module.css";
 
@@ -45,7 +46,7 @@ export function GoalDetails({ plan, creating, onSave, onClose }: {
 
   async function dismiss() {
     const sheet = dialog.current;
-    if (!sheet?.open || sheet.dataset.closing) return;
+    if (saving || !sheet?.open || sheet.dataset.closing) return;
     sheet.dataset.closing = "true";
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const current = getComputedStyle(sheet);
@@ -109,6 +110,11 @@ export function GoalDetails({ plan, creating, onSave, onClose }: {
         )}
         {editing ? (
           <GoalEditor plan={plan} creating={creating} submit={submit} />
+        ) : plan.id === "emergency" ? (
+          <EmergencyVault plan={plan} busy={saving} edit={() => { setNotice(""); switchPanel(true); }} save={async next => {
+            setSaving(true);
+            try { await onSave(next); } finally { setSaving(false); }
+          }} />
         ) : (
           <>
             <div className={styles.funding}>

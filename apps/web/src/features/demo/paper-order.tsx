@@ -3,12 +3,13 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { DistortionWave } from "distortion-waves";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faCommentDots, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faChevronRight, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { apiGet, apiPost } from "@/lib/api/client";
 import type { components } from "@/lib/api/demo.generated";
 import { DemoData, signed, thbCash, toSatang, usd, type StockData } from "./data";
+import { TradePlanCheck, useTradeCheck } from "./trade-plan-check";
 import { AgentAvatar } from "./agent-avatar";
-import { ResearchPanel } from "./research-chat";
+import { Mascot } from "../companion/mascots";
 
 type Schemas = components["schemas"];
 type Side = Schemas["PaperOrder"]["side"];
@@ -19,9 +20,8 @@ const rateFormat = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, ma
 type OrderType = NonNullable<Schemas["PaperOrder"]["order_type"]>;
 export type PaperAccount = Schemas["PaperAccount"];
 
-export function PaperTrade({ stock }: { stock: StockData }) {
+export function PaperTrade({ stock, onAsk }: { stock: StockData; onAsk?: () => void }) {
   const [side, setSide] = useState<Side>();
-  const [research, setResearch] = useState(false);
   const [fill, setFill] = useState<PaperFill>();
   const [orderRevision, setOrderRevision] = useState(0);
   const [ordersOpen, setOrdersOpen] = useState(false);
@@ -35,13 +35,11 @@ export function PaperTrade({ stock }: { stock: StockData }) {
 
   function start(side: Side, button: HTMLButtonElement) {
     trigger.current = button;
-    setResearch(false);
     setSide(side);
   }
 
   function dismiss() {
     setSide(undefined);
-    setResearch(false);
     requestAnimationFrame(() => trigger.current?.focus());
   }
 
@@ -51,15 +49,11 @@ export function PaperTrade({ stock }: { stock: StockData }) {
         <button type="button" onClick={(event) => start("buy", event.currentTarget)}>Buy</button>
         <button type="button" onClick={(event) => start("sell", event.currentTarget)}>Sell</button>
       </div>
-      <button className="stock-research" type="button" aria-expanded={research} onClick={(event) => {
-        trigger.current = event.currentTarget;
-        setSide(undefined);
-        setResearch(true);
-      }}><FontAwesomeIcon icon={faCommentDots} /> Ask Agent</button>
-      {research && <ResearchPanel symbol={stock.symbol} onDismiss={() => {
-        if (side) setResearch(false);
-        else dismiss();
-      }} />}
+      {onAsk && <button className="stock-agent-action" type="button" aria-haspopup="dialog" onClick={onAsk}>
+        <Mascot agent="companion" size={40} />
+        <span>Ask Doraemon about {stock.symbol}</span>
+        <FontAwesomeIcon icon={faChevronRight} aria-hidden="true" />
+      </button>}
       {fill && (
         <p className="paper-receipt" role="status">
           {fill.status === "open" ? `Limit order placed · ${fill.quantity} ${fill.symbol} · Open`
@@ -70,7 +64,7 @@ export function PaperTrade({ stock }: { stock: StockData }) {
       {ordersOpen && <OpenOrders key={orderRevision} symbol={stock.symbol} onCancelled={(id) => {
         if (fill?.order_id === id) setFill(undefined);
       }} />}
-      {side && <OrderSheet key={side} stock={stock} side={side} onDismiss={dismiss} onFill={recordFill} obscured={research} onResearch={() => setResearch(true)} />}
+      {side && <OrderSheet key={side} stock={stock} side={side} onDismiss={dismiss} onFill={recordFill} onAsk={onAsk} />}
     </>
   );
 }
@@ -116,19 +110,18 @@ function OpenOrders({ symbol, onCancelled }: { symbol: string; onCancelled: (id:
   </section>;
 }
 
-function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
+function OrderSheet({ stock, side, onDismiss, onFill, onAsk }: {
   stock: StockData;
   side: Side;
   onDismiss: () => void;
   onFill: (fill: PaperFill) => void;
-  onResearch: () => void;
-  obscured: boolean;
+  onAsk?: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const confirmButton = useRef<HTMLButtonElement>(null);
   const formId = useId();
   const [receipt, setReceipt] = useState<PaperFill>();
-  const [review, setReview] = useState(side === "buy" || stock.symbol !== "NVDA");
+  const [review, setReview] = useState(true);
   const [reflection, setReflection] = useState<Reflection | null>();
   const [reply, setReply] = useState<"plan" | "news">();
   const [quantity, setQuantity] = useState("1");
@@ -149,6 +142,10 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
     && (orderType === "market" || (limit >= 1 && limit <= 100_000_000));
   const isMarketable = orderType === "market" || (side === "buy" ? stock.price_cents <= limit : stock.price_cents >= limit);
   const estimatedPrice = orderType === "market" ? stock.price_cents : limit;
+  const check = useTradeCheck(review && valid && fx && !receipt ? {
+    symbol: stock.symbol, side, quantity: shares, order_type: orderType,
+    estimated_satang: toSatang(estimatedPrice * shares, fx.rate_micros),
+  } : null);
   const statusTitle = receipt?.status === "open" ? "Limit order placed" : "Order filled";
 
   useEffect(() => {
@@ -161,10 +158,6 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
       if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
     };
   }, [review]);
-
-  useEffect(() => {
-    if (!obscured && !review) closePanel.current?.focus();
-  }, [obscured, review]);
 
   useEffect(() => {
     if (review) return;
@@ -202,7 +195,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!valid || !fx || inFlight.current || receipt) return;
+    if (!valid || !fx || inFlight.current || receipt || (reviewingOrder && check.pending)) return;
     if (!reviewingOrder) {
       setReviewingOrder(true);
       setError("");
@@ -237,7 +230,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
   const prompt = reflection?.prompt;
   if (!review) {
     return (
-      <section className="agent-panel" hidden={obscured} role="dialog" aria-labelledby="agent-title"
+      <section className="agent-panel" role="dialog" aria-labelledby="agent-title"
         onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onDismiss(); } }}>
         <div className="agent-toolbar">
           <AgentAvatar busy={reflection === undefined} />
@@ -281,7 +274,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
             <button type="button" onClick={() => setReply("plan")}>Part of my plan</button>
             <button type="button" onClick={() => setReply("news")}>New information</button>
           </div>}
-          <button type="button" className="agent-research-link" onClick={onResearch}>Research this stock</button>
+          {onAsk && <button type="button" className="agent-research-link" onClick={onAsk}>Ask Doraemon about {stock.symbol}</button>}
           <button className="agent-continue" type="button" onClick={() => setReview(true)}>{reply ? "Continue to review" : "Skip to review"}</button>
         </div>
       </section>
@@ -311,10 +304,10 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
               className="order-primary"
               type={receipt ? "button" : "submit"}
               form={receipt ? undefined : formId}
-              disabled={!receipt && (!valid || !fx || busy)}
+              disabled={!receipt && (!valid || !fx || busy || (reviewingOrder && check.pending))}
               onClick={receipt ? onDismiss : undefined}
             >
-              {receipt ? "Done" : busy ? "Submitting…" : reviewingOrder ? `Confirm ${side}` : "Review order"}
+              {receipt ? "Done" : busy ? "Submitting…" : reviewingOrder ? `Confirm ${side}` : `Review ${side} order`}
             </button>
           </div>
         }
@@ -346,6 +339,8 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
               ? <button type="button" disabled={busy} onClick={() => { setReviewingOrder(false); setError(""); }}>Edit</button>
               : <button type="button" onClick={onDismiss}>Close</button>}
           </div>
+          {!receipt && <TradePlanCheck check={check} side={side} symbol={stock.symbol}
+            estimatedSatang={valid && fx ? toSatang(estimatedPrice * shares, fx.rate_micros) : null} onPause={onDismiss} disabled={busy} />}
           <form id={formId} onSubmit={submit}>
             {reviewingOrder ? (
               <dl className="order-details">
@@ -359,9 +354,12 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
               <>
                 <DemoData<PaperAccount> path="/api/v1/demo/paper-account" title="trading account">
                   {(account) => <dl className="order-details order-account-context">
-                    <div><dt>{side === "buy" ? "Cash balance" : "Share balance"}</dt><dd>{side === "buy"
+                    <div><dt>{side === "buy" ? "Portfolio cash" : "Available shares"}</dt><dd>{side === "buy"
                       ? account.cash_thb_satang != null ? thbCash.format(account.cash_thb_satang / 100) : "—"
                       : `${account.positions[stock.symbol]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? 0} ${stock.symbol}`}</dd></div>
+                    {side === "buy" && valid && fx && account.cash_thb_satang != null && <div>
+                      <dt>Cash after purchase at estimate</dt><dd>{account.cash_thb_satang >= toSatang(estimatedPrice * shares, fx.rate_micros)
+                        ? thbCash.format((account.cash_thb_satang - toSatang(estimatedPrice * shares, fx.rate_micros)) / 100) : "Exceeds cash balance"}</dd></div>}
                   </dl>}
                 </DemoData>
                 <fieldset className="order-types">
@@ -397,6 +395,8 @@ function OrderSheet({ stock, side, onDismiss, onFill, onResearch, obscured }: {
             {orderType === "limit" && valid && <p className="source-label">
               {isMarketable ? "The demo quote meets your limit." : "The demo quote falls outside your limit. This order stays open until cancelled in the demo."}
             </p>}
+            {!reviewingOrder && side === "sell" && stock.symbol === "NVDA" &&
+              <button type="button" onClick={() => setReview(false)}>Review stock headlines</button>}
             {error && <p role="alert" className="order-error">{error}</p>}
           </form>
         </div>
