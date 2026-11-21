@@ -1,0 +1,31 @@
+.market {
+  min-height: 100dvh;
+  padding-top: max(30px, env(safe-area-inset-top));
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  background: radial-gradient(ellipse 125% 285px at 12% 0%, #373184, transparent 92%), #111214;
+}
+.market h1 { font-size: 28px; }
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 26px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #686388;
+  border-radius: 14px;
+  background: #1c1c2d;
+  color: #bdbbd1;
+}
+.search:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.search input { width: 100%; min-width: 0; padding: 12px 0; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; }
+.search input::placeholder { color: #c0bccf; }
+.heading,.row { display: flex; align-items: center; gap: 12px; }
+.heading { justify-content: space-between; margin-bottom: 8px; }
+.list { list-style: none; margin: 0; padding: 0; }
+.row { min-height: 68px; padding: 10px 3px; border-bottom: 1px solid var(--edge); }
+.row:hover { background: #ffffff07; }
+.instrument,.quote { display: grid; gap: 3px; }
+.instrument { flex: 1; min-width: 0; }
+.instrument small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quote { text-align: right; }

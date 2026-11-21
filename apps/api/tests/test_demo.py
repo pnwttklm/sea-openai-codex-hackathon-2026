@@ -42,6 +42,9 @@ def test_demo_routes_share_consistent_fixture(monkeypatch):
         assert sum(group["percent"] for group in portfolio["allocation"]) == 100
         assert [(h["symbol"], h["weight"]) for h in portfolio["holdings"]] == [
             ("VOO", 35), ("NVDA", 15), ("SGOV", 15), ("VT", 10), ("SE", 10), ("GLD", 10), ("BTC", 5)]
+        catalog = client.get("/api/v1/demo/stocks").json()
+        assert [s["symbol"] for s in catalog] == sorted(seed_document()["stocks"])
+        assert amd in catalog
         assert amd["source"] == "demo"
         assert amd["price_cents"] == 17523
         assert len(amd["factors"]) == 5

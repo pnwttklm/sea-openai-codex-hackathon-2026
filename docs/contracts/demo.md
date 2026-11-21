@@ -5,6 +5,7 @@ This is a shared, synthetic fixture for the local prototype. The monthly target,
 
 - `GET /portfolio` returns investor name, value and period change in integer THB, chart point arrays and comparison values by range, allocation percentages, and holdings with USD prices in cents and signed percentage moves.
 - `GET /behavior` returns Investor Health Score calculated from the monthly demo snapshot. The four equally weighted dimensions are Contribution, DCA Consistency, Diversification, and Goal & Risk Fit. Each includes its question, measurement and score out of 10. POST /behavior/target accepts monthly_target_thb (whole THB, 1–100,000,000) and returns the recalculated score.
+- `GET /stocks` returns the complete demo instrument catalog as a list of Stock objects sorted by symbol. Invest searches this catalog by ticker or name. Prices use USD cents, changes use signed percentages, and an empty catalog returns an empty list.
 - `GET /stocks/{symbol}` accepts 1–5 uppercase ASCII letters. It returns name, exchange, synthetic USD quote in cents, signed percentage change, and optional fundamental factors. Unknown symbols return 404 and malformed symbols return 422.
 
 The canonical fields are the Pydantic schemas exposed in OpenAPI. Each response includes `source: "demo"`. For example AMD has `price_cents: 17523` and `change_percent: 1.36`. The frontend distinguishes the fixture quote from any independently sourced TradingView chart.

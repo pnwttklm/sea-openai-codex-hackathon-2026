@@ -4,8 +4,8 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
-export function BackLink() {
-  return <Link className="demo-icon" href="/" aria-label="Back to Portfolio"><FontAwesomeIcon icon={faArrowLeft} /></Link>;
+export function BackLink({ market = false }: { market?: boolean }) {
+  return <Link className="demo-icon" href={market ? "/invest" : "/"} aria-label={market ? "Back to market" : "Back to Portfolio"}><FontAwesomeIcon icon={faArrowLeft} /></Link>;
 }
 
 export function Character({ name }: { name: "nobita" | "doraemon" | "shizuka" }) {
@@ -13,7 +13,7 @@ export function Character({ name }: { name: "nobita" | "doraemon" | "shizuka" })
   return <span className={`character ${name}`}><img src={`/demo/${filename}`} alt="" /></span>;
 }
 
-export function DemoNav({ active = "portfolio" }: { active?: "portfolio" | "goals" }) {
+export function DemoNav({ active = "portfolio" }: { active?: "portfolio" | "invest" | "goals" }) {
   return (
     <nav data-active={active} className={styles.tabs} aria-label="Main navigation">
       <Link href="/" aria-current={active === "portfolio" ? "page" : undefined}>
@@ -22,7 +22,7 @@ export function DemoNav({ active = "portfolio" }: { active?: "portfolio" | "goal
         </span>
         Portfolio
       </Link>
-      <Link href="/stocks/AMD">
+      <Link href="/invest" aria-current={active === "invest" ? "page" : undefined}>
         <Image src={`/future-you/doraemon-tab.svg`} alt="" width={31.605} height={28.105} />
         Invest
       </Link>

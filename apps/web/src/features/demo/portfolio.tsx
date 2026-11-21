@@ -6,13 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartLine, faChartPie, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { DemoData, signed, thb, thbCash, type PortfolioData, type Range } from "./data";
 import { Ring, Sparkline } from "./charts";
+import { TickerLogo } from "./ticker-logo";
 import { Character, DemoNav } from "./shell";
 import type { PaperAccount } from "./paper-order";
 
 const ranges: Range[] = ["1Y", "3Y", "5Y", "10Y", "All"];
 const periodLabels: Record<Range, string> = { "1Y": "past 1 year", "3Y": "past 3 years", "5Y": "past 5 years", "10Y": "past 10 years", All: "all time" };
 const shades = ["#a45cff", "#676780", "#494950", "#696971", "#888893", "#38383b"];
-const logos: Record<string, string> = { SGOV: "sgov.svg", VT: "vt.svg", SE: "se.svg", GLD: "gld.svg", BTC: "btc.svg", NVDA: "nvda.jpg", AAPL: "aapl.svg", MSTR: "mstr.jpg", MSFT: "msft.svg" };
 
 function Allocation({ items, value }: { items: PortfolioData["allocation"]; value: number }) {
   const [active, setActive] = useState(0);
@@ -120,9 +120,7 @@ export function Portfolio() {
                   {holdings.map((holding) => (
                     <li key={holding.symbol}>
                       <Link href={`/stocks/${holding.symbol}`} className="holding">
-                        <span className={`ticker-logo ticker-${holding.symbol.toLowerCase()}`}>
-                          {logos[holding.symbol] ? <img src={`/demo/${logos[holding.symbol]}`} alt="" /> : ({ VOO: "500", QQQ: "100" }[holding.symbol] ?? holding.symbol.slice(0, 2))}
-                        </span>
+                        <TickerLogo symbol={holding.symbol} />
                         <span className="holding-name"><strong>{holding.symbol}</strong><small>{holding.name}</small></span>
                         <span className={`holding-trend ${holding.change_percent >= 0 ? "gain" : "loss"}`}><Sparkline values={holding.trend} /></span>
                         <span className="quote"><strong>{thb.format(data.value_thb * holding.weight / 100)}</strong><small>{holding.weight}%</small></span>

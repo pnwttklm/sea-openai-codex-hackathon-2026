@@ -41,6 +41,10 @@ class DemoService:
         await self.repository.set_monthly_target(target)
         return await self.behavior()
 
+    async def stocks(self) -> list[Stock]:
+        catalog = (await self.repository.get())["stocks"]
+        return [Stock.model_validate(catalog[symbol]) for symbol in sorted(catalog)]
+
     async def stock(self, symbol: str) -> Stock | None:
         stock = (await self.repository.get())["stocks"].get(symbol)
         return Stock.model_validate(stock) if stock is not None else None

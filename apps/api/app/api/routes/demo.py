@@ -37,6 +37,11 @@ async def update_target(body: MonthlyTarget, service: Demo) -> Behavior:
     return await service.update_target(body.monthly_target_thb)
 
 
+@router.get("/stocks")
+async def stocks(service: Demo) -> list[Stock]:
+    return await service.stocks()
+
+
 @router.get("/stocks/{symbol}")
 async def stock(symbol: Annotated[str, Path(pattern=r"^[A-Z]{1,5}$")], service: Demo) -> Stock:
     result = await service.stock(symbol)
