@@ -80,7 +80,7 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const { open: openChat, close: closeChat } = chat;
   const { plans, ready, error } = useGoalPlans(true);
   const landmarks = useMemo(() => worldLandmarks(plans), [plans]);
-  const [selectedId, setSelectedId] = useState(initialGoal === "town-guide" || initialGoal === "shopee-dog" ? null : initialGoal ?? null);
+  const [selectedId, setSelectedId] = useState(initialGoal ?? null);
   const [nearbyId, setNearbyId] = useState<string | null>(null);
   const [availability, setAvailability] = useState<"loading" | "ready" | "fallback">("loading");
   const pointer = useRef<number | null>(null);
@@ -95,7 +95,9 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
   const guideOpen = dogOpen || selectedId === "town-guide";
   const panelOpen = Boolean(selected || guideOpen);
   const invitation = landmarks.find(plot => plot.plan.id === reminder?.id);
-  const conversationGoal = landmarks.find(plot => plot.plan.id === conversationGoalId);
+  const latestReply = chat.exchanges.at(-1)?.reply;
+  const subjectId = shared && latestReply ? latestReply.goal_id : conversationGoalId;
+  const conversationGoal = landmarks.find(plot => plot.plan.id === subjectId);
   const nearby = landmarks.find(plot => plot.plan.id === nearbyId);
   const enterNearby = town && nearby?.kind === "house";
   const nearbyLabel = nearbyId === "house-exit" ? "Exit to town"
@@ -110,10 +112,12 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
     } else if (id === "town-guide") {
       const nearbyGoal = scene.current?.startConversation(id);
       const subject = invitedGoal ?? nearbyGoal;
-      if (shared) openChat(subject);
-      if (!shared) {
+      setConversationGoalId(subject);
+      if (shared) {
+        setGuideReply("");
+        openChat(subject);
+      } else {
         const plan = latestLandmarks.current.find(plot => plot.plan.id === subject)?.plan;
-        setConversationGoalId(subject);
         setGuideReply(plan
           ? goalFollowUp(plan)
           : "Hi! I’m taking a walk around your town. Come look at the goals with me!");
@@ -288,23 +292,28 @@ export function FutureWorld({ initialGoal, houseId }: { initialGoal?: string; ho
         <div className={styles.guideHeading}><h2>{companionName}</h2>
           <button className={styles.iconButton} onClick={closeDetails} aria-label="Close conversation"><FontAwesomeIcon icon={faXmark} /></button>
         </div>
-        {shared && !dogOpen ? <WorldChat chat={chat} landmarks={landmarks} /> : <>
-          {!dogOpen && <small>Browser demo</small>}
-          <p aria-live="polite">{guideReply}</p>
-          {!dogOpen && conversationGoal && <label className={styles.goalMeter}>
-            <span>{conversationGoal.plan.title} · ฿{money.format(conversationGoal.plan.saved)} of ฿{money.format(conversationGoal.plan.target)}</span>
-            <progress value={Math.min(conversationGoal.plan.saved, conversationGoal.plan.target)} max={conversationGoal.plan.target} />
-          </label>}
-          <div className={styles.answers}>
-            {dogOpen ? <button onClick={() => setGuideReply("The little dog leans into your hand. Woof!")}>Pet the dog</button> :
-            conversationGoal ? <button onClick={() => {
-              scene.current?.endConversation();
-              setSelectedId(conversationGoal.plan.id);
-              setConversationGoalId(undefined);
-            }}>Show my progress</button> :
-            <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>}
-          </div></>}
-        <div className={styles.answers}><button onClick={closeDetails}>Back to exploring</button></div>
+        {shared && !dogOpen && (
+          chat.pending || chat.failure || latestReply
+            ? <WorldChat chat={chat} landmarks={landmarks} />
+            : <button disabled={!ready} onClick={event => discover("town-guide", event.currentTarget)}>Talk to Doraemon</button>
+        )}
+        {!shared && !dogOpen && <small>Browser demo</small>}
+        {guideReply && <p aria-live="polite">{guideReply}</p>}
+        {!shared && !dogOpen && conversationGoal && <label className={styles.goalMeter}>
+          <span>{conversationGoal.plan.title} · ฿{money.format(conversationGoal.plan.saved)} of ฿{money.format(conversationGoal.plan.target)}</span>
+          <progress value={Math.min(conversationGoal.plan.saved, conversationGoal.plan.target)} max={conversationGoal.plan.target} />
+        </label>}
+        <div className={styles.answers}>
+          {dogOpen ? <button onClick={() => setGuideReply("The little dog leans into your hand. Woof!")}>Pet the dog</button> :
+          conversationGoal ? <button onClick={() => {
+            closeChat();
+            scene.current?.endConversation();
+            setSelectedId(conversationGoal.plan.id);
+            setConversationGoalId(undefined);
+          }}>Show my progress</button> :
+          <button onClick={() => setGuideReply("Save a goal in Future You and a new landmark appears here. Tap it to see your progress.")}>How do goals appear?</button>}
+          <button onClick={closeDetails}>Back to exploring</button>
+        </div>
       </WorldSheet>}
       {selected && <FundingDetails landmark={selected} onEnter={town && selected.kind === "house" && availability === "ready" ? () => {
         setSelectedId(null);

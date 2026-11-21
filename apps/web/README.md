@@ -8,7 +8,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. Optional configuration: copy `.env.example` to `.env.local`.
+Open http://localhost:3000. For the shared demo with a host-run frontend and the Docker API on port 8113, set `NEXT_PUBLIC_SHARED_DEMO=1`, `NEXT_PUBLIC_API_BASE_URL=http://localhost:8113`, and `INTERNAL_API_URL=http://localhost:8113` in `apps/web/.env.local`. Include the frontend origin in the API’s `CORS_ORIGINS` when its port differs from `WEB_PORT`. Restart the development server after changing its environment.
 
 ```sh
 npm run typecheck

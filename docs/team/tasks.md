@@ -81,6 +81,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | TALK-PORTRAIT | Use the supplied adult Nobita portrait in Future Talk | Codex | Review | codex/investor-health-ux | FUTURE-TALK-LINK |
 | MARKET-CHARTS | Use sourced price history for every catalog instrument and add the research agent portrait to its stock action | Codex | Review | codex/investor-health-ux | Stock overview, research trigger and market data contract |
 | STOCK-COMPANION | Route stock questions to Doraemon and remove the separate research panel | Codex | Review | codex/investor-health-ux | Stock UI and companion turn context |
+| CORE-WORLD | Integrate the backend town with the ed6f7c8 shared demo and preserve its navigation | Codex | Review | codex/core-future-world | Future World UI, local demo configuration, and integration verification |
 | MERGE-03 | Resolve PR #3 conflicts in Future World, goal loading, API types and the task board | Codex | Review | `poon-future-you` | WORLD-01, WORLD-SYNC |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
