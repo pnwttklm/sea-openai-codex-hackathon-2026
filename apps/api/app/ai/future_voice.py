@@ -22,7 +22,8 @@ def describe_goal(goal: SavedGoal) -> dict:
     result = assess_plan(goal)
     return {
         "name": goal.goal_name,
-        "years_from_now": goal.years,
+        "years_from_now": (goal.months / 12 if goal.months else goal.years),
+        "months_remaining": goal.months or goal.years * 12,
         "saved_thb": f"THB {goal.saved:,}",
         "monthly_deposit_thb": f"THB {goal.monthly:,}",
         "target_thb": f"THB {goal.target:,}",

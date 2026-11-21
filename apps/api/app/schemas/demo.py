@@ -56,7 +56,8 @@ class Behavior(MonthlyTarget):
 class Portfolio(BaseModel):
     source: Literal["demo"] = "demo"
     investor: str
-    value_thb: int
+    value_thb: float
+    cash_thb: float | None = None
     history: dict[Range, History]
     allocation: list[Allocation]
     holdings: list[Holding]
@@ -92,7 +93,7 @@ class SellReflection(BaseModel):
 class PaperFX(BaseModel):
     rate_micros: int = Field(gt=0, le=1_000_000_000)
     as_of: date
-    source: Literal["Frankfurter"] = "Frankfurter"
+    source: Literal["Frankfurter", "Demo"] = "Frankfurter"
 
 
 class PaperAccount(BaseModel):

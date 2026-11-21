@@ -33,10 +33,10 @@ function Allocation({ items, value }: { items: PortfolioData["allocation"]; valu
               strokeDasharray={`${Math.max(0, percent - 0.75)} 100`} strokeDashoffset={-start} transform="rotate(-90 105 105)" />;
           })}
         </svg>
-        <p aria-live="polite"><strong>{selected.name}</strong><span>{selected.percent}%</span><small>{thb.format(value * selected.percent / 100)}</small></p>
+        <p aria-live="polite"><strong>{selected.name}</strong><span>{Number(selected.percent.toFixed(1))}%</span><small>{thb.format(value * selected.percent / 100)}</small></p>
       </div>
       <div className="allocation-key" aria-label="Allocation groups">
-        {items.map(({ name, percent }, index) => <button key={name} type="button" aria-pressed={active === index} onClick={() => setActive(index)}>{name} {percent}%</button>)}
+        {items.map(({ name, percent }, index) => <button key={name} type="button" aria-pressed={active === index} onClick={() => setActive(index)}>{name} {Number(percent.toFixed(1))}%</button>)}
       </div>
     </div>
   );
@@ -73,7 +73,7 @@ export function Portfolio() {
           return (
             <>
               <header className="portfolio-profile">
-                <div className="investor-avatar"><Character name="nobita" /><img className="companion-badge" src="/demo/doraemon-badge.svg" alt="" /></div>
+                <Link href="/companion" aria-label="Open Investor Companion" className="investor-avatar"><Character name="nobita" /><img className="companion-badge" src="/demo/doraemon-badge.svg" alt="" /></Link>
                 <span className="muted">Investor</span><h1>{data.investor}</h1>
               </header>
               <section ref={chart} aria-label="Portfolio value">
@@ -91,7 +91,8 @@ export function Portfolio() {
                 </div>
                 {view === "line" ? (
                   <>
-                    <HistoryExplorer key={period} values={history.values} label={`Portfolio history, ${periodLabels[period]}`} />
+                    <HistoryExplorer key={period} values={history.values} label={`Illustrative portfolio history, ${periodLabels[period]}`} />
+                    <small>Illustrative history · synthetic prices</small>
                     <div className="segments" role="group" aria-label="Time range">
                       {ranges.map((range) => <button type="button" key={range} aria-pressed={period === range} onClick={() => setPeriod(range)}>{range}</button>)}
                     </div>
@@ -105,7 +106,7 @@ export function Portfolio() {
               <section className="insights">
                 <h2>Portfolio Insights Analytics</h2>
                 <div className="insight-grid">
-                  <button type="button" onClick={() => { setView("allocation"); chart.current?.scrollIntoView({ block: "start" }); }}>Largest allocation <strong>{data.allocation[0]?.name ?? "—"} {data.allocation[0]?.percent ?? 0}%</strong></button>
+                  <button type="button" onClick={() => { setView("allocation"); chart.current?.scrollIntoView({ block: "start" }); }}>Largest allocation <strong>{data.allocation[0]?.name ?? "—"} {Number((data.allocation[0]?.percent ?? 0).toFixed(1))}%</strong></button>
                   <Link href="/stocks/VT">Explore VT <strong>Stock detail <FontAwesomeIcon icon={faChevronRight} /></strong></Link>
                 </div>
               </section>
@@ -129,7 +130,7 @@ export function Portfolio() {
                     </li>
                   ))}
                 </ul>
-                <p className="source-label">VT includes US stocks also held in VOO. Total invested · {thb.format(data.value_thb)}</p>
+                <p className="source-label">VT includes US stocks also held in VOO. Portfolio total · {thb.format(data.value_thb)}</p>
               </section>
               <section className="paper-account" aria-label="Paper account">
                 <h2>Paper account</h2>

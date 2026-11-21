@@ -13,8 +13,11 @@ def investor_health(snapshot: dict) -> Behavior:
     # Combine direct and look-through fund weights in the same exposure buckets.
     exposure = {}
     for holding in holdings:
-        for bucket, share in plan["exposures"][holding["symbol"]].items():
+        for bucket, share in plan["exposures"].get(holding["symbol"], {holding["symbol"]: 1}).items():
             exposure[bucket] = exposure.get(bucket, 0) + holding["weight"] * share
+    cash_weight = max(0, 100 - sum(h["weight"] for h in holdings))
+    if cash_weight > 0.001 or not exposure:
+        exposure["Cash"] = cash_weight
     largest = max(exposure, key=exposure.get)
 
     matches = 0

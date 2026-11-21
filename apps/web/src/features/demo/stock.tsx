@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { DemoData, signed, usd, type StockData } from "./data";
-import { Radar } from "./charts";
+import { Conversation } from "@/features/companion/conversation";
+import { FundamentalChart } from "./fundamental-chart";
 import { BackLink } from "./shell";
 import { PaperTrade } from "./paper-order";
 
@@ -54,15 +55,11 @@ function Chart({ symbol }: { symbol: string }) {
 }
 
 const modes = ["Overview", "INVX", "Options", "News"] as const;
-const dimensions = ["Quality", "Profitability", "Growth", "Dividend", "Valuation"];
 type Mode = (typeof modes)[number];
 
 function Details({ stock }: { stock: StockData }) {
   const [selected, setSelected] = useState<Mode>("INVX");
   const up = stock.change_percent >= 0;
-  const factors = dimensions.map((name) => ({
-    name, score: stock.factors?.find((factor) => factor.name === name)?.score ?? null,
-  }));
   return (
     <>
       <header className="stock-title">
@@ -78,15 +75,10 @@ function Details({ stock }: { stock: StockData }) {
         {modes.map((mode) => <button type="button" key={mode} aria-pressed={selected === mode} onClick={() => setSelected(mode)}>{mode}</button>)}
       </div>
       {selected === "Overview" && <Chart symbol={stock.symbol === "BTC" ? "COINBASE:BTCUSD" : `${stock.exchange}:${stock.symbol}`} />}
-      {selected === "INVX" && (
-        <section className="fundamentals">
-          <h2>INVX Fundamental</h2>
-          <p className="source-label">5 dimensions · {stock.factors?.length ? "Illustrative demo ratings" : "Ratings unavailable for " + stock.symbol}</p>
-          <Radar factors={factors} />
-        </section>
-      )}
+      {selected === "INVX" && <FundamentalChart symbol={stock.symbol} factors={stock.factors ?? []} />}
       {selected === "Options" && <p className="demo-state">Options data is unavailable in this demo.</p>}
-      {selected === "News" && <p className="demo-state">News is unavailable in this demo.</p>}
+      {selected === "News" && (process.env.NEXT_PUBLIC_SHARED_DEMO === "1"
+        ? <Conversation symbol={stock.symbol} /> : <p className="demo-state">News is unavailable in this demo.</p>)}
       <PaperTrade stock={stock} />
     </>
   );

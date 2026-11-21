@@ -84,7 +84,7 @@ function GoalCard({ goal, open }: { goal: GoalPlan; open: (trigger: HTMLButtonEl
 }
 
 export function FutureYou() {
-  const { plans, savePlan } = useGoalPlans();
+  const { plans, savePlan, ready, error } = useGoalPlans();
   const goals = plans.filter(plan => plan.id !== "emergency");
   const reserve = plans.find(plan => plan.id === "emergency")!;
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -102,6 +102,8 @@ export function FutureYou() {
     trigger.current = button;
     setDetailId(id);
   }
+
+  if (!ready || error) return <main id="main" className={styles.screen}><p role="status">{error || "Loading saved goals…"}</p></main>;
 
   return (
     <main id="main" className={styles.screen} tabIndex={-1}>
@@ -134,7 +136,7 @@ export function FutureYou() {
 
       <DemoNav active="goals" />
 
-      {detail && <GoalDetails plan={detail} creating={draft !== null} onSave={plan => { savePlan(plan); setDraft(null); }} onClose={() => {
+      {detail && <GoalDetails plan={detail} creating={draft !== null} onSave={async plan => { await savePlan(plan); setDraft(null); }} onClose={() => {
         setDraft(null);
         setDetailId(null);
         trigger.current?.focus({ preventScroll: true });

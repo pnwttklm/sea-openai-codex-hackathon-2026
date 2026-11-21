@@ -348,6 +348,111 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/companion/turns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Companion Turn */
+        post: operations["companion_turn_api_v1_companion_turns_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login_api_v1_ops_session_post"];
+        /** Logout */
+        delete: operations["logout_api_v1_ops_session_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/agent-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Runs */
+        get: operations["list_runs_api_v1_ops_agent_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/agent-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Run Detail */
+        get: operations["run_detail_api_v1_ops_agent_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companion/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Shared Goals */
+        get: operations["shared_goals_api_v1_companion_goals_get"];
+        put?: never;
+        /** Confirm Goal */
+        post: operations["confirm_goal_api_v1_companion_goals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/companion/journal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Journal Entries */
+        get: operations["journal_entries_api_v1_companion_journal_get"];
+        put?: never;
+        /** Journal Save */
+        post: operations["journal_save_api_v1_companion_journal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -517,6 +622,26 @@ export interface components {
             /** Goals */
             goals?: components["schemas"]["SavedGoalSummary"][];
         };
+        /** GoalPlan */
+        GoalPlan: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /** Saved */
+            saved: number;
+            /** Target */
+            target: number;
+            /** Monthly */
+            monthly: number;
+            /** Months */
+            months: number;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -569,6 +694,31 @@ export interface components {
             /** Trend */
             trend: number[];
         };
+        /** JournalEntry */
+        JournalEntry: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Text */
+            text: string;
+            /**
+             * Created
+             * Format: date-time
+             */
+            created: string;
+        };
+        /** JournalNote */
+        JournalNote: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Text */
+            text: string;
+        };
         /** MonthlyTarget */
         MonthlyTarget: {
             /** Monthly Target Thb */
@@ -584,6 +734,11 @@ export interface components {
             published_at?: string | null;
             /** Url */
             url?: string | null;
+        };
+        /** OperatorLogin */
+        OperatorLogin: {
+            /** Secret */
+            secret: string;
         };
         /** PaperAccount */
         PaperAccount: {
@@ -610,9 +765,9 @@ export interface components {
             /**
              * Source
              * @default Frankfurter
-             * @constant
+             * @enum {string}
              */
-            source: "Frankfurter";
+            source: "Frankfurter" | "Demo";
         };
         /** PaperFill */
         PaperFill: {
@@ -694,6 +849,8 @@ export interface components {
             investor: string;
             /** Value Thb */
             value_thb: number;
+            /** Cash Thb */
+            cash_thb?: number | null;
             /** History */
             history: {
                 [key: string]: components["schemas"]["History"];
@@ -706,6 +863,69 @@ export interface components {
             score: number;
             /** Score Label */
             score_label: string;
+        };
+        /** Reply */
+        Reply: {
+            /** Answer */
+            answer: string;
+            /** Presenters */
+            presenters: ("companion" | "goal_planner" | "portfolio_analyst" | "sentiment_analyst")[];
+            /** Evidence */
+            evidence: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "complete" | "partial" | "needs_input";
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "demo" | "openai";
+        };
+        /** Run */
+        Run: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Started */
+            started: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "partial" | "failed" | "interrupted";
+            /** Agents */
+            agents: ("companion" | "goal_planner" | "portfolio_analyst" | "sentiment_analyst")[];
+            /** Tools */
+            tools: number;
+            /** Db Reads */
+            db_reads: number;
+        };
+        /** RunDetail */
+        RunDetail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Started */
+            started: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "partial" | "failed" | "interrupted";
+            /** Agents */
+            agents: ("companion" | "goal_planner" | "portfolio_analyst" | "sentiment_analyst")[];
+            /** Tools */
+            tools: number;
+            /** Db Reads */
+            db_reads: number;
+            /** Spans */
+            spans: components["schemas"]["Span"][];
         };
         /** SavedGoalSummary */
         SavedGoalSummary: {
@@ -744,6 +964,34 @@ export interface components {
         SellReflection: {
             prompt: components["schemas"]["SellPrompt"] | null;
         };
+        /** Span */
+        Span: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Parent */
+            parent: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "agent" | "tool" | "db" | "service" | "provider" | "fixture";
+            /** Name */
+            name: string;
+            /** Started */
+            started: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "partial" | "failed" | "interrupted";
+            /** Duration Ms */
+            duration_ms?: number | null;
+            /** Error */
+            error?: string | null;
+        };
         /** Stock */
         Stock: {
             /** Symbol */
@@ -764,6 +1012,13 @@ export interface components {
             source: "demo";
             /** Factors */
             factors?: components["schemas"]["Factor"][];
+        };
+        /** Turn */
+        Turn: {
+            /** Question */
+            question: string;
+            /** Goal Id */
+            goal_id?: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1367,6 +1622,258 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    companion_turn_api_v1_companion_turns_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Turn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reply"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_api_v1_ops_session_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperatorLogin"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_api_v1_ops_session_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_runs_api_v1_ops_agent_runs_get: {
+        parameters: {
+            query?: {
+                agent?: ("companion" | "goal_planner" | "portfolio_analyst" | "sentiment_analyst") | null;
+                status?: ("running" | "completed" | "partial" | "failed" | "interrupted") | null;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_detail_api_v1_ops_agent_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shared_goals_api_v1_companion_goals_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalPlan"][];
+                };
+            };
+        };
+    };
+    confirm_goal_api_v1_companion_goals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalPlan"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalPlan"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    journal_entries_api_v1_companion_journal_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JournalEntry"][];
+                };
+            };
+        };
+    };
+    journal_save_api_v1_companion_journal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JournalNote"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JournalEntry"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };

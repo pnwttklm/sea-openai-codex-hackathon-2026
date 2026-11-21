@@ -1,9 +1,3 @@
-import type { Factor } from "./data";
-
-const size = 240;
-const center = 120;
-const radius = 94;
-
 export function Sparkline({ values, label, point, onPoint }: {
   values: number[];
   label?: string;
@@ -53,41 +47,6 @@ export function factorColor(score: number) {
   if (score >= 6) return "var(--yellow)";
   if (score >= 4) return "var(--amber)";
   return "var(--loss)";
-}
-
-export function Radar({ factors }: { factors: { name: Factor["name"]; score: number | null }[] }) {
-  const point = (index: number, ratio: number) => {
-    const axis = [0, 1, 4, 2, 3][index] ?? index;
-    const angle = -Math.PI / 2 - axis * 2 * Math.PI / factors.length;
-    return [center + Math.cos(angle) * radius * ratio, center + Math.sin(angle) * radius * ratio];
-  };
-  const polygon = (ratios: number[]) => [0, 1, 3, 4, 2].map((index) => point(index, ratios[index]).join(",")).join(" ");
-  return (
-    <div className="radar">
-      <svg viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
-        {[0.2, 0.4, 0.6, 0.8, 1].map((step) => <polygon key={step} className="radar-grid" points={polygon(factors.map(() => step))} />)}
-        {factors.map(({name}, index) => {
-          const [x, y] = point(index, 1);
-          return <line key={name} className="radar-grid" x1={center} y1={center} x2={x} y2={y} />;
-        })}
-        {factors.every(({ score }) => score !== null) && (
-          <polygon className="radar-values" points={polygon(factors.map(({ score }) => Number(score) / 10))} />
-        )}
-        {factors.map(({name, score}, index) => {
-          if (score === null) return null;
-          const [x, y] = point(index, score / 10);
-          return <circle key={name} cx={x} cy={y} r="4" fill={factorColor(score)} />;
-        })}
-      </svg>
-      <ul aria-label="Radar chart values">
-        {factors.map(({name, score}, index) => (
-          <li key={name} className={`radar-label radar-label-${index}`}>
-            {name}<span style={{ color: score === null ? undefined : factorColor(score) }}>{score?.toFixed(1) ?? "—"}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 }
 
 export function Gauge({ score }: { score: number }) {

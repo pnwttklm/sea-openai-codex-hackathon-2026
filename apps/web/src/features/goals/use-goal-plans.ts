@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiGet, apiPost, ApiError } from "@/lib/api/client";
 import { initialPlans, validPlan, type GoalPlan } from "./demo-goals";
 
 const prefix = "future-you.demo.plan.v1.";
@@ -29,23 +30,49 @@ function readPlans() {
 }
 
 export function useGoalPlans() {
-  const [plans, setPlans] = useState(initialPlans);
+  const [plans, setPlans] = useState<GoalPlan[]>(initialPlans);
+  const [error, setError] = useState("");
+  const [ready, setReady] = useState(false);
+  const shared = process.env.NEXT_PUBLIC_SHARED_DEMO === "1";
   useEffect(() => {
-    function refresh() { setPlans(readPlans()); }
-    refresh();
-    window.addEventListener("storage", refresh);
+    const controller = new AbortController();
+    async function refresh() {
+      try {
+        const next = shared ? await apiGet<GoalPlan[]>("/api/v1/companion/goals", controller.signal) : readPlans();
+        if (!next.some(p => p.id === "emergency")) throw new Error("Demo goals need to be seeded.");
+        if (!controller.signal.aborted) { setPlans(next); setError(""); setReady(true); }
+      } catch {
+        if (!controller.signal.aborted) setError("Could not load saved goals. Reload to try again.");
+      }
+    }
+    void refresh();
     window.addEventListener("pageshow", refresh);
-    return () => {
-      window.removeEventListener("storage", refresh);
-      window.removeEventListener("pageshow", refresh);
-    };
-  }, []);
+    return () => { controller.abort(); window.removeEventListener("pageshow", refresh); };
+  }, [shared]);
 
-  function savePlan(plan: GoalPlan) {
-    if (!validPlan(plan)) throw new Error("Review the goal values.");
-    localStorage.setItem(prefix + plan.id, JSON.stringify(plan));
-    setPlans(readPlans());
+  async function savePlan(plan: GoalPlan) {
+    if (!validPlan(plan) || !ready) throw new Error("Review the goal values and reload your saved goals.");
+    if (shared) {
+      let saved: GoalPlan;
+      try {
+        saved = await apiPost<GoalPlan>("/api/v1/companion/goals", plan);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 409) {
+          setPlans(await apiGet<GoalPlan[]>("/api/v1/companion/goals"));
+        }
+        throw error;
+      }
+      setPlans(previous => [...previous.filter(p => p.id !== saved.id), saved]
+        .sort((a,b) => order(a.id) - order(b.id) || a.id.localeCompare(b.id)));
+    } else {
+      localStorage.setItem(prefix + plan.id, JSON.stringify(plan));
+      setPlans(readPlans());
+    }
   }
+  return { plans, savePlan, error, ready };
+}
 
-  return { plans, savePlan };
+function order(id: string) {
+  const index = initialPlans.findIndex(plan => plan.id === id);
+  return index < 0 ? initialPlans.length : index;
 }

@@ -31,7 +31,7 @@ def profile_voice_style(profile: FutureProfile | None, *, fallback: VoiceStyle |
 def assess_plan(plan: FuturePlan) -> FutureAssessment:
     annual_rate = Decimal("0.04") if plan.goal == "wedding" else Decimal(0)
     rate = annual_rate / 12
-    months = plan.years * 12
+    months = getattr(plan, "months", None) or plan.years * 12
     growth = (1 + rate) ** months
     contribution_factor = (growth - 1) / rate if rate else Decimal(months)
     grown_savings = plan.saved * growth

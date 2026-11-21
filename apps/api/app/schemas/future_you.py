@@ -60,6 +60,12 @@ MongoId = Annotated[str, StringConstraints(pattern=r"^[0-9a-fA-F]{24}$")]
 
 
 class SavedGoal(FuturePlan):
+    saved: Annotated[Decimal, Field(ge=0, le=10**12, decimal_places=2)]
+    target: Annotated[Decimal, Field(gt=0, le=10**12, decimal_places=2)]
+    monthly: Annotated[Decimal, Field(ge=0, le=10**12, decimal_places=2)]
+    months: int | None = Field(default=None, ge=1, le=1200)
+    years: int = Field(ge=1, le=100)
+
     id: MongoId
     goal_name: GoalName
 
@@ -67,8 +73,8 @@ class SavedGoal(FuturePlan):
 class SavedGoalSummary(BaseModel):
     id: MongoId
     name: GoalName
-    saved: int
-    target: int
+    saved: float
+    target: float
     years: int
     future_age: int | None = None
 

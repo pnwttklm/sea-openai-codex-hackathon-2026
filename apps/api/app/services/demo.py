@@ -13,16 +13,29 @@ class SnapshotReader(Protocol):
 
 
 class DemoService:
-    def __init__(self, repository: SnapshotReader) -> None:
+    def __init__(self, repository: SnapshotReader, shared=None, goals=None) -> None:
+        self.shared = shared
+        self.goals = goals
         self.repository = repository
 
+    async def snapshot(self):
+        data = await self.repository.get()
+        if self.shared:
+            data["portfolio"] = await self.shared.snapshot(data)
+            if self.goals:
+                plans = await self.goals()
+                for goal, slug in zip(data["health_plan"]["goals"], ("wedding", "retirement", "time-machine", "dream-home")):
+                    if slug in plans:
+                        goal.update(name=plans[slug].title, years=plans[slug].months / 12)
+        return data
+
     async def portfolio(self) -> Portfolio:
-        snapshot = await self.repository.get()
+        snapshot = await self.snapshot()
         health = investor_health(snapshot)
         return Portfolio(**snapshot["portfolio"], score=health.score, score_label=health.label)
 
     async def behavior(self) -> Behavior:
-        return investor_health(await self.repository.get())
+        return investor_health(await self.snapshot())
 
     async def update_target(self, target: int) -> Behavior:
         await self.repository.set_monthly_target(target)
@@ -33,7 +46,7 @@ class DemoService:
         return Stock.model_validate(stock) if stock is not None else None
 
     async def sell_reflection(self, symbol: str) -> SellReflection | None:
-        snapshot = await self.repository.get()
+        snapshot = await self.snapshot()
         if symbol not in snapshot["stocks"]:
             return None
 

@@ -6,7 +6,7 @@ export const initialPlans = [
   { id: "emergency", title: "Emergency fund", saved: 100_000, target: 300_000, monthly: 10_000, months: 20 },
 ];
 
-export type GoalPlan = (typeof initialPlans)[number];
+export type GoalPlan = (typeof initialPlans)[number] & { revision?: number };
 export const money = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
 export const compactMoney = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 });
 

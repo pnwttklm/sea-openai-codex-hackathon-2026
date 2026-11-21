@@ -4,7 +4,7 @@ An intent-based AI financial companion for Thai investors, focused on goals, inv
 
 ## Current status
 
-The local demo includes Portfolio (line and allocation views), Investor Health Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. FastMCP server tools, authentication, and deployment remain future work.
+The local demo includes Portfolio (line and allocation views), Investor Health Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. The shared agent demo adds an in-process FastMCP server and a private operator login.
 Open Future Talk from the Goals dashboard to talk with an imagined older self using a saved profile, goals, and portfolio. See the [local demo setup](docs/development.md#future-you-demo) for MongoDB, Realtime voice, and portrait uploads.
 
 ## Run locally
@@ -18,6 +18,17 @@ docker compose up --build
 Open http://localhost:3000. See [Docker development guide](docs/development.md) for hot reload, logs, tests, and persistent MongoDB data.
 
 See [Frontend setup](apps/web/README.md) and [Backend setup](apps/api/README.md). Frontend uses npm and its committed lockfile. Backend uses a virtual environment and `pyproject.toml`.
+
+## Shared agent demo
+
+In the root `.env` for this worktree set `FUTURE_YOU_DEMO=1`, leave `FUTURE_YOU_USER_ID` empty, set `WEB_PORT=3113` and `API_PORT=8113`, and set `AGENT_OPS_SECRET` to a locally generated secret of at least 24 characters. Leave `MONGODB_URI` unset to use the isolated Compose volume. For OpenAI routing and sentiment analysis, supply a server-side `OPENAI_API_KEY` and an accessible structured-output model in `OPENAI_COMPANION_MODEL`. With these unset the UI labels answers as an offline demo. News uses labeled synthetic samples by default. Set `COMPANION_NEWS_SOURCE=webull` and `WEBULL_MCP_ACCESS_TOKEN` for provider coverage.
+
+```sh
+docker compose -p prik-agent-foundation up --build -d
+docker compose -p prik-agent-foundation exec -T api python -m app.data.seed_future_you_demo
+```
+
+Open [Investor Companion](http://localhost:3113/companion), [the stock greeting](http://localhost:3113/stocks/AMD), or the [operator dashboard](http://localhost:3113/ops/agents). Operator access uses the worktree's local secret. Goals, Future Talk, Portfolio, paper orders and the companion share the synthetic investor's saved data. [Agent contracts and account valuation](docs/contracts/agent-operations.md)
 
 ## Stack and structure
 

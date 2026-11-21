@@ -1,3 +1,6 @@
+from contextlib import nullcontext
+from datetime import UTC, datetime
+
 from pymongo import AsyncMongoClient
 from pymongo.errors import DuplicateKeyError
 
@@ -11,9 +14,10 @@ class DemoRepository:
         self.collection = client[database]["demo_snapshots"]
         self.paper = client[database]["paper_accounts"]
 
-    async def get(self) -> dict:
+    async def get(self, trace=None, parent=None) -> dict:
         query = {"_id": FIXTURE_ID}
-        document = await self.collection.find_one(query)
+        async with trace.span(parent, "db", "demo_snapshots.find_one") if trace else nullcontext():
+            document = await self.collection.find_one(query)
         if document is None:
             fixture = seed_document()
             try:
@@ -30,16 +34,17 @@ class DemoRepository:
         await self.get()
         await self.collection.update_one({"_id": FIXTURE_ID}, {"$set": {"health_plan.monthly_target_thb": target}})
 
-    async def get_paper_account(self) -> dict:
+    async def get_paper_account(self, trace=None, parent=None) -> dict:
         query = {"_id": "nobita-paper-v1"}
-        document = await self.paper.find_one(query)
+        async with trace.span(parent, "db", "paper_accounts.find_one") if trace else nullcontext():
+            document = await self.paper.find_one(query)
         if document is None:
             snapshot = await self.get()
             positions = dict.fromkeys(snapshot["stocks"], 10)
             try:
                 await self.paper.update_one(
                     query,
-                    {"$setOnInsert": {"revision": 0, "cash_cents": 1_000_000, "positions": positions, "fills": {}}},
+                    {"$setOnInsert": {"revision": 0, "created_at": datetime.now(UTC), "cash_cents": 1_000_000, "positions": positions, "fills": {}}},
                     upsert=True,
                 )
             except DuplicateKeyError:
@@ -54,7 +59,7 @@ class DemoRepository:
     ) -> bool:
         result = await self.paper.update_one(
             {"_id": "nobita-paper-v1", "revision": revision},
-            {"$set": {**account, f"fills.{order_id}": fill}},
+            {"$set": {**account, "as_of": datetime.now(UTC), f"fills.{order_id}": fill}},
         )
         return result.modified_count == 1
 

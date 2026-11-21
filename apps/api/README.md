@@ -27,3 +27,5 @@ Run `pytest` after installing dev dependencies. Set `CORS_ORIGINS` as a comma-se
 `app/api/routes/`: REST handlers. `app/schemas/`: Pydantic contracts. `app/services/`: business logic shared by REST and MCP. `app/core/`: settings and shared infrastructure. `app/data/`: MongoDB. `app/ai/`: OpenAI and FastMCP.
 
 The local API includes health, saved Future You context, GPT Image portrait upload, and opt-in Realtime voice. See the [Future You contract](../../docs/contracts/future-you.md) and [local demo setup](../../docs/development.md). FastMCP, authentication, and a Python lockfile remain follow-up work.
+
+The [shared agent demo setup](../../README.md#shared-agent-demo) enables the investor-scoped goals and journal APIs, private FastMCP tools, unified paper portfolio and operator trace API.

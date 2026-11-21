@@ -35,6 +35,10 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | DEMO-12 | Connect four Investor Health Score dimensions across the demo | Codex | Review | codex/prik-thai-agent-demo | Verified seven holdings, four dimensions, shared navigation and Future You |
 | TALK-01 | Integrate the profile-based Future Talk conversation into the Goals dashboard | Codex | Done | codex/main-future-talk | WEB-10 |
 | DEMO-13 | Add real holding logos | Codex | Review | main | Build, typecheck and five served SVGs verified |
+| AI-DESIGN-01 | Specify companion roles, FastMCP tools and the operator dashboard | Codex | Done | codex/agent-foundation | AGENT-01 |
+| AI-DESIGN-02 | Specify investor reflection and headline sentiment analysis | Codex | Done | codex/agent-foundation | AGENT-01 |
+| AGENT-01 | Implement four agents, MCP tools, shared investor data, character popup and private dashboard | Codex | Review | codex/agent-foundation | [Agent operations](../contracts/agent-operations.md) |
+| CHART-01 | Refresh the stock INVX radar, add selectable factors and a bar comparison | Codex | Review | codex/agent-foundation | AMD five-factor fixture |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
 Implementation tasks may scaffold infrastructure before product contracts are agreed; product behavior must follow the selected journey and approved interface decisions.

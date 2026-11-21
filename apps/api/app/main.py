@@ -4,6 +4,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from bson import ObjectId
+from app.data.goal_plans import list_plans
+from app.services.shared_portfolio import DemoFX, SharedPortfolio
+from openai import AsyncOpenAI
+from app.ai.companion_model import CompanionModel
+from app.data.decision_journal import JournalRepository
+from app.data.agent_traces import TraceStore
 from pymongo import AsyncMongoClient
 from pymongo.errors import PyMongoError
 
@@ -28,6 +35,9 @@ async def lifespan(application: FastAPI):
     application.state.future_you_user_id = DEMO_PROFILE_ID if demo else user_id
     application.state.future_you_is_demo = demo
     application.state.future_you_repository = None
+    application.state.agent_traces = None
+    application.state.operator_failures = []
+    application.state.companion_model = CompanionModel()
     if not uri:
         yield
         return
@@ -36,10 +46,25 @@ async def lifespan(application: FastAPI):
     async with AsyncMongoClient(uri, serverSelectionTimeoutMS=3000, timeoutMS=5000) as client:
         application.state.future_you_repository = FutureYouRepository(client[database], demo=demo)
         repository = DemoRepository(client, database)
-        application.state.demo = DemoService(repository)
-        application.state.paper = PaperService(repository)
+        shared = SharedPortfolio(repository) if demo else None
+        application.state.future_you_repository.shared_portfolio = shared
+
+        async def health_goals():
+            plans = await list_plans(application.state.future_you_repository.goals, ObjectId(DEMO_PROFILE_ID))
+            return {p.id: p for p in plans}
+
+        application.state.demo = DemoService(repository, shared, health_goals if demo else None)
+        application.state.paper = PaperService(repository, DemoFX() if demo else None)
         application.state.research = ResearchService(ResearchRepository(client, database), application.state.demo)
-        yield
+        application.state.journal = JournalRepository(client[database])
+        application.state.agent_traces = TraceStore(client[database])
+        model = os.getenv("OPENAI_COMPANION_MODEL")
+        if model and os.getenv("OPENAI_API_KEY"):
+            async with AsyncOpenAI(timeout=7, max_retries=0) as ai:
+                application.state.companion_model = CompanionModel(ai, model)
+                yield
+        else:
+            yield
 
 
 def create_app() -> FastAPI:
