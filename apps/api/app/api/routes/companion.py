@@ -7,7 +7,7 @@ from typing import Annotated
 from uuid import UUID
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 
 from app.ai.companion_runtime import TurnRunner
 from app.ai.stock_news import stock_news
@@ -17,7 +17,7 @@ from app.schemas.future_you import OVERVIEW_YEARS, VoiceScenario
 from app.api.routes.future_you import local_origin_allowed
 from app.data.decision_journal import JournalEntry, JournalNote
 from app.data.agent_traces import Trace
-from app.data.goal_plans import GoalPlan, list_plans, save_plan
+from app.data.goal_plans import GoalPlan, TownGoalPlan, list_plans, save_plan
 from app.data.future_you import DEMO_PROFILE_ID
 from app.schemas.companion import Agent, OperatorLogin, Reply, Run, RunDetail, State, Turn
 from app.services.companion import CompanionServices
@@ -158,16 +158,22 @@ def goal_store(request: Request, response: Response):
     return repo.goals
 
 
-@router.get("/companion/goals", response_model=list[GoalPlan])
+@router.get("/companion/goals", response_model=list[TownGoalPlan], response_model_exclude_none=True)
 async def shared_goals(collection=Depends(goal_store)):
     return await list_plans(collection, ObjectId(DEMO_PROFILE_ID))
 
 
 @router.post("/companion/goals", response_model=GoalPlan)
-async def confirm_goal(plan: GoalPlan, collection=Depends(goal_store)):
-    saved = await save_plan(collection, ObjectId(DEMO_PROFILE_ID), plan)
+async def confirm_goal(plan: TownGoalPlan, request: Request, background: BackgroundTasks, collection=Depends(goal_store)):
+    # A client may round-trip the GET payload. Only the renderer service writes appearance.
+    changes = GoalPlan.model_validate(plan.model_dump(exclude={"appearance"}))
+    saved = await save_plan(collection, ObjectId(DEMO_PROFILE_ID), changes)
     if saved is None:
         raise HTTPException(409, "This goal changed. Reopen the goal and review the latest values.")
+    if saved.id.startswith("custom-"):
+        state = request.app.state
+        background.add_task(state.world_landmarks.prepare, collection, ObjectId(DEMO_PROFILE_ID),
+                            saved.id, state.companion_model)
     return saved
 
 

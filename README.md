@@ -32,6 +32,14 @@ docker compose -p prik-agent-foundation exec -T api python -m app.data.seed_futu
 
 Open [Investor Companion](http://localhost:3113/companion), [the stock greeting](http://localhost:3113/stocks/AMD), or the [operator dashboard](http://localhost:3113/ops/agents). Operator access uses the worktree's local secret. Goals, Future Talk, Portfolio, paper orders and the companion share the synthetic investor's saved data. [Agent contracts and account valuation](docs/contracts/agent-operations.md)
 
+If this checkout uses `.env.local`, reload the running API with the command below after changing its key or model. This gives the file precedence over previously exported OpenAI settings.
+
+```sh
+env -u OPENAI_API_KEY -u OPENAI_COMPANION_MODEL docker compose --env-file .env.local up -d --no-deps api
+```
+
+From [Future You](http://localhost:3113/goals), add a goal and enter **Future World**. Talk to Doraemon at a landmark to see its funding progress or compare a monthly contribution. The town saves conversations and custom landmark appearances in MongoDB. If the model is unavailable, the conversation offers a retry and an offline demo. [Future World contract](docs/contracts/future-you.md#future-world-town-world-01)
+
 ## Stack and structure
 
 | Path | Responsibility | Stack |

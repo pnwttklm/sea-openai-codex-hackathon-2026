@@ -1,6 +1,6 @@
 # Future World integration handoff
 
-These are proposed integration points for the teammate building the backend, MongoDB, and AI services. The current frontend uses local demo goals, scripted Doraemon replies, and predefined Three.js landmarks. Backend and Frontend should agree on payloads and failure states in the [shared contracts](../contracts/README.md) before wiring them together.
+WORLD-01 implements this handoff in the local shared demo. Future You and Future World use the same MongoDB goal records. Doraemon stores conversations and shows a visual with each reply. Custom goals receive a saved landmark appearance. The original interaction requirements are recorded below. [Implemented API contract](../contracts/future-you.md#future-world-town-world-01)
 
 ## Who the player is talking to
 

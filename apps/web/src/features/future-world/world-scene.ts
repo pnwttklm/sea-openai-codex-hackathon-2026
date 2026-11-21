@@ -103,11 +103,18 @@ export function mountWorld({ canvas, houseId, dogImage, landmarks, onReminder, o
       const backDoor = Math.abs(x - 0.75) < 0.82 && z < -2.36;
       id = frontDoor || backDoor ? "house-exit" : home.plan.id;
     } else {
+      let atDoor = false;
       for (const plot of landmarks) {
+        if (plot.kind === "house" && Math.hypot(x - plot.x - 0.55, z - plot.z - 2.04) < 0.3) {
+          id = plot.plan.id;
+          atDoor = true;
+          break;
+        }
         const gap = Math.hypot(x - plot.x, z - plot.z);
         if (gap < distance) { id = plot.plan.id; distance = gap; }
       }
       for (const companion of companions) {
+        if (atDoor) break;
         const gap = Math.hypot(x - companion.position.x, z - companion.position.z);
         if (gap < Math.min(distance, 2)) { id = companion.name; distance = gap; }
       }
@@ -154,8 +161,26 @@ export function mountWorld({ canvas, houseId, dogImage, landmarks, onReminder, o
     onInterior(null);
   }
 
+  function addPlot(plot: Landmark) {
+    const { group, highlight } = art.landmark(plot.kind, plot.plan.appearance);
+    highlights.set(plot.plan.id, highlight);
+    highlight.visible = nearby === plot.plan.id;
+    group.name = plot.plan.id;
+    group.visible = plot.plan.id !== home?.plan.id;
+    group.position.set(plot.x, 0, plot.z);
+    plots.add(group);
+  }
+
   function setLandmarks(next: Landmark[]) {
-    if (lawn && next.length === landmarks.length && next.every((v,i) => v.plan.id === landmarks[i].plan.id && v.kind === landmarks[i].kind)) {
+    const sameLayout = next.length === landmarks.length && next.every((plot, i) =>
+      plot.plan.id === landmarks[i].plan.id && plot.kind === landmarks[i].kind);
+    if (lawn && sameLayout) {
+      next.forEach((plot, i) => {
+        if (plot.plan.appearance?.revision === landmarks[i].plan.appearance?.revision) return;
+        plots.getObjectByName(plot.plan.id)?.removeFromParent();
+        addPlot(plot);
+        dirty = true;
+      });
       landmarks = next;
       return;
     }
@@ -173,14 +198,7 @@ export function mountWorld({ canvas, houseId, dogImage, landmarks, onReminder, o
     north = -6.3 - Math.ceil(Math.max(0, next.length - 6) / 3) * 5.45;
     lawn = art.townGround(north);
     outside.add(lawn);
-    for (const plot of next) {
-      const { group, highlight } = art.landmark(plot.kind);
-      highlights.set(plot.plan.id, highlight);
-      highlight.visible = nearby === plot.plan.id;
-      group.name = plot.plan.id;
-      group.position.set(plot.x, 0, plot.z);
-      plots.add(group);
-    }
+    next.forEach(addPlot);
     routine.reset();
     dogRoutine.reset();
     placeInterior();

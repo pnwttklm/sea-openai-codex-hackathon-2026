@@ -137,3 +137,20 @@
   .page :is(button, a) { transition: transform 140ms ease; }
   .page :is(button, a):active { transform: scale(.96); }
 }
+
+.chatLog, .visual, .goalChoices, .ask { display: grid; gap: 8px; }
+.chatLog { overflow-wrap: anywhere; }
+.chatLog .question { color: var(--focus); text-align: right; margin-top: 16px; }
+.visual { margin: 0 0 12px; padding: 12px; background: var(--raised); border-radius: 12px; }
+.visual progress, .chart { width: 100%; }
+.visual progress { accent-color: var(--focus); }
+.visual :is(small, figcaption), .axis { color: var(--secondary); }
+.axis, .legend, .ask div { display: flex; justify-content: space-between; gap: 8px; }
+.axis, .legend { font-size: 12px; flex-wrap: wrap; }
+.legend span:first-child { color: #ffd468; }
+.legend span:last-child { color: #9ccbff; }
+.ask { margin: 12px 0; }
+.ask input { min-width: 0; flex: 1; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 16px; }
+.ask button, .goalChoices :is(button, a) { min-height: 44px; color: white; background: var(--blue); border: 0; border-radius: 10px; padding: 8px 12px; font: inherit; }
+.goalChoices :is(button, a) { display: flex; align-items: center; gap: 8px; text-align: left; overflow-wrap: anywhere; }
+.sheet button:disabled { opacity: .65; }
