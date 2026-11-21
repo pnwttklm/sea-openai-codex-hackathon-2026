@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { apiPost } from "@/lib/api/client";
 import { DemoData, type BehaviorData } from "./data";
@@ -38,6 +39,7 @@ function HealthReport({ initial }: { initial: BehaviorData }) {
         <div className="card-heading"><h2>{factor.name}</h2><strong>{factor.score}/10</strong></div>
         <progress value={factor.score} max="10" aria-label={factor.name} />
         <p><strong>{factor.question}</strong></p><p>{factor.measurement}</p>
+        {factor.name === "Goal & Risk Fit" && <Link href="/goals">View life goals →</Link>}
         {factor.name === "Contribution" && <form onSubmit={save}>
           <label>Monthly target (THB)<input type="number" min="1" max="100000000" step="1" required value={target} disabled={saving} onChange={event => setTarget(event.target.value)} /></label>
           <button type="submit" disabled={saving || Number(target) === report.monthly_target_thb}>{saving ? "Saving…" : "Save target"}</button>

@@ -4,7 +4,8 @@ An intent-based AI financial companion for Thai investors, focused on goals, inv
 
 ## Current status
 
-The local demo includes Portfolio (line and allocation views), Investing Behavior Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. FastMCP server tools, authentication, and deployment remain future work.
+The local demo includes Portfolio (line and allocation views), Investor Health Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. FastMCP server tools, authentication, and deployment remain future work.
+Open Future Talk from the Goals dashboard to talk with an imagined older self using a saved profile, goals, and portfolio. See the [local demo setup](docs/development.md#future-you-demo) for MongoDB, Realtime voice, and portrait uploads.
 
 ## Run locally
 

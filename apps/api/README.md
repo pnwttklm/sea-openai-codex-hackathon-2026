@@ -22,3 +22,8 @@ The local paper account starts with the THB equivalent of USD 10,000 and 10 shar
 To enable live headlines, give the API a valid Webull Cloud MCP OAuth access token with Non-Trading authorization in `WEBULL_MCP_ACCESS_TOKEN`. The adapter only calls `get_stock_news`. It does not obtain or refresh a token. Optionally set `OPENAI_API_KEY` and `OPENAI_REFLECTION_MODEL` to let the model select a neutral question from approved options based on public headlines. Compose reads these optional values from the repository root environment or ignored root `.env` file. Restart the API after changing them. Without a token, the reflection still works and shows that news is unavailable.
 
 For free-text research chat, set `OPENAI_API_KEY` and `OPENAI_REFLECTION_MODEL` to a Responses API model that supports function calling and web search. The agent can request Webull MCP stock news when its token is configured. OpenAI web search is available as a fallback and citations appear in the chat panel. Webull receives the ticker only. Chat is read-only and served by the local demo API.
+Run `pytest` after installing dev dependencies. Set `CORS_ORIGINS` as a comma-separated process environment variable. The API does not automatically load `.env` files.
+
+`app/api/routes/`: REST handlers. `app/schemas/`: Pydantic contracts. `app/services/`: business logic shared by REST and MCP. `app/core/`: settings and shared infrastructure. `app/data/`: MongoDB. `app/ai/`: OpenAI and FastMCP.
+
+The local API includes health, saved Future You context, GPT Image portrait upload, and opt-in Realtime voice. See the [Future You contract](../../docs/contracts/future-you.md) and [local demo setup](../../docs/development.md). FastMCP, authentication, and a Python lockfile remain follow-up work.

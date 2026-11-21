@@ -9,7 +9,7 @@ from collections.abc import Awaitable, Callable
 from openai import AsyncOpenAI, OpenAIError
 
 from app.ai.reflection import NEWS_TOOL, fetch_news, parse_headlines
-from app.schemas.demo import AgentChat, AgentReply, NewsHeadline
+from app.schemas.demo import Behavior, AgentChat, AgentReply, NewsHeadline
 
 NEWS_FUNCTION = {
     "type": "function",
@@ -65,7 +65,7 @@ def _citations(response) -> list[NewsHeadline]:
     return parse_headlines(items)
 
 
-async def research_chat(chat: AgentChat, health=None) -> AgentReply | None:
+async def research_chat(chat: AgentChat, health: Behavior | None = None) -> AgentReply | None:
     key = os.getenv("OPENAI_API_KEY")
     model = os.getenv("OPENAI_REFLECTION_MODEL")
     if not key or not model:
@@ -79,7 +79,7 @@ async def research_chat(chat: AgentChat, health=None) -> AgentReply | None:
         return None
 
 
-async def run_research(client, chat: AgentChat, model: str, *, webull_enabled: bool, reader: NewsReader = fetch_news, health=None) -> AgentReply | None:
+async def run_research(client, chat: AgentChat, model: str, *, webull_enabled: bool, reader: NewsReader = fetch_news, health: Behavior | None = None) -> AgentReply | None:
     inputs = [{"role": message.role, "content": message.text} for message in chat.messages]
     sources: list[NewsHeadline] = []
     instructions = f"{INSTRUCTIONS}\nCurrent stock context: {chat.symbol}."

@@ -14,11 +14,18 @@ HEALTH_PLAN = {
     },
     "risk_profiles": {
         "VOO": {"minimum_years": 5, "stress_loss_pct": 30, "risk_level": 2},
+        "SGOV": {"minimum_years": 1, "stress_loss_pct": 2, "risk_level": 1},
+        "VT": {"minimum_years": 5, "stress_loss_pct": 35, "risk_level": 2},
+        "SE": {"minimum_years": 7, "stress_loss_pct": 50, "risk_level": 3},
+        "GLD": {"minimum_years": 5, "stress_loss_pct": 25, "risk_level": 2},
+        "BTC": {"minimum_years": 8, "stress_loss_pct": 70, "risk_level": 3},
         "NVDA": {"minimum_years": 7, "stress_loss_pct": 50, "risk_level": 3},
     },
     "goals": [
-        {"name": "Wedding", "years": 5, "loss_capacity_pct": 15, "risk_comfort": 2, "symbols": ["NVDA"]},
-        {"name": "Retirement", "years": 25, "loss_capacity_pct": 40, "risk_comfort": 3, "symbols": ["VOO"]},
+        {"name": "Marry Shizuka", "years": 5, "loss_capacity_pct": 15, "risk_comfort": 2, "symbols": ["NVDA"]},
+        {"name": "Retirement in Thailand", "years": 25, "loss_capacity_pct": 40, "risk_comfort": 3, "symbols": ["VOO", "VT"]},
+        {"name": "Time machine", "years": 3, "loss_capacity_pct": 10, "risk_comfort": 1, "symbols": ["SGOV"]},
+        {"name": "Dream home", "years": 8, "loss_capacity_pct": 25, "risk_comfort": 2, "symbols": ["GLD", "SE", "BTC"]},
     ],
 }
 
@@ -82,7 +89,7 @@ def seed_document() -> dict:
         ]
     ]
     stocks = {
-        holding["symbol"]: Stock(**holding, factors=factors if holding["symbol"] == "AMD" else []).model_dump()
+        holding["symbol"]: Stock(**holding, factors=[]).model_dump()
         for holding in holdings
     }
     for symbol, name, exchange, price, change in OTHER_QUOTES:

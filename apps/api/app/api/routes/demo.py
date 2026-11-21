@@ -85,8 +85,10 @@ async def paper_order(order: PaperOrder, service: Paper) -> PaperFill:
 
 
 @router.post("/agent/chat")
-async def agent_chat(chat: AgentChat, service: Demo) -> AgentReply:
-    reply = await research_chat(chat, await service.behavior())
+async def agent_chat(chat: AgentChat, request: Request) -> AgentReply:
+    service = request.app.state.demo
+    health = await service.behavior() if service is not None else None
+    reply = await research_chat(chat, health)
     if reply is None:
         raise HTTPException(status_code=503, detail="Research is unavailable right now. Try again once the agent is configured and online.")
     return reply

@@ -79,7 +79,7 @@ def test_sell_reflection_uses_webull_only_for_nvda(monkeypatch):
         assert client.get("/api/v1/demo/stocks/AMD/sell-reflection").json() == {"prompt": None}
         prompt = client.get("/api/v1/demo/stocks/NVDA/sell-reflection").json()["prompt"]
         assert prompt["demo_change_percent"] == -6
-        assert prompt["goal_risk_fit_score"] == 5
+        assert prompt["goal_risk_fit_score"] == 5.8
         assert prompt["news_status"] == "available"
         assert prompt["headlines"][0]["title"] == "Example NVIDIA news"
         assert calls == ["NVDA"]

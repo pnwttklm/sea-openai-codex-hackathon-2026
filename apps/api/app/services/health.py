@@ -15,7 +15,6 @@ def investor_health(snapshot: dict) -> Behavior:
     for holding in holdings:
         for bucket, share in plan["exposures"][holding["symbol"]].items():
             exposure[bucket] = exposure.get(bucket, 0) + holding["weight"] * share
-    exposure["Other assets"] = 100 - sum(h["weight"] for h in holdings)
     largest = max(exposure, key=exposure.get)
 
     matches = 0
@@ -46,8 +45,8 @@ def investor_health(snapshot: dict) -> Behavior:
                   f"{completed} of {len(purchases)} scheduled purchases completed this month. "
                   "Only completed recurring purchases count.", completed / len(purchases)),
         dimension("Diversification", "How much of my money depends on the same investments?",
-                  f"{largest} is your largest shared exposure at {exposure[largest]:.1f}%. "
-                  "The demo combines direct holdings and estimated fund exposures. "
+                  f"Largest shared exposure: {largest} ({exposure[largest]:.1f}%). "
+                  "VOO and VT both include US stocks. The illustrative mix assigns 60% of VT to US equities. "
                   "The score falls as exposure concentrates in fewer buckets.",
                   1 - sum((weight / 100) ** 2 for weight in exposure.values())),
         dimension("Goal & Risk Fit", "Does the way I invest make sense for each goal?",

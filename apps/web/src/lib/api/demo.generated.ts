@@ -229,6 +229,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/future-you/assessment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assessment */
+        post: operations["assessment_api_v1_future_you_assessment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/future-you/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context */
+        get: operations["context_api_v1_future_you_context_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/future-you/voice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Voice */
+        post: operations["voice_api_v1_future_you_voice_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/future-you/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Image */
+        post: operations["image_api_v1_future_you_image_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/future-you/portrait/{goal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Portrait */
+        post: operations["portrait_api_v1_future_you_portrait__goal_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/future-you/portrait": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Overview Portrait */
+        post: operations["overview_portrait_api_v1_future_you_portrait_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/future-you/video": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Video */
+        post: operations["video_api_v1_future_you_video_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -307,6 +426,96 @@ export interface components {
             score: number;
             /** Label */
             label: string;
+        };
+        /** FutureAssessmentResponse */
+        FutureAssessmentResponse: {
+            /** Projected */
+            projected: number;
+            /** Gap */
+            gap: number;
+            /** On Track */
+            on_track: boolean;
+            /** Required Monthly */
+            required_monthly: number;
+            /** Annual Rate */
+            annual_rate: number;
+            /** Voice Available */
+            voice_available: boolean;
+            /** Media Available */
+            media_available: boolean;
+        };
+        /** FuturePlan */
+        FuturePlan: {
+            /**
+             * Goal
+             * @enum {string}
+             */
+            goal: "wedding" | "retirement" | "time-machine" | "home" | "other";
+            /** Goal Name */
+            goal_name?: string | null;
+            profile?: components["schemas"]["FutureProfile"] | null;
+            /** Saved */
+            saved: number;
+            /** Target */
+            target: number;
+            /** Monthly */
+            monthly: number;
+            /** Years */
+            years: number;
+        };
+        /** FutureProfile */
+        FutureProfile: {
+            /** Name */
+            name?: string | null;
+            /** Age */
+            age?: number | null;
+            /** Priorities */
+            priorities?: string | null;
+            /** Gender */
+            gender?: string | null;
+            /** Voice Style */
+            voice_style?: ("masculine" | "feminine" | "neutral") | null;
+            /** Risk Tolerance */
+            risk_tolerance?: string | null;
+            /** Preferred Language */
+            preferred_language?: ("th" | "en") | null;
+        };
+        /** FutureYouContext */
+        FutureYouContext: {
+            /** Profile Name */
+            profile_name?: string | null;
+            /**
+             * Profile Available
+             * @default false
+             */
+            profile_available: boolean;
+            /**
+             * Years From Now
+             * @default 25
+             */
+            years_from_now: number;
+            /** Future Age */
+            future_age?: number | null;
+            /**
+             * Voice Style
+             * @default neutral
+             * @enum {string}
+             */
+            voice_style: "masculine" | "feminine" | "neutral";
+            /** Voice Available */
+            voice_available: boolean;
+            /**
+             * Media Available
+             * @default false
+             */
+            media_available: boolean;
+            /**
+             * Is Demo
+             * @default false
+             */
+            is_demo: boolean;
+            /** Goals */
+            goals?: components["schemas"]["SavedGoalSummary"][];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -498,6 +707,21 @@ export interface components {
             /** Score Label */
             score_label: string;
         };
+        /** SavedGoalSummary */
+        SavedGoalSummary: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Saved */
+            saved: number;
+            /** Target */
+            target: number;
+            /** Years */
+            years: number;
+            /** Future Age */
+            future_age?: number | null;
+        };
         /** SellPrompt */
         SellPrompt: {
             /** Demo Change Percent */
@@ -553,6 +777,15 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VoiceOffer */
+        VoiceOffer: {
+            /** Goal Id */
+            goal_id?: string | null;
+            /** Sdp */
+            sdp: string;
+            /** Voice Style */
+            voice_style?: ("masculine" | "feminine" | "neutral") | null;
         };
     };
     responses: never;
@@ -940,6 +1173,200 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PaperFX"];
                 };
+            };
+        };
+    };
+    assessment_api_v1_future_you_assessment_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FuturePlan"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FutureAssessmentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    context_api_v1_future_you_context_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FutureYouContext"];
+                };
+            };
+        };
+    };
+    voice_api_v1_future_you_voice_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoiceOffer"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/sdp": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    image_api_v1_future_you_image_post: {
+        parameters: {
+            query: {
+                goal: "wedding" | "retirement" | "time-machine" | "home" | "other";
+                years: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    portrait_api_v1_future_you_portrait__goal_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "image/png": string;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    overview_portrait_api_v1_future_you_portrait_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "image/png": string;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Future-Voice-Style"?: "masculine" | "feminine" | "neutral";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+        };
+    };
+    video_api_v1_future_you_video_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

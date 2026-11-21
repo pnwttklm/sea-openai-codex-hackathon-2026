@@ -18,10 +18,11 @@ npm start
 
 `npm start` requires a successful build. `src/app/` owns routes and layouts; `src/components/layout/` owns navigation and the shared shell; `src/components/ui/` owns reusable UI; `src/features/` owns feature modules; `src/lib/api/` owns the API client. Use `@/` imports for `src/`.
 
-The demo starts at `/` with both Portfolio chart views. The score card opens `/behavior` and holdings open `/stocks/[symbol]`. For the reference stock detail use `/stocks/AMD`. The browser reads the demo endpoints via FastAPI. Portfolio, quotes, and scores are labeled synthetic. Stock Overview embeds a separate TradingView feed. The `/goals`, `/journal`, and `/companion` routes remain starters.
+The demo starts at `/` with both Portfolio chart views. The score card opens `/behavior` and holdings open `/stocks/[symbol]`. For the reference stock detail use `/stocks/AMD`. The browser reads the demo endpoints via FastAPI. Portfolio, quotes, and scores are labeled synthetic. Stock Overview embeds a separate TradingView feed. The `/journal` and `/companion` routes remain starters.
 
 Stock pages support confirmed paper buys and sells at synthetic prices. Open NVDA and select Sell to see the optional Agent reflection before review. Portfolio shows the paper account cash and share counts separately from the synthetic THB reference chart.
 
 Ask Agent saves completed questions, answers, and citations to MongoDB. Reopen the panel in the same browser and stock page to pick up the conversation. The browser stores the random conversation identifier locally.
 
 The paper order ticket offers Market and Limit orders for whole shares, with a separate review before confirmation. The static quote fills market orders and limits that already qualify. Other limits go to Open orders and reserve cash or shares until cancelled. The demo does not match against a live market feed.
+`/goals` shows the Future You dashboard with editable demo goals, an emergency reserve, and a time-machine entry at `/future-you/[goal]`. Edits persist in the current browser origin. Future Talk opens the full-screen conversation at `/future-you` using the configured API profile. `/journal` and `/companion` are starter routes. Loading, error, and not-found boundaries are included.

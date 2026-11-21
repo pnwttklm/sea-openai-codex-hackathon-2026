@@ -1,7 +1,7 @@
 # Read-only prototype data
 
 Owner and consumer: Backend/API and Frontend (DEMO-01). Prefix: `/api/v1/demo`.
-This is a shared, synthetic fixture for the local prototype. No user identifiers, private data, authentication, trade execution, or client mutations are involved.
+This is a shared, synthetic fixture for the local prototype. The monthly target, paper orders and saved chat are local-demo mutations.
 
 - `GET /portfolio` returns investor name, value and period change in integer THB, chart point arrays and comparison values by range, allocation percentages, and holdings with USD prices in cents and signed percentage moves.
 - `GET /behavior` returns Investor Health Score calculated from the monthly demo snapshot. The four equally weighted dimensions are Contribution, DCA Consistency, Diversification, and Goal & Risk Fit. Each includes its question, measurement and score out of 10. POST /behavior/target accepts monthly_target_thb (whole THB, 1–100,000,000) and returns the recalculated score.

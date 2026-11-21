@@ -3,7 +3,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.data.demo_seed import seed_document
 
-FIXTURE_ID = "prik-thai-demo-v3"
+FIXTURE_ID = "prik-thai-demo-health-v1"
 
 
 class DemoRepository:

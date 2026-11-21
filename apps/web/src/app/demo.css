@@ -41,7 +41,7 @@ body:has(.demo-shell) { background: #09090c; }
 .sr-only { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
 
 .portfolio { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
-.portfolio-line { background: linear-gradient(180deg, #4540ec 0, #1c1871 190px, #111214 480px); }
+.portfolio-line { background: radial-gradient(ellipse 130% 420px at 75% 0%, #1e3345, transparent 88%), #111214; }
 .portfolio-allocation { background: #080809; }
 .demo-shell .portfolio-profile {
   display: flex; flex-direction: column; gap: 2px; text-align: center;
@@ -118,18 +118,7 @@ body:has(.demo-shell) { background: #09090c; }
 .demo-shell .badge-gain { color: #b5ffed; background: #07594a; }
 .demo-shell .badge-loss { color: #ffe1e5; background: #8b2341; }
 .holding-trend svg { width: 100%; height: 22px; }
-.demo-nav {
-  position: fixed; z-index: 5; bottom: calc(10px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
-  width: min(300px, calc(100% - 32px)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
-  padding: 4px; border: 1px solid #ffffff33; border-radius: 999px; background: #23252e;
-}
-@supports (backdrop-filter: blur(16px)) {
-  .demo-nav { backdrop-filter: blur(16px); background: #23252ece; }
-}
-.demo-shell .demo-nav a { display: grid; gap: 2px; justify-items: center; padding: 4px; border-radius: 999px; font-size: 11px; }
-.demo-shell .demo-nav a[aria-current="page"] { background: #ffffff14; color: var(--focus); font-weight: 600; }
-
-.behavior { background: linear-gradient(180deg, #7435e7, #291454 210px, var(--surface) 520px); }
+.behavior { background: radial-gradient(ellipse 130% 420px at 75% 0%, #1e3345, transparent 88%), var(--surface); }
 .behavior .segments button[aria-pressed="true"] { background: #ffffff26; font-weight: 700; }
 .demo-shell .view-header { border: 0; padding: 8px 0; display: grid; grid-template-columns: 44px 1fr 44px; gap: 0; }
 .view-header h1 { font-size: 14px; font-weight: 600; text-align: center; }
