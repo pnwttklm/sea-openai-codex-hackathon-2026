@@ -26,4 +26,4 @@ Ask Agent saves completed questions, answers, and citations to MongoDB. Reopen t
 
 `/goals` shows the Future You dashboard with editable demo goals, an emergency reserve, and Future World at `/future-you/[goal]`. Goal edits persist in the current browser origin. The `/journal` and `/companion` routes remain starters.
 
-Open **Future Talk** from `/goals` to start the conversation at `/future-you`. The [local development guide](../../docs/development.md) covers the demo fixture, selfie upload, and Realtime voice. The Future Talk landing design remains available at `/welcome`.
+Open **Future Talk** from `/goals` to start the conversation at `/future-you`. Its VoiceBeam uses the incoming Realtime audio. The [local development guide](../../docs/development.md) covers the demo fixture, selfie upload, and Realtime voice. The Future Talk landing design remains available at `/welcome`.

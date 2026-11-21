@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getAudioContext } from "voice-glow";
 import { type VoiceStyle, requestFutureVoice } from "./scenarios";
 
 type Call = {
@@ -20,6 +21,8 @@ export function useFutureVoice() {
   const [heard, setHeard] = useState("");
   const [muted, setMuted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [needsPlayback, setNeedsPlayback] = useState(false);
 
   const release = useCallback(() => {
@@ -45,6 +48,8 @@ export function useFutureVoice() {
     setHeard("");
     setMuted(false);
     setSpeaking(false);
+    setProcessing(false);
+    setRemoteStream(null);
   }, [release]);
 
   function toggleMute() {
@@ -76,6 +81,11 @@ export function useFutureVoice() {
       setError("Live voice needs a supported browser on HTTPS or localhost.");
       return;
     }
+    try {
+      getAudioContext();
+    } catch {
+      // The voice call can still play when the glow's audio analyser is unavailable.
+    }
     const call: Call = { controller: new AbortController() };
     current.current = call;
     setStatus("connecting");
@@ -97,7 +107,9 @@ export function useFutureVoice() {
       peer.ontrack = ({ track, streams }) => {
         const player = audio.current;
         if (!player || current.current !== call) return;
-        player.srcObject = streams[0] ?? new MediaStream([track]);
+        const incoming = streams[0] ?? new MediaStream([track]);
+        player.srcObject = incoming;
+        setRemoteStream(incoming);
         void play();
       };
       peer.onconnectionstatechange = () => {
@@ -120,6 +132,7 @@ export function useFutureVoice() {
         if (current.current !== call) return;
         window.clearTimeout(call.timer);
         setStatus("live");
+        setProcessing(true);
         stream.getAudioTracks().forEach((track) => { track.enabled = true; });
         events.send(JSON.stringify({ type: "response.create" }));
       };
@@ -138,7 +151,12 @@ export function useFutureVoice() {
         if (event?.type === "conversation.item.input_audio_transcription.completed" && typeof event.transcript === "string") {
           setHeard(event.transcript);
         }
-        if (event?.type === "output_audio_buffer.started") setSpeaking(true);
+        if (event?.type === "response.created") setProcessing(true);
+        if (event?.type === "response.done") setProcessing(false);
+        if (event?.type === "output_audio_buffer.started") {
+          setSpeaking(true);
+          setProcessing(false);
+        }
         if (event?.type === "output_audio_buffer.stopped" || event?.type === "output_audio_buffer.cleared") setSpeaking(false);
         if (event?.type === "error") fail("The voice service reported an error. Try again.");
       };
@@ -161,5 +179,5 @@ export function useFutureVoice() {
     }
   }
 
-  return { audio, status, error, caption, heard, muted, speaking, needsPlayback, play, start, stop, toggleMute };
+  return { audio, status, error, caption, heard, muted, speaking, processing, remoteStream, needsPlayback, play, start, stop, toggleMute };
 }
