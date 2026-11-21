@@ -152,12 +152,12 @@ def test_voice_rejects_unapproved_origins(client, monkeypatch, headers):
 
 @pytest.mark.parametrize("upstream_status, upstream_body, expected_status, override, expected_voice, overview", [
     (201, ANSWER, 200, None, "marin", False),
-    (201, ANSWER, 200, "masculine", "cedar", False),
+    (201, ANSWER, 200, "masculine", "marin", False),
     (201, ANSWER, 200, None, "marin", True),
     (201, "bad answer", 502, None, "marin", False),
     (401, "private upstream detail", 502, None, "marin", False),
 ])
-def test_voice_multipart_exchange(
+def test_voice_client_secret_exchange(
     client, monkeypatch, saved_profile, upstream_status, upstream_body, expected_status, override, expected_voice, overview,
 ):
     monkeypatch.setenv("FUTURE_YOU_VOICE_ENABLED", "1")
@@ -174,6 +174,9 @@ def test_voice_multipart_exchange(
 
     def provider(request):
         requests.append(request)
+        if request.url.path.endswith("/client_secrets"):
+            return httpx.Response(200, json={"value": "ephemeral-example", "expires_at": 2000000000,
+                                             "session": {"type": "realtime"}})
         return httpx.Response(upstream_status, text=upstream_body, headers={"Content-Type": "application/sdp"})
 
     def mock_openai(**kwargs):
@@ -194,14 +197,15 @@ def test_voice_multipart_exchange(
         assert response.headers["cache-control"] == "no-store"
     else:
         assert response.json() == {"detail": "Could not start the voice session. Try again."}
-    assert len(requests) == 1
-    request = requests[0]
-    assert request.url.path == "/v1/realtime/calls"
-    assert request.headers["Authorization"] == "Bearer fake-test-key"
-    assert request.headers["Content-Type"].startswith("multipart/form-data; boundary=")
-    assert b'name="sdp"\r\nContent-Type: application/sdp\r\n\r\n' + OFFER.encode() in request.content
-    session_marker = b'name="session"\r\nContent-Type: application/json\r\n\r\n'
-    session = json.loads(request.content.split(session_marker, 1)[1].split(b"\r\n", 1)[0])
+    assert len(requests) == 2
+    mint, call = requests
+    assert mint.url.path == "/v1/realtime/client_secrets"
+    assert mint.headers["Authorization"] == "Bearer fake-test-key"
+    assert call.url.path == "/v1/realtime/calls"
+    assert call.headers["Authorization"] == "Bearer ephemeral-example"
+    assert call.headers["Content-Type"] == "application/sdp"
+    assert call.content == OFFER.encode()
+    session = json.loads(mint.content)["session"]
     assert session["model"] == "test-realtime-model"
     assert session["type"] == "realtime"
     assert "THB 525,142.68" in session["instructions"]
@@ -224,7 +228,10 @@ def test_voice_multipart_exchange(
         assert '"as_of": "2026-11-21T00:00:00Z"' in session["instructions"]
         assert "Global equity fund" in session["instructions"]
     assert session["audio"]["output"]["voice"] == expected_voice
-    assert session["audio"]["input"]["transcription"]["model"] == "gpt-4o-mini-transcribe"
+    assert session["audio"]["input"]["transcription"]["model"] == "gpt-realtime-whisper"
+    assert session["audio"]["input"]["turn_detection"]["interrupt_response"] is True
+    assert session["audio"]["input"]["format"] == session["audio"]["output"]["format"] == {"type": "audio/pcm", "rate": 24000}
+    assert session["tools"] == []
     saved_profile.latest_portfolio.assert_awaited_once_with(USER_ID)
 
 
