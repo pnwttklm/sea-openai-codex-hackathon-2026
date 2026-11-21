@@ -10,7 +10,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | API-01 | Scaffold FastAPI, configuration, health route, and Python package | Codex | Review | Current workspace | Starter implemented; review before feature work |
 | DATA-01 | Implement MongoDB client lifecycle and agreed repository interfaces | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
 | AI-01 | Implement configurable OpenAI service and FastMCP entry point | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
-| VOICE-02 | Configure personalized Realtime voice with client secrets and interruptible turns | Codex | Review | feat/future-you-realtime | FUTURE-01 |
+| VOICE-02 | Configure personalized Realtime voice with client secrets, interruptible turns, and Thai particles from the profile | Codex | Review | feat/future-you-realtime | FUTURE-01 |
 | FUTURE-01 | Talk live about saved goals, personalization, and the latest portfolio | Codex | Review | feat/future-you-realtime | Future Talk owns its page layout and can share the API lifespan with the Agent demo. See the branch handoff in `parallel-work.md`. |
 | INT-01 | Integrate and verify the first complete mobile and desktop journey | Unassigned | Ready | TBD | PLAN-01; WEB-01; API-01; DATA-01; AI-01 |
 
