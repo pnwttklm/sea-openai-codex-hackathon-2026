@@ -14,6 +14,10 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | DOC-01 | Document Future You interaction and motion guidance in `.agents/skills/prik-thai-ai-design/SKILL.md` | Codex | Review | `poon-future-you` | WEB-04, WEB-05 |
 | WEB-06 | Replace the Future You hero picker with Future Talk and Future World actions | Codex | Review | `poon-future-you` | WEB-05 |
 | WEB-07 | Restore the pre-wave Future You launch controls | Codex | Review | `poon-future-you` | WEB-06 |
+| WEB-08 | Build the Future World trip ticket and savings view in `apps/web` | Codex | Review | `poon-future-you` | WEB-07 |
+| WEB-09 | Add personal goals and refine the Future You editor in `apps/web` | Codex | Review | `poon-future-you` | WEB-07 |
+| WEB-10 | Apply the supplied Brim and Slava references to the Future You dashboard | Codex | Review | `poon-future-you` | WEB-09 |
+| WEB-11 | Restore the previous web UI icons and design guidance | Codex | Review | `poon-future-you` | WEB-10 |
 | API-01 | Scaffold FastAPI, configuration, health route, and Python package | Codex | Review | Current workspace | Starter implemented; review before feature work |
 | DATA-01 | Implement MongoDB client lifecycle and agreed repository interfaces | Unassigned | Ready | TBD | API-01; CONTRACT-01 |
 | AI-01 | Implement configurable OpenAI service and FastMCP entry point | Unassigned | Ready | TBD | API-01; CONTRACT-01 |

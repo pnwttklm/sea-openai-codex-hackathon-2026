@@ -45,7 +45,7 @@ export function FutureActions({ goals }: { goals: GoalPlan[] }) {
             <h2 id="world-title">Future World</h2>
             <form method="dialog"><button aria-label="Close Future World"><FontAwesomeIcon icon={faXmark} /></button></form>
           </div>
-          <p>Choose a goal to visit.</p>
+          <p>Where would you like to go?</p>
           <ul className={styles.worldList}>
             {goals.map(goal => <li key={goal.id}>
               <Link href={`/future-you/${goal.id}`} onNavigate={() => chooser.current?.close()}>

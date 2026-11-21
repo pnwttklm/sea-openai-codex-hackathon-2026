@@ -9,8 +9,9 @@ import styles from "./future-you.module.css";
 
 const savedMessage = "Changes saved in this browser.";
 
-export function GoalDetails({ plan, onSave, onClose }: {
+export function GoalDetails({ plan, creating, onSave, onClose }: {
   plan: GoalPlan;
+  creating: boolean;
   onSave: (plan: GoalPlan) => void;
   onClose: () => void;
 }) {
@@ -18,7 +19,7 @@ export function GoalDetails({ plan, onSave, onClose }: {
   const previousHeight = useRef<number | null>(null);
   const resize = useRef<Animation | null>(null);
   const editButton = useRef<HTMLButtonElement>(null);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(creating);
   const [notice, setNotice] = useState("");
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { dialog.current?.showModal(); }, []);
@@ -61,6 +62,12 @@ export function GoalDetails({ plan, onSave, onClose }: {
     requestAnimationFrame(() => editButton.current?.focus());
   }
 
+  function cancelEdit() {
+    setNotice("");
+    if (creating) void dismiss();
+    else endEdit();
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (dialog.current?.dataset.closing) return;
@@ -82,16 +89,24 @@ export function GoalDetails({ plan, onSave, onClose }: {
   const ratio = Math.min(plan.saved / plan.target, 1);
   const percent = new Intl.NumberFormat("en", { style: "percent", maximumFractionDigits: 1 }).format(ratio);
   return (
-    <dialog ref={dialog} className={styles.preview} aria-labelledby="detail-title" onClose={onClose}
+    <dialog ref={dialog} data-goal={plan.id} className={styles.preview} aria-labelledby="detail-title" onClose={onClose}
       onCancel={e => { e.preventDefault(); void dismiss(); }}
       onClick={e => { if (e.target === e.currentTarget) void dismiss(); }}>
       <div className={styles.previewContent}>
-        <div className={styles.previewHeading}>
-          <h2 ref={heading} tabIndex={-1} id="detail-title" key={editing ? "edit" : "view"}>{editing ? "Edit goal" : plan.title}</h2>
-          <button type="button" aria-label="Close goal details" onClick={() => void dismiss()}><FontAwesomeIcon icon={faXmark} /></button>
-        </div>
         {editing ? (
-          <GoalEditor plan={plan} submit={submit} cancel={() => { setNotice(""); endEdit(); }} />
+          <div className={styles.editToolbar}>
+            <button type="button" onClick={cancelEdit}>Cancel</button>
+            <h2 ref={heading} tabIndex={-1} id="detail-title">{creating ? "New goal" : "Edit goal"}</h2>
+            <button type="submit" form="goal-form">{creating ? "Add" : "Save"}</button>
+          </div>
+        ) : (
+          <div className={styles.previewHeading}>
+            <h2 ref={heading} tabIndex={-1} id="detail-title">{plan.title}</h2>
+            <button type="button" aria-label="Close goal details" onClick={() => void dismiss()}><FontAwesomeIcon icon={faXmark} /></button>
+          </div>
+        )}
+        {editing ? (
+          <GoalEditor plan={plan} creating={creating} submit={submit} />
         ) : (
           <>
             <div className={styles.funding}>

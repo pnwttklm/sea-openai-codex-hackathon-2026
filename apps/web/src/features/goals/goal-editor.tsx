@@ -1,5 +1,5 @@
-import { useRef, useState, type FormEvent } from "react";
-import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { useState, type FormEvent } from "react";
+import { faFlag } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { compactMoney, duration, money, type GoalPlan } from "./demo-goals";
 import styles from "./goal-editor.module.css";
@@ -25,7 +25,7 @@ function ValueInput({ name, label, value, change, min = 0 }: {
         <div className={styles.number}>
           <input id={name} name={name} type="number" required min={min} max={time ? 1200 : maxMoney}
             step={time ? 1 : 0.01} inputMode={time ? "numeric" : "decimal"}
-            aria-label={label + (time ? " (months)" : " (THB)")} value={value}
+            placeholder={name === "target" ? "0" : undefined} aria-label={label + (time ? " (months)" : " (THB)")} value={value}
             onFocus={e => e.currentTarget.select()} onChange={e => change(e.target.value)} />
           <span key={value} aria-hidden="true">{value && money.format(Number(value))}</span>
         </div>
@@ -38,12 +38,11 @@ function monthlyCeiling(value: number) {
   return Math.min(maxMoney, Math.max(10000, Math.ceil(value / 5000) * 10000));
 }
 
-export function GoalEditor({ plan, submit, cancel }: {
-  plan: GoalPlan; submit: (e: FormEvent<HTMLFormElement>) => void; cancel: () => void;
+export function GoalEditor({ plan, creating, submit }: {
+  plan: GoalPlan; creating: boolean; submit: (e: FormEvent<HTMLFormElement>) => void;
 }) {
-  const name = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(String(plan.saved));
-  const [target, setTarget] = useState(String(plan.target));
+  const [target, setTarget] = useState(creating ? "" : String(plan.target));
   const [monthly, setMonthly] = useState(String(plan.monthly));
   const [months, setMonths] = useState(String(plan.months));
   const [monthlyMax, setMonthlyMax] = useState(() => monthlyCeiling(plan.monthly));
@@ -58,16 +57,15 @@ export function GoalEditor({ plan, submit, cancel }: {
   const percent = Math.round(ratio * 1000) / 10;
 
   return (
-    <form className={styles.editor} onSubmit={submit}>
+    <form id="goal-form" className={styles.editor} onSubmit={submit}>
       <div className={styles.identity}>
-        <span className={styles.portrait} aria-hidden="true" style={{backgroundImage: `url(/future-you/${thumbnail[plan.id]})`}} />
+        <span className={styles.portrait} aria-hidden="true" style={thumbnail[plan.id] ? { backgroundImage: `url(/future-you/${thumbnail[plan.id]})` } : undefined}>
+          {!thumbnail[plan.id] && <FontAwesomeIcon icon={faFlag} />}
+        </span>
         <div className={styles.rename}>
           <label htmlFor="goal-name">Goal name</label>
-          <input id="goal-name" name="title" ref={name} defaultValue={plan.title} required maxLength={80} autoComplete="off" />
+          <input id="goal-name" name="title" placeholder="e.g. Trip to Japan" defaultValue={plan.title} required maxLength={80} autoComplete="off" />
         </div>
-        <button type="button" className={styles.pencil} aria-label="Rename goal" onClick={() => {name.current?.focus(); name.current?.select();}}>
-          <FontAwesomeIcon icon={faPen} />
-        </button>
       </div>
 
       <div className={styles.balances}>
@@ -124,7 +122,6 @@ export function GoalEditor({ plan, submit, cancel }: {
         </div>
         <div className={styles.ends}><span>1 month</span><strong>{validTime ? duration(monthCount) : "—"}</strong><span>{duration(monthsMax)}</span></div>
       </div>
-      <div className={styles.actions}><button type="button" onClick={cancel}>Cancel</button><button type="submit">Save changes</button></div>
     </form>
   );
 }

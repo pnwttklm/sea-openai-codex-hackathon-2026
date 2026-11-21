@@ -1,5 +1,7 @@
 "use client";
 
+import { faFlag, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { FutureActions } from "./future-actions";
 import Image from "next/image";
@@ -19,10 +21,33 @@ function Amount({ value }: { value: string }) {
   return <span className={styles.amount}><span className={styles.currency}>THB</span> <span className={styles.digits} key={value}>{value}</span></span>;
 }
 
+function SavingsOverview({ goals }: { goals: GoalPlan[] }) {
+  const saved = goals.reduce((total, goal) => total + goal.saved, 0);
+  const target = goals.reduce((total, goal) => total + goal.target, 0);
+  const funded = goals.reduce((total, goal) => total + Math.min(goal.saved, goal.target), 0);
+  const percent = target ? 100 * funded / target : 0;
+  return (
+    <div className={styles.overview}>
+      <div>
+        <p>Saved toward life goals</p>
+        <Amount value={numberFormat.format(saved)} />
+        <p>of THB {compactMoney.format(target)} planned</p>
+      </div>
+      <div className={styles.overviewDial}>
+        <svg viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="35" />
+          <circle cx="40" cy="40" r="35" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - percent} />
+        </svg>
+        <span>{Number(percent.toFixed(1))}%<small>funded</small></span>
+      </div>
+    </div>
+  );
+}
+
 function GoalArt({ id }: { id: string }) {
   return (
     <div className={styles.goalArt} data-goal={id} aria-hidden="true">
-      <div className={styles.scenery} />
+      <div className={styles.scenery}>{id.startsWith("custom-") && <FontAwesomeIcon icon={faFlag} />}</div>
       {id === "wedding" && (
         <Image className={styles.weddingFigure} src={`${assets}/shizuka-wedding.png`} alt="" width={120} height={120} unoptimized />
       )}
@@ -49,7 +74,7 @@ function GoalCard({ goal, open }: { goal: GoalPlan; open: (trigger: HTMLButtonEl
         </h2>
         <div className={styles.saved}>
           <Amount value={numberFormat.format(goal.saved)} />
-          <p>of THB {compactMoney.format(goal.target)} saved</p>
+          <p>of THB {compactMoney.format(goal.target)}</p>
         </div>
         <div className={styles.progress} aria-hidden="true"><span style={{ transform: `scaleX(${Math.min(1, goal.saved / goal.target)})` }} /></div>
         <p>{duration(goal.months)} left</p>
@@ -89,7 +114,14 @@ export function FutureYou() {
   const reserve = plans.find(plan => plan.id === "emergency")!;
   const [detailId, setDetailId] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
-  const detail = plans.find(plan => plan.id === detailId);
+  const [draft, setDraft] = useState<GoalPlan | null>(null);
+  const detail = plans.find(plan => plan.id === detailId) ?? draft;
+
+  function addGoal(button: HTMLButtonElement) {
+    const id = `custom-${Date.now()}-${crypto.getRandomValues(new Uint32Array(2)).join("-")}`;
+    setDraft({ id, title: "", saved: 0, target: 0, monthly: 0, months: 12 });
+    openDetails(id, button);
+  }
 
   function openDetails(id: string, button: HTMLButtonElement) {
     trigger.current = button;
@@ -99,23 +131,21 @@ export function FutureYou() {
   return (
     <main id="main" className={styles.screen} tabIndex={-1}>
       <section className={styles.hero} aria-labelledby="future-you-title">
-        <div className={styles.eclipse} aria-hidden="true">
-          <Image className={styles.eclipseViolet} src={`${assets}/eclipse-violet.svg`} alt="" width={165.823} height={169.293} />
-          <Image className={styles.eclipseBlue} src={`${assets}/eclipse-blue.svg`} alt="" width={151.203} height={167.775} />
-          <Image className={styles.eclipseIndigo} src={`${assets}/eclipse-indigo.svg`} alt="" width={291.669} height={352.857} />
-          <Image className={styles.eclipseLight} src={`${assets}/eclipse-light.svg`} alt="" width={403.308} height={206.175} />
-          <Image className={styles.eclipseBlend} src={`${assets}/eclipse-blend.svg`} alt="" width={403.308} height={206.175} />
-          <Image className={styles.eclipseGlow} src={`${assets}/eclipse-glow.svg`} alt="" width={439.77} height={262.997} />
-          <Image className={styles.eclipseDisc} src={`${assets}/eclipse-disc.svg`} alt="" width={444.34} height={433.714} />
-        </div>
-        <div className={styles.heroTop}>
+        <div className={styles.heroScene}>
+          <Image src={`${assets}/two-nobitas.webp`} alt="Young Nobita sitting beside his older self" width={1280} height={720} preload unoptimized />
           <h1 id="future-you-title">Future You</h1>
-          <Image className={styles.family} src={`${assets}/doraemon-family.png`} alt="" width={1000} height={536} unoptimized preload />
         </div>
-        <FutureActions goals={goals} />
+        <SavingsOverview goals={goals} />
+        <FutureActions goals={goals.filter(goal => !goal.id.startsWith("custom-"))} />
       </section>
 
       <section className={styles.goals} aria-label="Your life goals">
+        <header className={styles.goalsHeading}>
+          <h2>Life goals</h2>
+          <button type="button" aria-haspopup="dialog" onClick={e => addGoal(e.currentTarget)}>
+            <FontAwesomeIcon icon={faPlus} /> Add goal
+          </button>
+        </header>
         {goals.map(goal => <GoalCard key={goal.id} goal={goal} open={button => openDetails(goal.id, button)} />)}
         <article className={styles.reserve}>
           <button className={styles.openCard} aria-haspopup="dialog" aria-label={`View ${reserve.title} details`} onClick={e => openDetails(reserve.id, e.currentTarget)} />
@@ -129,7 +159,8 @@ export function FutureYou() {
 
       <FutureYouTabs />
 
-      {detail && <GoalDetails plan={detail} onSave={savePlan} onClose={() => {
+      {detail && <GoalDetails plan={detail} creating={draft !== null} onSave={plan => { savePlan(plan); setDraft(null); }} onClose={() => {
+        setDraft(null);
         setDetailId(null);
         trigger.current?.focus({ preventScroll: true });
       }} />}
