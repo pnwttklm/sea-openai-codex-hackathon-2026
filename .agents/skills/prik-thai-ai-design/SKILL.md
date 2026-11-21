@@ -15,7 +15,7 @@ File key: `fxGXlNob258j5CekcAFxIH`. In [the Design canvas](https://www.figma.com
 | --- | --- | --- |
 | Portfolio | `54:1325` default; `54:1541` allocation | Nobita profile, portfolio value and period change, line/allocation toggle, line time ranges, Investor Health Score, insights, and holdings. Holdings show ticker, weight, mini-chart, price and signed change. |
 | Investing Behavior Score | `73:7643` | Me/Community selector, overall score and explanation, five-axis radar, and cards for Discipline, Performance, Decision, Pressure, and Psychology. Demo overall state: Low, 30/100. Do not invent a scoring formula. |
-| Future You | `67:1974` top viewport; `54:1816` full goals | Character hero, lead goal selector and Enter action, then a two-column goal grid with amount saved, target, progress and years left. Order: Marry Shizuka, Retirement in Thailand, Time machine, Dream home. |
+| Future You | `67:1974` top viewport; `54:1816` full goals | Character hero with the updated Future Talk and Future World controls, then a two-column goal grid with amount saved, target, progress and years left. Order: Marry Shizuka, Retirement in Thailand, Time machine, Dream home. |
 | Future world | `54:1904` transition; `54:1927` landscape world; `72:6245` adult Nobita concept | Treat the transition, landscape scene, and future-self conversation as distinct from the dashboard. The board labels voice/video as a concept; a reference image does not require live calling or a 3D engine. |
 | Invest | `67:2340` Search; `54:2004` Matrix; `67:2257` World | Keep Search, Matrix and World as modes inside Invest, not as global tabs. Search starts from goal, horizon and risk context; Matrix is exploration against a goal; World is the globe visualization. |
 | Product details and budget | `67:3497` product reference; `72:6297` budget card | Keep product research and monthly budget context apart from confirmation or execution. Do not wire trades from mock controls. |
@@ -47,11 +47,21 @@ Use semantic CSS variables and shared components. These are web implementation d
 - **Icons:** use [Font Awesome 6 Free Classic Solid](https://docs-v6.fontawesome.com/web/use-with/react), with named imports and its React SVG component. Use 16 px for inline icons and 20–24 px for controls. Map chart switches to `faChartLine` and `faChartPie`, search to `faMagnifyingGlass`, back to `faArrowLeft`, close to `faXmark`, and forward navigation to `faChevronRight`. Decorative SVGs are hidden from assistive tech; icon-only buttons get English names. Doraemon/Nobita art and stock logos are assets, not UI icons; do not replace them with emoji or mix icon packs.
 - **Components:** share the tab bar, segmented control, card, primary button, amount, status badge and bottom sheet. Pair holdings' green/red changes with explicit signs. Keep goal progress and score readable without relying on the charts or color. Check contrast on glass and gradients.
 
-## Motion
+## Transitions and animation
 
-- Keep motion lightweight: CSS first; add no animation dependency unless an existing one meaningfully simplifies a specific interaction. Animate `transform` and `opacity` instead of layout properties. No blocking splash, oversized parallax, or full-screen animation on every tab tap.
-- Suggested timing: 100–120 ms press feedback (scale to 0.97), 180–220 ms selection-indicator or chart crossfade, and 240–300 ms for a bottom sheet (ease-out on entry, faster exit). Animate the affected element, not the entire app. Keep backdrop blur static; translate the sheet and fade the scrim.
-- For the best demo payoff, animate the funding preview opening, then the saved goal progress changing **after** confirmation. When numbers or charts move, keep final values immediately available to assistive tech. Respect `prefers-reduced-motion`: remove sliding, scale and chart tweening; update state immediately.
+Start with the current Future You implementation when extending its motion. Use CSS for press feedback, selection changes, and chart fills. The detail sheet uses the Web Animations API to resize between measured panel heights and to finish its exit before closing the native dialog. Reuse the existing easing and durations as starting points. [Dashboard and journey styles](../../../apps/web/src/features/goals/future-you.module.css) · [Sheet behavior](../../../apps/web/src/features/goals/goal-details.tsx)
+
+| Interaction | Motion and behavior |
+| --- | --- |
+| Hero actions | Place Future Talk on the left and Future World on the right. Use the custom conversation and orbiting-world symbols with a subtle press scale. Future World opens a goal chooser. |
+| Cards and glass navigation | Give goal cards and the emergency fund a small press scale. On a fine pointer, lift the hovered card 2 px. Slide the glass highlight over 260 ms and keep the backdrop blur static. Keep the active route identifiable while another tab has focus. |
+| Detail sheet | Raise and fade the sheet over 250 ms. Use a faster 150 ms exit for the close button, Escape, and backdrop. When switching between detail and edit, resize over 220 ms. On dismissal, restore focus to the card that opened the sheet. |
+| Funding and save | Show the funded percentage as text while the ring fills. In the editor, update the draft percentage as savings and target change. Update the dashboard meter and show the success check only after Save succeeds. Cancel discards the draft. |
+| Time machine | Choosing a goal in Future World opens its journey. Bring the machine into place, stagger Nobita and Doraemon settling aboard, pulse the portal once, then reveal the destination and horizon. The sequence takes about one second. Keep the back control available throughout. |
+
+**Editable inputs.** Edit the name directly. Keep Cancel and Save in the sheet toolbar. The Life goals header opens the same form for a new goal, with Add as the confirmation. Savings chips add THB amounts, and target chips adjust the current target by 10%. The contribution slider fills bars up to the thumb. The time ruler moves in whole months and displays the equivalent years and months. Pair both sliders with labeled inputs for exact keyboard entry. Keep value changes legible during motion and show save feedback when there is a result to report. [Editor controls](../../../apps/web/src/features/goals/goal-editor.tsx) · [Editor motion](../../../apps/web/src/features/goals/goal-editor.module.css)
+
+**Reduced motion and verification.** Honor `prefers-reduced-motion` in CSS and in scripted animations. Present final values, the destination, and the correct focus immediately. Check keyboard activation of both hero actions, dismissal during sheet entry, slider arrow keys, exact typing, and save versus cancel. Repeat with reduced motion enabled.
 
 ## Demo behavior and data
 
@@ -71,10 +81,10 @@ Use semantic CSS variables and shared components. These are web implementation d
 
 Use these as references, not as new dependencies or replacements for the Figma design, Inter, or Font Awesome 6:
 
-- [Transitions.dev](https://transitions.dev/): reference for sheet entry, segmented selection, and transitions between related states.
+- For sheet entry and exit, changing numbers, and selection indicators, consult the [Transitions.dev library](https://transitions.dev/library.html).
 - [Beautiful UI](https://www.beautifului.dev/): reference for compact AI prompt, loading, and result states for Doraemon.
 - [BoardUI](https://www.boardui.com/): reference for holdings rows, dashboard cards, and data hierarchy.
-- [Bencho](https://bencho.dev/): reference for touch/press feedback and small React micro-interactions.
+- For input inspiration, browse Bencho’s free public examples directly. [Floating Label Input](https://bencho.dev/blocks/label-input) · [Rolling Counter](https://bencho.dev/blocks/rolling-counter) · [Time Scrubber](https://bencho.dev/blocks/time-scrubber)
 
 ## Review checklist
 
