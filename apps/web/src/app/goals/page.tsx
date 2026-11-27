@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { FutureYou } from "@/features/goals/future-you";
 
-export const metadata: Metadata = { title: "Future You | Prik Thai AI" };
+export const metadata: Metadata = { title: "Future You | Nobi Invest" };
 
 export const viewport: Viewport = {
   viewportFit: "cover",

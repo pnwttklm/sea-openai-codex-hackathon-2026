@@ -1,6 +1,6 @@
 import { FutureWorld } from "@/features/future-world/future-world";
 
-export const metadata = { title: "Future World · Prik Thai AI" };
+export const metadata = { title: "Future World · Nobi Invest" };
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ goal?: string | string[]; house?: string | string[] }> }) {
   const { goal, house } = await searchParams;
