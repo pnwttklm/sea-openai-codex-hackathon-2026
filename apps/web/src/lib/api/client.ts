@@ -1,7 +1,7 @@
 const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").replace(/\/$/, "");
 
 export function isRemoteDemoPreview() {
-  return process.env.NEXT_PUBLIC_SHARED_DEMO === "1" && typeof window !== "undefined"
+  return process.env.NEXT_PUBLIC_HOSTED_DEMO !== "1" && process.env.NEXT_PUBLIC_SHARED_DEMO === "1" && typeof window !== "undefined"
     && !["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
 }
 

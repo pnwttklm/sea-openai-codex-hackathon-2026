@@ -44,7 +44,7 @@ async def lifespan(application: FastAPI):
         yield
         return
 
-    database = os.getenv("MONGODB_DATABASE", "prik_thai_dev")
+    database = application.state.database_name or os.getenv("MONGODB_DATABASE", "prik_thai_dev")
     async with AsyncMongoClient(uri, serverSelectionTimeoutMS=3000, timeoutMS=5000) as client:
         application.state.future_you_repository = FutureYouRepository(client[database], demo=demo)
         repository = DemoRepository(client, database, shared_demo=demo)
@@ -69,8 +69,9 @@ async def lifespan(application: FastAPI):
             yield
 
 
-def create_app() -> FastAPI:
+def create_app(*, database_name: str | None = None) -> FastAPI:
     application = FastAPI(title="Prik Thai API", version="0.1.0", lifespan=lifespan)
+    application.state.database_name = database_name
     default_origins = "http://localhost:3000,http://127.0.0.1:3000"
     origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", default_origins).split(",") if origin.strip()]
     application.state.allowed_origins = origins
