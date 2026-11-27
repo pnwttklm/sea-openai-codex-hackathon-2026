@@ -1,4 +1,4 @@
-"""Investor health rubric for the synthetic monthly planning snapshot."""
+"""Financial Health Score rubric for the synthetic monthly planning snapshot."""
 
 from app.schemas.demo import Behavior, HealthDimension
 

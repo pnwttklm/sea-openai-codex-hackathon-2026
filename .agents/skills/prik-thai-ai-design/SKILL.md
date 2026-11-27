@@ -13,8 +13,8 @@ File key: `fxGXlNob258j5CekcAFxIH`. In [the Design canvas](https://www.figma.com
 
 | Area | Figma nodes | What to preserve |
 | --- | --- | --- |
-| Portfolio | `54:1325` default; `54:1541` allocation | Nobita profile, portfolio value and period change, line/allocation toggle, line time ranges, Investor Health Score, insights, and holdings. Holdings show ticker, weight, mini-chart, price and signed change. |
-| Investing Behavior Score | `73:7643` | Me/Community selector, overall score and explanation, five-axis radar, and cards for Discipline, Performance, Decision, Pressure, and Psychology. Demo overall state: Low, 30/100. Do not invent a scoring formula. |
+| Portfolio | `54:1325` default; `54:1541` allocation | Nobita profile, portfolio value and period change, line/allocation toggle, line time ranges, Financial Health Score Score, insights, and holdings. Holdings show ticker, weight, mini-chart, price and signed change. |
+| Financial Score | `73:7643` | five-axis radar, and cards for Discipline, Performance, Decision, Pressure, and Psychology. Demo overall state: Low, 30/100. Do not invent a scoring formula. |
 | Future You | `67:1974` top viewport; `54:1816` full goals | Character hero with the updated Future Talk and Future World controls, then a two-column goal grid with amount saved, target, progress and years left. Order: Marry Shizuka, Retirement in Thailand, Time machine, Dream home. |
 | Future world | `54:1904` transition; `54:1927` landscape world; `72:6245` adult Nobita concept | Treat the transition, landscape scene, and future-self conversation as distinct from the dashboard. The board labels voice/video as a concept; a reference image does not require live calling or a 3D engine. |
 | Invest | `67:2340` Search; `54:2004` Matrix; `67:2257` World | Keep Search, Matrix and World as modes inside Invest, not as global tabs. Search starts from goal, horizon and risk context; Matrix is exploration against a goal; World is the globe visualization. |

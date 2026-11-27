@@ -20,7 +20,7 @@ The core journey is: know what you are investing for, build the habits to get th
 
 - Learn users' investing habits and help them recognize cognitive biases and emotional triggers.
 - Support habits such as consistent contributions, diversification, and reflection during volatility.
-- Make an Investing Behavior Score transparent enough for users to understand strengths and areas to improve.
+- Make an Financial Score transparent enough for users to understand strengths and areas to improve.
 - Let users define goals and budgets, then show whether their strategy is ahead, on track, or behind those goals.
 - Give contextual explanations that develop independent judgment and avoid overreliance on automated answers.
 

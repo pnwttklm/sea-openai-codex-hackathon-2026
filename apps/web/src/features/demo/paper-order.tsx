@@ -239,7 +239,7 @@ function OrderSheet({ stock, side, onDismiss, onFill, onAsk }: {
         </div>
         <div className="agent-thread">
           {prompt && <p className="agent-context">
-            {stock.symbol} {signed(prompt.demo_change_percent)}% (simulation) · Investor Health {prompt.behavior_score}/100
+            {stock.symbol} {signed(prompt.demo_change_percent)}% (simulation) · Financial Health Score {prompt.behavior_score}/100
              · Goal &amp; Risk Fit {prompt.goal_risk_fit_score}/10
           </p>}
           <div className="agent-message" aria-live="polite">

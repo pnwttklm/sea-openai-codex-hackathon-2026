@@ -4,7 +4,7 @@ An intent-based AI financial companion for Thai investors, focused on goals, inv
 
 ## Current status
 
-The local demo includes Portfolio (line and allocation views), Investor Health Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. The shared agent demo adds an in-process FastMCP server and a private operator login.
+The local demo includes Portfolio (line and allocation views), Financial Health Score Score, and Stock Detail. FastAPI reads a versioned synthetic fixture from MongoDB. Quotes and ratings in the demo API are synthetic. The demo includes local paper orders and a pre-sell reflection for NVDA with optional Webull headlines and OpenAI question selection. The shared agent demo adds an in-process FastMCP server and a private operator login.
 Open Future Talk from the Goals dashboard to talk with an imagined older self using a saved profile, goals, and portfolio. See the [local demo setup](docs/development.md#future-you-demo) for MongoDB, Realtime voice, and portrait uploads.
 
 For a fresh checkout with Nobita’s THB 500,000 portfolio, follow the [database and integration README](database/README.md). It includes the opening dataset, MongoDB restore commands, and the agent connection diagram.

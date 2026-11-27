@@ -157,14 +157,14 @@ function HealthReport({ initial }: { initial: BehaviorData }) {
 export function Behavior() {
   const [community, setCommunity] = useState(false);
   return <div className={`demo-screen ${styles.screen}`}>
-    <header className={styles.header}><BackLink /><span>Investor health</span>
-      <div role="group" aria-label="Score audience">
+    <header className={styles.header}><BackLink /><span>Financial Health Score</span>
+      {/* <div role="group" aria-label="Score audience">
         <button type="button" aria-pressed={!community} onClick={() => setCommunity(false)}>Me</button>
         <button type="button" aria-pressed={community} onClick={() => setCommunity(true)}>Community</button>
-      </div>
+      </div> */}
     </header>
-    <h1>Investing Behavior Score</h1>
+    <h1>Financial Score</h1>
     {community && <p className="demo-state">Community scores are unavailable in this demo.</p>}
-    <div hidden={community}><DemoData<BehaviorData> path="/api/v1/demo/behavior" title="investing behavior score">{data => <HealthReport initial={data} />}</DemoData></div>
+    <div hidden={community}><DemoData<BehaviorData> path="/api/v1/demo/behavior" title="Financial Score">{data => <HealthReport initial={data} />}</DemoData></div>
   </div>;
 }

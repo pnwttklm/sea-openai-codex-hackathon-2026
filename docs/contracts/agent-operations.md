@@ -8,7 +8,7 @@
 | --- | --- |
 | Goals, Future World, Future Talk and Goal Planner | `future_you_demo` contains the profile and owned goals. Goals displays stable slugs. Voice and MCP use ObjectIds. Confirmed edits update the same document. Exact months drive projections. The separate emergency reserve stays outside life-goal projections. |
 | Portfolio, Portfolio Analyst, stock order tickets and Future Talk | `paper_accounts` holds cash and positions (including fractional opening holdings). `demo_snapshots` supplies synthetic quoted prices and metadata. In shared demo mode, all consumers value the same account with the same synthetic USD/THB rate of 35. Legacy paper balances and orders are preserved. The portfolio chart shows illustrative history. |
-| Investor Health, Invest research and sell reflection | The shared portfolio supplies current exposures. Saved goal horizons feed goal/risk fit. The existing synthetic planning assumptions and contribution history drive the other dimensions. Research chat retains its existing MongoDB conversation storage. |
+| Financial Health Score, Invest research and sell reflection | The shared portfolio supplies current exposures. Saved goal horizons feed goal/risk fit. The existing synthetic planning assumptions and contribution history drive the other dimensions. Research chat retains its existing MongoDB conversation storage. |
 | Decision journal | `decision_journal` stores reflections explicitly submitted for the synthetic investor. A retried submission with the same ID and text returns the original record. |
 | Operator dashboard | `agent_runs` and `agent_spans` store operation metadata, statuses, durations and call relationships. Both collections have seven-day TTL indexes. |
 

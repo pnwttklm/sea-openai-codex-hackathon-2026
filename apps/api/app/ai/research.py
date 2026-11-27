@@ -84,7 +84,7 @@ async def run_research(client, chat: AgentChat, model: str, *, webull_enabled: b
     sources: list[NewsHeadline] = []
     instructions = f"{INSTRUCTIONS}\nCurrent stock context: {chat.symbol}."
     if health is not None:
-        instructions += "\nUse this synthetic Investor Health Score when relevant. Keep the plan out of market-data queries: " + health.model_dump_json()
+        instructions += "\nUse this synthetic Financial Health Score Score when relevant. Keep the plan out of market-data queries: " + health.model_dump_json()
     for round_number in range(3):
         allow_webull = webull_enabled and round_number < 2
         tools = [NEWS_FUNCTION, {"type": "web_search"}] if allow_webull else [{"type": "web_search"}]

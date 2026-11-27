@@ -100,7 +100,7 @@ export function Portfolio() {
                 ) : <Allocation items={data.allocation} value={data.value_thb} />}
               </section>
               <Link href="/behavior" className="health-card">
-                <div className="card-heading"><h2>Investing Behavior Score</h2><span>This month <FontAwesomeIcon icon={faChevronRight} /></span></div>
+                <div className="card-heading"><h2>Financial Score</h2><span>This month <FontAwesomeIcon icon={faChevronRight} /></span></div>
                 <div className="score-summary"><div>{data.score_label}<small>{data.score} / 100 · 4 dimensions</small></div><Ring score={data.score} /></div>
               </Link>
               <section className="insights">

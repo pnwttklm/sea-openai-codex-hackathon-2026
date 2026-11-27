@@ -14,7 +14,7 @@ docker compose exec -T api python -m app.data.seed_future_you_demo
 
 The seed creates the synthetic profile, four goals, emergency reserve, market snapshot and opening account. Running it again preserves saved trades and goal edits. Compose keeps the database in its project’s `mongo_data` volume between restarts. Once images exist, use `docker compose up -d --wait` to run the same checkout again.
 
-Open [Portfolio](http://localhost:3113/), [Investing Behavior Score](http://localhost:3113/behavior) or [FastAPI docs](http://localhost:8113/docs). To verify the data from another client, call the portfolio endpoint. With a fresh account, expect `value_thb` of 500000, `cash_thb` of 0 and seven entries in `holdings`.
+Open [Portfolio](http://localhost:3113/), [Financial Score](http://localhost:3113/behavior) or [FastAPI docs](http://localhost:8113/docs). To verify the data from another client, call the portfolio endpoint. With a fresh account, expect `value_thb` of 500000, `cash_thb` of 0 and seven entries in `holdings`.
 
 ```sh
 curl -fsS http://localhost:8113/api/v1/demo/portfolio
