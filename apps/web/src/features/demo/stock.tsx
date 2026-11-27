@@ -10,11 +10,11 @@ import { OptionsChain } from "./options-chain";
 import { PriceOverview } from "./price-overview";
 import { PaperTrade } from "./paper-order";
 
-const modes = ["Overview", "INVX", "Options", "News"] as const;
+const modes = ["Overview", "Options", "News"] as const;
 type Mode = (typeof modes)[number];
 
 function Details({ stock }: { stock: StockData }) {
-  const [selected, setSelected] = useState<Mode>(process.env.NEXT_PUBLIC_SHARED_DEMO === "1" ? "News" : "INVX");
+  const [selected, setSelected] = useState<Mode>(process.env.NEXT_PUBLIC_SHARED_DEMO === "1" ? "News" : "Overview");
   const [chatOpen, setChatOpen] = useState(false);
   const askDoraemon = process.env.NEXT_PUBLIC_SHARED_DEMO === "1" ? () => setChatOpen(true) : undefined;
   const up = stock.change_percent >= 0;
@@ -33,7 +33,6 @@ function Details({ stock }: { stock: StockData }) {
         {modes.map((mode) => <button type="button" key={mode} aria-pressed={selected === mode} onClick={() => setSelected(mode)}>{mode}</button>)}
       </div>
       {selected === "Overview" && <PriceOverview key={stock.symbol} stock={stock} />}
-      {selected === "INVX" && <FundamentalChart symbol={stock.symbol} factors={stock.factors ?? []} />}
       {selected === "Options" && <OptionsChain stock={stock} />}
       {selected === "News" && (process.env.NEXT_PUBLIC_SHARED_DEMO === "1"
         ? <StockNews key={stock.symbol} symbol={stock.symbol} /> : <p className="demo-state">News is unavailable in this demo.</p>)}

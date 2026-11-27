@@ -147,7 +147,6 @@ body:has(.demo-shell) { background: #09090c; }
 .stock-modes { display: flex; gap: 6px; margin: 18px 0; }
 .stock-modes button { flex: 1; border: 1px solid var(--edge); border-radius: 999px; min-height: 44px; font-size: 12px; padding: 0 5px; }
 .stock-modes button[aria-pressed="true"] { background: #5146dc; border-color: #7c73f2; }
-/* INVX factor ratings */
 .factor-card-chart { padding: 16px; border: 1px solid #363545; border-radius: 22px;
   background: radial-gradient(ellipse at 68% 40%, #27243a 0, #1b1b28 43%, transparent 72%), #191922; }
 .factor-title, .factor-inspector { display: flex; justify-content: space-between; align-items: center; gap: 8px; }

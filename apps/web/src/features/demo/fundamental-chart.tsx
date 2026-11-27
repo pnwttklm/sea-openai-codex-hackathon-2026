@@ -32,10 +32,7 @@ export function FundamentalChart({ symbol, factors }: { symbol: string; factors:
   const active = factors.find(f => f.name === selected);
   if (!factors.length && process.env.NEXT_PUBLIC_SHARED_DEMO === "1") return <InstrumentRating key={symbol} symbol={symbol} />;
   return <section className="fundamentals factor-card-chart" aria-label={symbol + " fundamental ratings"}>
-    <div className="factor-title"><h2>INVX Fundamentals</h2>
-      <div className="factor-switch" role="group" aria-label="Chart style">{(["Radar", "Bars"] as const).map(v =>
-        <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>{v}</button>)}</div>
-    </div>
+    
     {!factors.length ? <p className="factor-empty">Ratings unavailable for {symbol}</p> : <>
       {view === "Radar" ? <div className="factor-plot">
         <svg viewBox="0 0 340 272" aria-hidden="true">

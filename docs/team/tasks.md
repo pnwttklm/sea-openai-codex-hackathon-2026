@@ -44,14 +44,14 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | DEMO-08 | Add a broker-style paper order ticket with market and limit orders | Codex | Review | codex/prik-thai-agent-demo | Market fills, limit placement and cancellation verified in browser; API tests and frontend checks passed |
 | DEMO-09 | Settle paper trades in THB and add direct Portfolio chart interaction | Codex | Review | codex/prik-thai-agent-demo | Live FX, THB buy/sell, chart interactions, API tests and frontend checks verified |
 | DEMO-10 | Remove stock action bar caption | Codex | Review | codex/prik-thai-agent-demo | Frontend typecheck passed |
-| DEMO-11 | Show five INVX dimensions on stock pages | Codex | Review | codex/prik-thai-agent-demo | VOO browser check and typecheck passed |
+| DEMO-11 | Show five dimensions on stock pages | Codex | Review | codex/prik-thai-agent-demo | VOO browser check and typecheck passed |
 | DEMO-12 | Connect four Investor Health Score dimensions across the demo | Codex | Review | codex/prik-thai-agent-demo | Verified seven holdings, four dimensions, shared navigation and Future You |
 | TALK-01 | Integrate the profile-based Future Talk conversation into the Goals dashboard | Codex | Done | codex/main-future-talk | WEB-10 |
 | DEMO-13 | Add real holding logos | Codex | Review | main | Build, typecheck and five served SVGs verified |
 | AI-DESIGN-01 | Specify companion roles, FastMCP tools and the operator dashboard | Codex | Done | codex/agent-foundation | AGENT-01 |
 | AI-DESIGN-02 | Specify investor reflection and headline sentiment analysis | Codex | Done | codex/agent-foundation | AGENT-01 |
 | AGENT-01 | Implement four agents, MCP tools, shared investor data, character popup and private dashboard | Codex | Review | codex/agent-foundation | [Agent operations](../contracts/agent-operations.md) |
-| CHART-01 | Refresh the stock INVX radar, add selectable factors and a bar comparison | Codex | Review | codex/agent-foundation | AMD five-factor fixture |
+| CHART-01 | Refresh the stock radar, add selectable factors and a bar comparison | Codex | Review | codex/agent-foundation | AMD five-factor fixture |
 | POPUP-01 | Show the current stock in the investor’s portfolio in the stock companion popup | Codex | Review | codex/agent-foundation | AGENT-01 |
 | INVEST-01 | Open the searchable demo market from the Invest tab | Codex | Review | codex/agent-foundation | Demo stock catalog, stock detail and shared tab bar |
 | OPTIONS-01 | Add a read-only interactive option-chain mockup to stock detail | Codex | Review | codex/agent-foundation | Stock detail synthetic quote |
@@ -75,7 +75,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 | OPS-CONTEXT | Inspect the saved Future You session context in the authenticated operator dashboard | Codex | Review | codex/investor-health-ux | OPS-FUTURE |
 | STOCK-NEWS | Show ticker headlines and analysis directly, and open stock chat from Doraemon | Codex | Review | codex/investor-health-ux | Companion news tool |
 | AMBIENT-TICKETS | Adapt trade tickets and animate a reviewed reserve withdrawal using the supplied ambient prototype | Codex | Review | codex/investor-health-ux | TRADE-PLAN |
-| INVX-AGENT | Ground missing INVX ratings in shared demo goal-fit evidence and a Portfolio Analyst review | Codex | Review | codex/investor-health-ux | TRADE-PLAN |
+| AGENT | Ground missing ratings in shared demo goal-fit evidence and a Portfolio Analyst review | Codex | Review | codex/investor-health-ux | TRADE-PLAN |
 | STOCK-OVERVIEW | Minimal time-range chart and basic analysis | Codex | Review | codex/investor-health-ux | Demo stock data |
 | FUTURE-TALK-LINK | Connect Future Talk directly to the future-self voice screen | Codex | Review | codex/investor-health-ux | Future You |
 | TALK-PORTRAIT | Use the supplied adult Nobita portrait in Future Talk | Codex | Review | codex/investor-health-ux | FUTURE-TALK-LINK |
