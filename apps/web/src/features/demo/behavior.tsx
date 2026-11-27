@@ -157,7 +157,7 @@ function HealthReport({ initial }: { initial: BehaviorData }) {
 export function Behavior() {
   const [community, setCommunity] = useState(false);
   return <div className={`demo-screen ${styles.screen}`}>
-    <header className={styles.header}><BackLink /><span>Financial Health Score</span>
+    <header className={styles.header}><BackLink /><span> </span>
       {/* <div role="group" aria-label="Score audience">
         <button type="button" aria-pressed={!community} onClick={() => setCommunity(false)}>Me</button>
         <button type="button" aria-pressed={community} onClick={() => setCommunity(true)}>Community</button>
