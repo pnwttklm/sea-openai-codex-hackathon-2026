@@ -32,6 +32,8 @@ no_store = {"Cache-Control": "no-store"}
 
 
 def local_origin_allowed(request: Request) -> bool:
+    if getattr(request.state, "hosted_demo_access", False):
+        return True
     origin = request.headers.get("origin")
     return origin is not None and origin in request.app.state.allowed_origins and urlsplit(origin).hostname in {
         "localhost", "127.0.0.1", "::1"
