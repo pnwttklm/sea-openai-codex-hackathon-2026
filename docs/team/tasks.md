@@ -4,7 +4,7 @@ All tasks are unassigned and not started. Update the owner and status before wor
 
 | ID | Task | Owner | Status | Branch | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| HOST-03 | Restore the hosted FastAPI service and same-origin Vercel routing on the latest main commit | Codex | In progress | main | WEB-01; API-01 |
+| HOST-03 | Restore the hosted FastAPI service and same-origin Vercel routing on the latest main commit | Codex | Done | main | WEB-01; API-01 |
 | PLAN-01 | Select MVP journey and review accessible design references | Unassigned | Ready | TBD | Team decision |
 | CONTRACT-01 | Agree on first journey's API, service, data, and tool interfaces | Unassigned | Ready | TBD | PLAN-01 |
 | WEB-01 | Scaffold Next.js, TypeScript, and responsive shell | Codex | Review | Current workspace | Starter implemented; design required for product-specific screens |
